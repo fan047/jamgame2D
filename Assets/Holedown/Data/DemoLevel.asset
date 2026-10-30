@@ -1,0 +1,115 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0678402ce8519064f9293d768a964f9b, type: 3}
+  m_Name: DemoLevel
+  m_EditorClassIdentifier: Holedown.Runtime::Holedown.LevelDefinition
+  initialBlocks:
+  - column: 0
+    row: 0
+    width: 2
+    health: 5
+    target: 0
+  - column: 3
+    row: 0
+    width: 2
+    health: 4
+    target: 0
+  - column: 6
+    row: 0
+    width: 2
+    health: 5
+    target: 0
+  - column: 0
+    row: 1
+    width: 1
+    health: 3
+    target: 0
+  - column: 2
+    row: 1
+    width: 1
+    health: 3
+    target: 0
+  - column: 5
+    row: 1
+    width: 1
+    health: 3
+    target: 0
+  - column: 7
+    row: 1
+    width: 1
+    health: 3
+    target: 0
+  - column: 1
+    row: 2
+    width: 2
+    health: 4
+    target: 0
+  - column: 5
+    row: 2
+    width: 2
+    health: 4
+    target: 0
+  - column: 0
+    row: 3
+    width: 2
+    health: 3
+    target: 0
+  - column: 6
+    row: 3
+    width: 2
+    health: 3
+    target: 0
+  incomingRows:
+  - blocks:
+    - column: 1
+      row: 0
+      width: 1
+      health: 3
+      target: 0
+    - column: 3
+      row: 0
+      width: 2
+      health: 4
+      target: 0
+    - column: 6
+      row: 0
+      width: 1
+      health: 3
+      target: 0
+  - blocks:
+    - column: 0
+      row: 0
+      width: 2
+      health: 4
+      target: 0
+    - column: 6
+      row: 0
+      width: 2
+      health: 4
+      target: 0
+  - blocks:
+    - column: 1
+      row: 0
+      width: 2
+      health: 4
+      target: 0
+    - column: 5
+      row: 0
+      width: 2
+      health: 4
+      target: 0
+  - blocks:
+    - column: 3
+      row: 0
+      width: 2
+      health: 10
+      target: 1

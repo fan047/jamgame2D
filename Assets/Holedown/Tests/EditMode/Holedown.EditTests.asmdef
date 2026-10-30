@@ -1,0 +1,1 @@
+{"name":"Holedown.EditTests","references":["Holedown.Rules","Holedown.Runtime"],"includePlatforms":["Editor"],"optionalUnityReferences":["TestAssemblies"]}
