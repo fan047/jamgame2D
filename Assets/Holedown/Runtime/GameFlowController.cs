@@ -93,6 +93,12 @@ namespace Holedown
             foreach (var ball in returning) ball.Return();
             Changed?.Invoke();
         }
+        public void Restart()
+        {
+            aim.CanAim = false;
+            StopAllCoroutines(); launching = null;
+            UnityEngine.SceneManagement.SceneManager.LoadScene(gameObject.scene.path);
+        }
         void Update()
         {
             if (Session != null && Session.Phase == SessionPhase.Volley && Time.time-volleyStarted >= settings.recallTimeout) RequestRecall();
