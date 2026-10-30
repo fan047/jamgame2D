@@ -60,6 +60,17 @@ namespace Holedown.Tests
                 UnityEngine.Object.Destroy(settings);
             }
         }
+        [UnityTest] public IEnumerator RadiusSettingUpdatesVisualAndCollider()
+        {
+            yield return LoadPhysicsOnlyScene();
+            var settings = ScriptableObject.CreateInstance<GameSettings>(); settings.ballRadius = 0.2f;
+            var ball = UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<BallActor>("Assets/Holedown/Prefabs/Ball.prefab"),AimInput.Origin,Quaternion.identity);
+            ball.Launch(settings,Guid.NewGuid(),1,1,Vector2.down);
+            Assert.AreEqual(0.2f,ball.GetComponent<CircleCollider2D>().radius,0.001f);
+            Assert.AreEqual(0.4f,ball.GetComponentInChildren<SpriteRenderer>().transform.localScale.x,0.001f);
+            Assert.AreEqual(Vector3.one,ball.transform.localScale);
+            ball.Return(); UnityEngine.Object.Destroy(settings); yield return null;
+        }
         [UnityTest] public IEnumerator PreviewMatchesBallCenterAtFirstContact()
         {
             yield return LoadPhysicsOnlyScene();
