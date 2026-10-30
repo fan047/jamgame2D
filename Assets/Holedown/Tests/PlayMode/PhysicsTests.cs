@@ -20,9 +20,22 @@ namespace Holedown.Tests
             Assert.AreEqual(75,Vector2.Angle(Vector2.down,d),0.01f);
         }
 #if UNITY_EDITOR
-        [UnityTest] public IEnumerator BallsBounceHitAndReturnAtBothSpeeds()
+        static IEnumerator LoadPhysicsOnlyScene()
         {
             yield return SceneManager.LoadSceneAsync("Assets/Scenes/SampleScene.unity");
+            yield return null;
+            // The integrated scene now auto-initializes gameplay. Isolate fixture-owned blocks.
+            UnityEngine.Object.FindFirstObjectByType<GameFlowController>().enabled = false;
+            UnityEngine.Object.Destroy(UnityEngine.Object.FindFirstObjectByType<BoardView>().gameObject);
+            yield return null;
+            var view = new GameObject("PhysicsTestBoard").AddComponent<BoardView>();
+            var serialized = new SerializedObject(view);
+            serialized.FindProperty("blockPrefab").objectReferenceValue = AssetDatabase.LoadAssetAtPath<BlockView>("Assets/Holedown/Prefabs/Block.prefab");
+            serialized.ApplyModifiedPropertiesWithoutUndo();
+        }
+        [UnityTest] public IEnumerator BallsBounceHitAndReturnAtBothSpeeds()
+        {
+            yield return LoadPhysicsOnlyScene();
             var board = new BoardState(new[] { new BlockDefinition(3, 0, 2, 100) }, new[] { new RowDefinition { blocks = new System.Collections.Generic.List<BlockDefinition> { new BlockDefinition(0, 0, 1, 1, true) } } });
             var view = UnityEngine.Object.FindFirstObjectByType<BoardView>(); view.Sync(board);
             var prefab = AssetDatabase.LoadAssetAtPath<BallActor>("Assets/Holedown/Prefabs/Ball.prefab");
@@ -49,7 +62,7 @@ namespace Holedown.Tests
         }
         [UnityTest] public IEnumerator PreviewMatchesBallCenterAtFirstContact()
         {
-            yield return SceneManager.LoadSceneAsync("Assets/Scenes/SampleScene.unity");
+            yield return LoadPhysicsOnlyScene();
             var aim=UnityEngine.Object.FindFirstObjectByType<AimInput>(); Physics2D.SyncTransforms();
             Assert.AreEqual(0.12f,aim.PreviewEnd(Vector2.down).y,0.015f);
             var rb=AssetDatabase.LoadAssetAtPath<BallActor>("Assets/Holedown/Prefabs/Ball.prefab").GetComponent<Rigidbody2D>();
