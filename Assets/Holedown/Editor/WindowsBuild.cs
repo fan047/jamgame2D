@@ -35,6 +35,7 @@ namespace Holedown.Editor
                 var message=$"result={summary.result}\nerrors={summary.totalErrors}\nwarnings={summary.totalWarnings}\nbytes={summary.totalSize}\nduration={summary.totalTime}\npath={summary.outputPath}";
                 File.WriteAllText("Library/Locus/tmp/windows-build-final.txt",message);
                 if(summary.result!=BuildResult.Succeeded) throw new BuildFailedException(message);
+                PreparePlannerFiles("Builds/Windows");
                 Debug.Log(message);
             }
             finally
@@ -42,6 +43,20 @@ namespace Holedown.Editor
                 Environment.SetEnvironmentVariable("TEMP",oldTemp);
                 Environment.SetEnvironmentVariable("TMP",oldTmp);
             }
+        }
+        public static void PreparePlannerFiles(string outputDirectory)
+        {
+            string config=Path.Combine(outputDirectory,"Config"),editor=Path.Combine(outputDirectory,"PlannerEditor");
+            Directory.CreateDirectory(config); Directory.CreateDirectory(editor);
+            foreach(string name in new[]{"settings.json","level.json"})
+            {
+                string destination=Path.Combine(config,name);
+                // Rebuilds must not overwrite the planner's work.
+                if(!File.Exists(destination)) File.Copy(Path.Combine("Config",name),destination);
+            }
+            foreach(string name in new[]{"index.html","config-model.js","defaults.js","editor.js","styles.css"})
+                File.Copy(Path.Combine("Tools/PlannerEditor",name),Path.Combine(editor,name),true);
+            File.Copy("Tools/PlannerEditor/快速上手.txt",Path.Combine(outputDirectory,"策划快速上手.txt"),true);
         }
     }
 }

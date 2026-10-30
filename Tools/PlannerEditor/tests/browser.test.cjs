@@ -13,7 +13,7 @@ fs.mkdirSync(out,{recursive:true});
     const context=await browser.newContext({acceptDownloads:true,viewport:{width:1400,height:1000}});
     const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
     page.on('dialog',dialog=>dialog.accept());
-    await page.goto(pathToFileURL(path.join(root,'Tools/PlannerEditor/index.html')).href);
+    await page.goto(pathToFileURL(path.join(process.env.PLANNER_EDITOR_DIR||path.join(root,'Tools/PlannerEditor'),'index.html')).href);
     assert.match(await page.locator('#validation').innerText(),/校验通过/);
     assert.equal(await page.locator('#board .block').count(),11);
     await page.locator('#ballsPerRound').fill('7');
