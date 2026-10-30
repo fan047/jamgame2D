@@ -19,7 +19,10 @@ namespace Holedown
             var phase = flow.Session?.Phase ?? SessionPhase.Initializing;
             bool ended = phase == SessionPhase.Won || phase == SessionPhase.Lost;
             panel.SetActive(ended || error);
-            title.text = error ? "Initialization failed" : phase == SessionPhase.Won ? "Victory" : "Defeat";
+            title.text = error ? "Config error" : phase == SessionPhase.Won ? "Victory" : "Defeat";
+            reason.fontSize = error ? 24 : 32;
+            reason.rectTransform.sizeDelta = new Vector2(800,error ? 170 : 80);
+            reason.rectTransform.anchoredPosition = new Vector2(0,error ? 10 : 20);
             reason.text = error ? flow.InitializationError : phase == SessionPhase.Lost ? "Blocks reached the danger line" : "Target destroyed";
         }
     }

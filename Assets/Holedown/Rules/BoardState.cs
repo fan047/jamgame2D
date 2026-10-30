@@ -95,35 +95,42 @@ namespace Holedown
 
         public static void Validate(IReadOnlyList<BlockDefinition> initial, IReadOnlyList<RowDefinition> rows)
         {
-            if (initial == null || rows == null || rows.Count == 0) throw new ArgumentException("Level requires initial blocks and incoming rows.");
+            if (initial == null || rows == null || rows.Count == 0) throw new ArgumentException("level.json: initialBlocks and at least one incomingRows entry are required.");
             int targets = 0;
             var occupied = new HashSet<int>();
-            foreach (var d in initial)
+            for(int i=0;i<initial.Count;i++)
             {
-                ValidateBlock(d, false, occupied);
-                if (d.target) throw new ArgumentException("Target must be in the last incoming row.");
+                var d=initial[i]; string path=$"level.json.initialBlocks[{i}]";
+                ValidateBlock(d, false, occupied,path);
+                if (d.target) throw new ArgumentException(path+".target: target must be in the last incoming row.");
             }
             for (int i = 0; i < rows.Count; i++)
             {
-                if (rows[i]?.blocks == null) throw new ArgumentException("Missing incoming row.");
+                string path=$"level.json.incomingRows[{i}]";
+                if (rows[i]?.blocks == null) throw new ArgumentException(path+": missing blocks array.");
                 occupied.Clear();
-                foreach (var d in rows[i].blocks)
+                for(int j=0;j<rows[i].blocks.Count;j++)
                 {
-                    ValidateBlock(d, true, occupied);
+                    var d=rows[i].blocks[j]; string blockPath=$"{path}.blocks[{j}]";
+                    ValidateBlock(d, true, occupied,blockPath);
                     if (!d.target) continue;
                     targets++;
-                    if (i != rows.Count - 1) throw new ArgumentException("Target must be in the last incoming row.");
+                    if (i != rows.Count - 1) throw new ArgumentException(blockPath+".target: target must be in the last incoming row.");
                 }
             }
-            if (targets != 1) throw new ArgumentException("Level must contain exactly one target.");
+            if (targets != 1) throw new ArgumentException($"level.json: expected exactly one target in the last incoming row; found {targets}.");
         }
 
-        static void ValidateBlock(BlockDefinition d, bool incoming, HashSet<int> occupied)
+        static void ValidateBlock(BlockDefinition d, bool incoming, HashSet<int> occupied,string path)
         {
-            if (d == null || d.column < 0 || (d.width != 1 && d.width != 2) || d.column + d.width > 8 || d.health <= 0 || d.row < 0 || d.row >= 8 || (incoming && d.row != 0))
-                throw new ArgumentException("Invalid block column, row, width or health.");
+            if(d==null) throw new ArgumentException(path+": missing block.");
+            if(d.column<0 || d.column>7) throw new ArgumentException(path+".column: expected 0-7.");
+            if(d.width!=1 && d.width!=2) throw new ArgumentException(path+".width: expected 1 or 2.");
+            if(d.column+d.width>8) throw new ArgumentException(path+": column + width exceeds 8 columns.");
+            if(d.health<=0) throw new ArgumentException(path+".health: expected positive integer.");
+            if(d.row<0 || d.row>=8 || (incoming && d.row!=0)) throw new ArgumentException(path+".row: "+(incoming?"incoming blocks must use row 0.":"expected 0-7."));
             for (int c = d.column; c < d.column + d.width; c++)
-                if (!occupied.Add(d.row * 8 + c)) throw new ArgumentException("Blocks overlap.");
+                if (!occupied.Add(d.row * 8 + c)) throw new ArgumentException(path+$": overlaps another block at column {c}, row {d.row}.");
         }
     }
 }

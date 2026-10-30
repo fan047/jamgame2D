@@ -12,6 +12,9 @@ namespace Holedown
         [SerializeField] AimInput aim;
         [SerializeField] BoardView boardView;
         [SerializeField] BallActor ballPrefab;
+        [SerializeField, Tooltip("Optional JSON folder. Empty: Inspector assets in Editor; executable/Config in Player.")]
+        string externalConfigDirectory;
+        LoadedConfiguration configuration;
         readonly Dictionary<int, BallActor> balls = new Dictionary<int, BallActor>();
         Coroutine launching;
         float volleyStarted;
@@ -20,7 +23,10 @@ namespace Holedown
         public string InitializationError { get; private set; }
         public event Action<BlockView, HitResult> BlockHit;
         public event Action Changed;
-        public GameSettings Settings => settings;
+        public GameSettings Settings => configuration?.Settings ?? settings;
+        public string ConfigurationLabel => configuration?.Label ?? "Not loaded";
+        public string ConfigurationDirectory { get; private set; }
+        void OnDestroy() { configuration?.Dispose(); }
 
         void OnEnable() { aim.FireRequested += OnFireRequested; }
         void OnDisable()
@@ -36,7 +42,12 @@ namespace Holedown
             Session = new GameSession();
             try
             {
-                settings.Validate(); Board = level.CreateBoard();
+                ConfigurationDirectory = !string.IsNullOrWhiteSpace(externalConfigDirectory)
+                    ? System.IO.Path.GetFullPath(externalConfigDirectory)
+                    : Application.isEditor ? null : System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Application.dataPath),"Config");
+                configuration = ExternalConfiguration.Load(ConfigurationDirectory,settings,level);
+                Board = configuration.Board;
+                aim.Configure(Settings);
                 boardView.Sync(Board); Session.Ready(); aim.CanAim = true;
             }
             catch (Exception exception)
@@ -50,22 +61,22 @@ namespace Holedown
         public bool TryFire(Vector2 direction)
         {
             if (Session == null || direction.y >= 0 || !float.IsFinite(direction.x) || !float.IsFinite(direction.y) || direction.sqrMagnitude < 0.0001f) return false;
-            float angle = Mathf.Clamp(Mathf.Atan2(direction.x,-direction.y)*Mathf.Rad2Deg,-settings.maxAimAngle,settings.maxAimAngle)*Mathf.Deg2Rad;
+            float angle = Mathf.Clamp(Mathf.Atan2(direction.x,-direction.y)*Mathf.Rad2Deg,-Settings.maxAimAngle,Settings.maxAimAngle)*Mathf.Deg2Rad;
             direction = new Vector2(Mathf.Sin(angle),-Mathf.Cos(angle));
-            if (!Session.TryFire(settings.ballsPerRound)) return false;
+            if (!Session.TryFire(Settings.ballsPerRound)) return false;
             aim.CanAim = false; volleyStarted = Time.time;
             launching = StartCoroutine(LaunchVolley(Session.SessionId,Session.VolleyId,direction));
             Changed?.Invoke(); return true;
         }
         IEnumerator LaunchVolley(Guid session, int volley, Vector2 direction)
         {
-            var interval = new WaitForSeconds(settings.launchInterval);
+            var interval = new WaitForSeconds(Settings.launchInterval);
             while (Session.SessionId == session && Session.VolleyId == volley && Session.Phase == SessionPhase.Volley && Session.Pending > 0)
             {
                 int id = Session.RegisterLaunch();
                 var ball = Instantiate(ballPrefab, AimInput.Origin, Quaternion.identity);
                 balls.Add(id,ball); ball.Hit += OnHit; ball.Returned += OnReturned;
-                ball.Launch(settings,session,volley,id,direction);
+                ball.Launch(Settings,session,volley,id,direction);
                 Changed?.Invoke();
                 yield return interval;
             }
@@ -101,7 +112,7 @@ namespace Holedown
         }
         void Update()
         {
-            if (Session != null && Session.Phase == SessionPhase.Volley && Time.time-volleyStarted >= settings.recallTimeout) RequestRecall();
+            if (Session != null && Session.Phase == SessionPhase.Volley && Time.time-volleyStarted >= Settings.recallTimeout) RequestRecall();
         }
         void LateUpdate()
         {

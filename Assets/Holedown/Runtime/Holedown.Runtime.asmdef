@@ -1,1 +1,1 @@
-{"name":"Holedown.Runtime","rootNamespace":"Holedown","references":["Holedown.Rules","Unity.InputSystem","Unity.TextMeshPro","Unity.ugui"]}
+{"name":"Holedown.Runtime","rootNamespace":"Holedown","references":["Holedown.Rules","Unity.InputSystem","Unity.TextMeshPro","Unity.ugui","Unity.Newtonsoft.Json"]}

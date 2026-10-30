@@ -17,6 +17,7 @@ namespace Holedown
         EventSystem pointerSystem;
         public static readonly Vector2 Origin = new Vector2(4, 9);
         public bool CanAim { get; set; }
+        public void Configure(GameSettings runtimeSettings) { settings = runtimeSettings; }
         public event Action<Vector2> FireRequested;
         public bool IsPointerOverUI(Vector2 screen)
         {

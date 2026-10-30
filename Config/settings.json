@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "version": "demo-1",
+  "ballsPerRound": 12,
+  "ballRadius": 0.12,
+  "ballSpeed": 12,
+  "launchInterval": 0.08,
+  "maxAimAngle": 75,
+  "recallTimeout": 30
+}
