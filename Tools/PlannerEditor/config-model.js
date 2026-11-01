@@ -5,6 +5,16 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function() {
   'use strict';
   const clone = value => JSON.parse(JSON.stringify(value));
+  function parse(text) {
+    const value=JSON.parse(text), stack=[], tokens=/"(?:\\.|[^"\\])*"|[{}\[\]]/g;let token;
+    while((token=tokens.exec(text))!==null){
+      const raw=token[0];
+      if(raw==='{'||raw==='[')stack.push(raw==='{'?new Set():null);
+      else if(raw==='}'||raw===']')stack.pop();
+      else if(/^\s*:/.test(text.slice(tokens.lastIndex))){const keys=stack[stack.length-1],key=JSON.parse(raw);if(keys?.has(key))throw new Error(`重复 JSON 字段：${key}`);keys?.add(key);}
+    }
+    return value;
+  }
   const object = value => value !== null && typeof value === 'object' && !Array.isArray(value);
   const integer = value => Number.isInteger(value) && value >= -2147483648 && value <= 2147483647;
   function diagnostics(settings, level) {
@@ -93,5 +103,5 @@
     if (blocks.some((b,i) => i!==selectedIndex && b.row===block.row && b.column<block.column+block.width && b.column+b.width>block.column)) return '此位置与其他块重叠';
     return null;
   }
-  return {clone, integer, validate, diagnostics, normalize, entryOptions, placementError};
+  return {clone, parse, integer, validate, diagnostics, normalize, entryOptions, placementError};
 });

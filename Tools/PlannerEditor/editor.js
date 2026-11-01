@@ -30,6 +30,7 @@
     $('levelStatus').textContent=state.status('level')+(propertyPending||drafts.some(([p])=>p.startsWith('level.'))?'（有未提交输入 / 属性）':'');
     $('undo').disabled=!state.past.length;$('redo').disabled=!state.future.length;
     const box=$('validation');box.replaceChildren();box.classList.toggle('invalid',errors.length>0||!!state.firstInvalid);
+    $('exportSettings').disabled=$('exportLevel').disabled=errors.length>0||!!state.firstInvalid;
     if(!errors.length&&!state.firstInvalid)box.textContent=`校验通过 · ${state.level.levels.length} 关 · 仅高度 1 · 导出后仍需游戏实射验证。`;
     errors.forEach(error=>{const button=document.createElement('button');button.type='button';button.className='error-link';button.textContent=`${error.path}：${error.message}`;button.onclick=()=>guard(()=>locate(error.path));box.append(button);});
     drafts.filter(([,d])=>d.error).forEach(([path,d])=>{const p=document.createElement('p');p.textContent=`${path}：${d.error}（未提交）`;box.append(p);});
@@ -102,7 +103,7 @@
   $('reset').onclick=()=>guard(()=>{if(!confirm('用默认示例替换当前内容？未导出修改会丢失。'))return;state.replace(PlannerDefaults.settings,PlannerDefaults.level);render();$('source').textContent='当前编辑：成长版内置默认示例，不是游戏当前文件。';});
   $('importFiles').onchange=async()=>{
     const files=Array.from($('importFiles').files);$('importFiles').value='';
-    try{const s=files.find(f=>f.name==='settings.json'),l=files.find(f=>f.name==='level.json');if(files.length!==2||!s||!l)throw new Error('请同时选择 settings.json 和 level.json 两份文件。');const settings=JSON.parse(await s.text()),level=JSON.parse(await l.text());const errors=M.validate(settings,level);if(errors.length)throw new Error('导入失败，当前内容保持不变：\n'+errors.slice(0,8).join('\n'));guard(()=>{if(state.hasUnexported&&!confirm('导入会替换未导出的修改，继续？'))return;state.replace(settings,level);render();$('source').textContent=`当前编辑：已导入两份配置，${state.level.levels.length} 关。旧 v1 将导出为 v2。`;message('导入完成；不会自动写回原文件。');});}catch(e){message(e.message,true);}
+    try{const s=files.find(f=>f.name==='settings.json'),l=files.find(f=>f.name==='level.json');if(files.length!==2||!s||!l)throw new Error('请同时选择 settings.json 和 level.json 两份文件。');const settings=M.parse(await s.text()),level=M.parse(await l.text());const errors=M.validate(settings,level);if(errors.length)throw new Error('导入失败，当前内容保持不变：\n'+errors.slice(0,8).join('\n'));guard(()=>{if(state.hasUnexported&&!confirm('导入会替换未导出的修改，继续？'))return;state.replace(settings,level);render();$('source').textContent=`当前编辑：已导入两份配置，${state.level.levels.length} 关。旧 v1 将导出为 v2。`;message('导入完成；不会自动写回原文件。');});}catch(e){message(e.message,true);}
   };
   function download(file){guard(()=>{state.markExport(file);const blob=new Blob([JSON.stringify(state[file],null,2)+'\n'],{type:'application/json;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=file+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);refresh();message(`已请求导出 ${file}.json，请核对下载并替换游戏 Config 文件，再 Reload + Restart；不是已保存到游戏。`);});}
   $('exportSettings').onclick=()=>download('settings');$('exportLevel').onclick=()=>download('level');
