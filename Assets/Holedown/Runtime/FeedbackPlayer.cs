@@ -32,14 +32,7 @@ namespace Holedown
             if(Time.time>=nextSoundTime) { audioSource.PlayOneShot(hitClip); nextSoundTime=Time.time+0.05f; SoundsPlayed++; }
             if(!view) return;
             if(hit.Destroyed) StartCoroutine(Fragments(view.transform.position,view.BaseColor));
-            else StartCoroutine(Flash(view));
-        }
-        IEnumerator Flash(BlockView view)
-        {
-            // Repeated hits extend white feedback without touching collision geometry.
-            view.Visual.color=Color.white;
-            yield return new WaitForSeconds(0.06f);
-            if(view && view.gameObject.activeSelf) view.Visual.color=view.BaseColor;
+            else view.PlayImpact();
         }
         IEnumerator Fragments(Vector3 position, Color color)
         {
