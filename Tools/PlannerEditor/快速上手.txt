@@ -1,5 +1,8 @@
 Holedown 成长版 P1 策划快速上手（不需要 Unity）
 
+每次构建单独保存在 Builds/01、Builds/02……，本运行目录位于对应编号的 Windows 子目录。
+新构建不覆盖旧包；升级时需手动将旧包的 Config 复制到新包，先备份，height=2 配置必须使用 P1 程序。
+
 1. 运行 HoledownGrowth.exe 试玩。
 2. 双击 PlannerEditor/index.html，用 Chrome 或 Edge 打开离线编辑器。
 3. 在编辑器里同时导入本目录 Config/settings.json 和 Config/level.json。

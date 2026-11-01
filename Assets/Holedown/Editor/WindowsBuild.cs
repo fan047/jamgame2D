@@ -15,6 +15,8 @@ namespace Holedown.Editor
             if (EditorApplication.isPlaying) throw new BuildFailedException("Exit Play Mode before building.");
             if (!BuildPipeline.IsBuildTargetSupported(BuildTargetGroup.Standalone,BuildTarget.StandaloneWindows64))
                 throw new BuildFailedException("Windows x64 build support is missing.");
+            string buildDirectory=CreateBuildDirectory("Builds");
+            string outputDirectory=Path.Combine(buildDirectory,"Windows");Directory.CreateDirectory(outputDirectory);
             var temp=Path.GetFullPath("Library/Locus/tmp/build-temp");
             Directory.CreateDirectory(temp);
             string oldTemp=Environment.GetEnvironmentVariable("TEMP"),oldTmp=Environment.GetEnvironmentVariable("TMP");
@@ -27,15 +29,16 @@ namespace Holedown.Editor
                 var report=BuildPipeline.BuildPlayer(new BuildPlayerOptions
                 {
                     scenes=new[]{"Assets/Scenes/SampleScene.unity"},
-                    locationPathName="Builds/Windows-Growth/HoledownGrowth.exe",
+                    locationPathName=Path.Combine(outputDirectory,"HoledownGrowth.exe"),
                     target=BuildTarget.StandaloneWindows64,
                     options=BuildOptions.None
                 });
                 var summary=report.summary;
                 var message=$"result={summary.result}\nerrors={summary.totalErrors}\nwarnings={summary.totalWarnings}\nbytes={summary.totalSize}\nduration={summary.totalTime}\npath={summary.outputPath}";
                 File.WriteAllText("Library/Locus/tmp/windows-growth-build-final.txt",message);
+                File.WriteAllText(Path.Combine(buildDirectory,"build-result.txt"),message);
                 if(summary.result!=BuildResult.Succeeded) throw new BuildFailedException(message);
-                PreparePlannerFiles("Builds/Windows-Growth");
+                PreparePlannerFiles(outputDirectory);
                 Debug.Log(message);
             }
             finally
@@ -43,6 +46,16 @@ namespace Holedown.Editor
                 Environment.SetEnvironmentVariable("TEMP",oldTemp);
                 Environment.SetEnvironmentVariable("TMP",oldTmp);
             }
+        }
+        public static string CreateBuildDirectory(string root)
+        {
+            Directory.CreateDirectory(root);
+            int highest=0;
+            foreach(string entry in Directory.EnumerateFileSystemEntries(root))
+                if(int.TryParse(Path.GetFileName(entry),System.Globalization.NumberStyles.None,System.Globalization.CultureInfo.InvariantCulture,out int number)&&number>highest)highest=number;
+            string path=Path.Combine(root,checked(highest+1).ToString("D2",System.Globalization.CultureInfo.InvariantCulture));
+            Directory.CreateDirectory(path);
+            return path;
         }
         public static void PreparePlannerFiles(string outputDirectory)
         {
