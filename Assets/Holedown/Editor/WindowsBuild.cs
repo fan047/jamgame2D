@@ -54,6 +54,9 @@ namespace Holedown.Editor
                 // Rebuilds must not overwrite the planner's work.
                 if(!File.Exists(destination)) File.Copy(Path.Combine("Config",name),destination);
             }
+            string examples=Path.Combine(config,"Examples");Directory.CreateDirectory(examples);
+            string verticalExample=Path.Combine(examples,"level-vertical.json");
+            if(!File.Exists(verticalExample))File.Copy("Config/Examples/level-vertical.json",verticalExample);
             foreach(string name in new[]{"index.html","config-model.js","defaults.js","editor-state.js","editor.js","styles.css"})
                 File.Copy(Path.Combine("Tools/PlannerEditor",name),Path.Combine(editor,name),true);
             File.Copy("Tools/PlannerEditor/快速上手.txt",Path.Combine(outputDirectory,"策划快速上手.txt"),true);

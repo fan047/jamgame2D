@@ -32,12 +32,13 @@ namespace Holedown.Tests
             File.Copy("Tests/Fixtures/legacy-level.json",Path.Combine(directory,"level.json"),true);
             using(var loaded=ExternalConfiguration.Load(directory,defaults,fallback)){Assert.AreEqual(1,loaded.Campaign.Stages.Count);Assert.AreEqual(0,loaded.Campaign.Stages[0].PossibleReward);}
         }
-        [Test] public void VerticalV2ConfigurationPreservesShapeAndMaximumHealthAcrossAttempts()
+        [TestCase(false)] [TestCase(true)] public void VerticalV2ConfigurationPreservesShapeAndMaximumHealthAcrossAttempts(bool shippedExample)
         {
             var json=JObject.Parse(File.ReadAllText(Path.Combine(directory,"level.json")));
             var block=(JObject)json.SelectToken("levels[0].initialBlocks[0]");
             block["column"]=4;block["row"]=4;block["width"]=1;block["height"]=2;block["health"]=6;
             File.WriteAllText(Path.Combine(directory,"level.json"),json.ToString());
+            if(shippedExample)File.Copy("Config/Examples/level-vertical.json",Path.Combine(directory,"level.json"),true);
             using(var loaded=ExternalConfiguration.Load(directory,defaults,fallback)) {
                 var board=loaded.CreateBoard(0);board.ApplyHit(1);board.Advance();
                 Assert.AreEqual(2,board.Blocks[1].Height);Assert.AreEqual(6,board.Blocks[1].MaxHealth);
