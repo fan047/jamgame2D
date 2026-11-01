@@ -33,7 +33,7 @@ namespace Holedown.Tests
         {
             var c=new CampaignState(2,int.MaxValue-1);Assert.Throws<OverflowException>(()=>c.RecordHit(1,Reward()));Assert.AreEqual(0,c.PendingBonus);
         }
-        [TestCase(2,0,false)] [TestCase(1,4,false)] [TestCase(1,3,true)]
+        [TestCase(3,0,false)] [TestCase(1,4,false)] [TestCase(1,3,true)]
         public void UnsupportedHeightRewardOrTargetCombinationRejected(int height,int reward,bool target)
         {
             Assert.Throws<ArgumentException>(()=>new BoardState(new[]{new BlockDefinition(0,0,1,1,target,reward,height)},new[]{new RowDefinition{blocks=new System.Collections.Generic.List<BlockDefinition>{new BlockDefinition(3,0,1,1,true)}}}));

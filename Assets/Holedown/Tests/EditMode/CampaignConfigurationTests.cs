@@ -32,6 +32,18 @@ namespace Holedown.Tests
             File.Copy("Tests/Fixtures/legacy-level.json",Path.Combine(directory,"level.json"),true);
             using(var loaded=ExternalConfiguration.Load(directory,defaults,fallback)){Assert.AreEqual(1,loaded.Campaign.Stages.Count);Assert.AreEqual(0,loaded.Campaign.Stages[0].PossibleReward);}
         }
+        [Test] public void VerticalV2ConfigurationPreservesShapeAndMaximumHealthAcrossAttempts()
+        {
+            var json=JObject.Parse(File.ReadAllText(Path.Combine(directory,"level.json")));
+            var block=(JObject)json.SelectToken("levels[0].initialBlocks[0]");
+            block["column"]=4;block["row"]=4;block["width"]=1;block["height"]=2;block["health"]=6;
+            File.WriteAllText(Path.Combine(directory,"level.json"),json.ToString());
+            using(var loaded=ExternalConfiguration.Load(directory,defaults,fallback)) {
+                var board=loaded.CreateBoard(0);board.ApplyHit(1);board.Advance();
+                Assert.AreEqual(2,board.Blocks[1].Height);Assert.AreEqual(6,board.Blocks[1].MaxHealth);
+                Assert.AreEqual(5,board.Blocks[1].Health);Assert.AreEqual(6,loaded.CreateBoard(0).Blocks[1].Health);
+            }
+        }
         [Test] public void SharedNegativeFixturesHaveSameContractAsEditor()
         {
             string settings=File.ReadAllText("Config/settings.json"),level=File.ReadAllText("Tests/Fixtures/growth-level.json");

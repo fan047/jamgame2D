@@ -30,11 +30,13 @@ namespace Holedown
         public int Column { get; }
         public int Row { get; internal set; }
         public int Width { get; }
+        public int Height { get; }
+        public int MaxHealth { get; }
         public int Health { get; internal set; }
         public bool IsTarget { get; }
         public int RewardBalls { get; }
         internal BlockState(int id, BlockDefinition definition, int row)
-        { Id = id; Column = definition.column; Row = row; Width = definition.width; Health = definition.health; IsTarget = definition.target; RewardBalls = definition.rewardBalls; }
+        { Id = id; Column = definition.column; Row = row; Width = definition.width; Height = definition.height; MaxHealth = definition.health; Health = definition.health; IsTarget = definition.target; RewardBalls = definition.rewardBalls; }
     }
 
     public readonly struct HitResult
@@ -93,7 +95,7 @@ namespace Holedown
                 foreach (var d in incoming[IncomingCursor].blocks) Add(d, 0);
                 IncomingCursor++;
             }
-            foreach (var block in blocks.Values) if (block.Row >= 8) return true;
+            foreach (var block in blocks.Values) if (block.Row + block.Height - 1 >= 8) return true;
             return false;
         }
 
@@ -134,13 +136,16 @@ namespace Holedown
             if(d.column<0 || d.column>7) throw new ArgumentException(path+".column: expected 0-7.");
             if(d.width!=1 && d.width!=2) throw new ArgumentException(path+".width: expected 1 or 2.");
             if(d.column+d.width>8) throw new ArgumentException(path+": column + width exceeds 8 columns.");
-            if(d.height!=1) throw new ArgumentException(path+".height: P0 supports height=1 only.");
+            if(d.height!=1 && d.height!=2) throw new ArgumentException(path+".height: expected 1 or 2.");
+            if(d.height==2 && (incoming || d.width!=1)) throw new ArgumentException(path+".height: height=2 requires width=1 and initial layout; incoming height must be 1.");
             if(d.rewardBalls!=0 && d.rewardBalls!=3 && d.rewardBalls!=5) throw new ArgumentException(path+".rewardBalls: expected 0, 3 or 5.");
             if(d.target && d.rewardBalls!=0) throw new ArgumentException(path+": target and reward are mutually exclusive.");
             if(d.health<=0) throw new ArgumentException(path+".health: expected positive integer.");
             if(d.row<0 || d.row>=8 || (incoming && d.row!=0)) throw new ArgumentException(path+".row: "+(incoming?"incoming blocks must use row 0.":"expected 0-7."));
-            for (int c = d.column; c < d.column + d.width; c++)
-                if (!occupied.Add(d.row * 8 + c)) throw new ArgumentException(path+$": overlaps another block at column {c}, row {d.row}.");
+            if(d.row+d.height>8) throw new ArgumentException(path+".height: row + height exceeds 8 rows.");
+            for (int r = d.row; r < d.row + d.height; r++)
+                for (int c = d.column; c < d.column + d.width; c++)
+                    if (!occupied.Add(r * 8 + c)) throw new ArgumentException(path+$": overlaps another block at column {c}, row {r}.");
         }
     }
 }
