@@ -9,11 +9,13 @@ namespace Holedown
         public int column;
         public int row;
         public int width = 1;
+        public int height = 1;
+        public int rewardBalls;
         public int health = 3;
         public bool target;
         public BlockDefinition() { }
-        public BlockDefinition(int column, int row, int width, int health, bool target = false)
-        { this.column = column; this.row = row; this.width = width; this.health = health; this.target = target; }
+        public BlockDefinition(int column, int row, int width, int health, bool target = false, int rewardBalls = 0, int height = 1)
+        { this.column = column; this.row = row; this.width = width; this.health = health; this.target = target; this.rewardBalls = rewardBalls; this.height = height; }
     }
 
     [Serializable]
@@ -30,8 +32,9 @@ namespace Holedown
         public int Width { get; }
         public int Health { get; internal set; }
         public bool IsTarget { get; }
+        public int RewardBalls { get; }
         internal BlockState(int id, BlockDefinition definition, int row)
-        { Id = id; Column = definition.column; Row = row; Width = definition.width; Health = definition.health; IsTarget = definition.target; }
+        { Id = id; Column = definition.column; Row = row; Width = definition.width; Health = definition.health; IsTarget = definition.target; RewardBalls = definition.rewardBalls; }
     }
 
     public readonly struct HitResult
@@ -40,8 +43,9 @@ namespace Holedown
         public readonly int Health;
         public readonly bool Destroyed;
         public readonly bool IsTarget;
-        public HitResult(bool accepted, int health, bool destroyed, bool target)
-        { Accepted = accepted; Health = health; Destroyed = destroyed; IsTarget = target; }
+        public readonly int RewardBalls;
+        public HitResult(bool accepted, int health, bool destroyed, bool target, int rewardBalls = 0)
+        { Accepted = accepted; Health = health; Destroyed = destroyed; IsTarget = target; RewardBalls = rewardBalls; }
     }
 
     public sealed class BoardState
@@ -61,7 +65,7 @@ namespace Holedown
             foreach (var row in rows)
             {
                 var copy = new RowDefinition();
-                foreach (var d in row.blocks) copy.blocks.Add(new BlockDefinition(d.column, 0, d.width, d.health, d.target));
+                foreach (var d in row.blocks) copy.blocks.Add(new BlockDefinition(d.column, 0, d.width, d.health, d.target, d.rewardBalls, d.height));
                 incoming.Add(copy);
             }
         }
@@ -78,7 +82,7 @@ namespace Holedown
                 if (block.IsTarget) TargetDestroyed = true;
                 blocks.Remove(id);
             }
-            return new HitResult(true, block.Health, destroyed, block.IsTarget);
+            return new HitResult(true, block.Health, destroyed, block.IsTarget, destroyed ? block.RewardBalls : 0);
         }
 
         public bool Advance()
@@ -96,12 +100,13 @@ namespace Holedown
         public static void Validate(IReadOnlyList<BlockDefinition> initial, IReadOnlyList<RowDefinition> rows)
         {
             if (initial == null || rows == null || rows.Count == 0) throw new ArgumentException("level.json: initialBlocks and at least one incomingRows entry are required.");
-            int targets = 0;
+            int targets = 0, rewards = 0;
             var occupied = new HashSet<int>();
             for(int i=0;i<initial.Count;i++)
             {
                 var d=initial[i]; string path=$"level.json.initialBlocks[{i}]";
                 ValidateBlock(d, false, occupied,path);
+                if(d.rewardBalls>0) rewards++;
                 if (d.target) throw new ArgumentException(path+".target: target must be in the last incoming row.");
             }
             for (int i = 0; i < rows.Count; i++)
@@ -113,11 +118,13 @@ namespace Holedown
                 {
                     var d=rows[i].blocks[j]; string blockPath=$"{path}.blocks[{j}]";
                     ValidateBlock(d, true, occupied,blockPath);
+                    if(d.rewardBalls>0) rewards++;
                     if (!d.target) continue;
                     targets++;
                     if (i != rows.Count - 1) throw new ArgumentException(blockPath+".target: target must be in the last incoming row.");
                 }
             }
+            if(rewards>1) throw new ArgumentException("level.json: at most one reward block per stage.");
             if (targets != 1) throw new ArgumentException($"level.json: expected exactly one target in the last incoming row; found {targets}.");
         }
 
@@ -127,6 +134,9 @@ namespace Holedown
             if(d.column<0 || d.column>7) throw new ArgumentException(path+".column: expected 0-7.");
             if(d.width!=1 && d.width!=2) throw new ArgumentException(path+".width: expected 1 or 2.");
             if(d.column+d.width>8) throw new ArgumentException(path+": column + width exceeds 8 columns.");
+            if(d.height!=1) throw new ArgumentException(path+".height: P0 supports height=1 only.");
+            if(d.rewardBalls!=0 && d.rewardBalls!=3 && d.rewardBalls!=5) throw new ArgumentException(path+".rewardBalls: expected 0, 3 or 5.");
+            if(d.target && d.rewardBalls!=0) throw new ArgumentException(path+": target and reward are mutually exclusive.");
             if(d.health<=0) throw new ArgumentException(path+".health: expected positive integer.");
             if(d.row<0 || d.row>=8 || (incoming && d.row!=0)) throw new ArgumentException(path+".row: "+(incoming?"incoming blocks must use row 0.":"expected 0-7."));
             for (int c = d.column; c < d.column + d.width; c++)
