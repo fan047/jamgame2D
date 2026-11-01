@@ -8,6 +8,11 @@ namespace Holedown
         [SerializeField] BlockView blockPrefab;
         readonly Dictionary<int, BlockView> views = new Dictionary<int, BlockView>();
         public IReadOnlyDictionary<int, BlockView> Views => views;
+        public void Clear()
+        {
+            foreach(var view in views.Values) if(view)view.Remove();
+            views.Clear();
+        }
         public void Sync(BoardState board)
         {
             foreach (var block in board.Blocks.Values)

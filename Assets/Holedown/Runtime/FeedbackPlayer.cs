@@ -19,8 +19,13 @@ namespace Holedown
             for(int i=0;i<samples.Length;i++) {float t=(float)i/rate; samples[i]=Mathf.Sin(t*880*Mathf.PI*2)*0.18f*(1f-(float)i/samples.Length);}
             hitClip=AudioClip.Create("Placeholder hit",samples.Length,1,rate,false); hitClip.SetData(samples,0);
         }
-        void OnEnable() { flow.BlockHit += PlayHit; }
-        void OnDisable() { flow.BlockHit -= PlayHit; StopAllCoroutines(); if(audioSource)audioSource.Stop(); }
+        void OnEnable() { flow.BlockHit += PlayHit; flow.AttemptReset += Clear; }
+        void OnDisable() { flow.BlockHit -= PlayHit; flow.AttemptReset -= Clear; Clear(); }
+        void Clear()
+        {
+            StopAllCoroutines(); if(audioSource)audioSource.Stop();nextSoundTime=0;
+            foreach(Transform child in transform)Destroy(child.gameObject);
+        }
         void OnDestroy() { if(hitClip) Destroy(hitClip); }
         void PlayHit(BlockView view, HitResult hit)
         {

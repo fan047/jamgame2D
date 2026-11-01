@@ -17,7 +17,8 @@ namespace Holedown
             var session=flow.Session;
             if(session==null) { recall.interactable=false; status.text="Preparing..."; return; }
             recall.interactable=session.Phase==SessionPhase.Volley;
-            status.text=$"Round {session.Round + (session.Phase==SessionPhase.Aiming?1:0)}   |   Balls {session.ActiveCount} (+{session.Pending})\nRows {flow.Board?.IncomingCursor ?? 0}/{flow.Board?.IncomingCount ?? 0}   |   {session.Phase}\n<size=65%>Config: {flow.ConfigurationLabel}</size>";
+            var campaign=flow.Campaign;
+            status.text=$"Stage {(campaign?.StageIndex ?? 0)+1}/{campaign?.StageCount ?? 1} | Per Round {campaign?.EntryBalls ?? flow.Settings.ballsPerRound} | Round {session.Round + (session.Phase==SessionPhase.Aiming?1:0)}\nBalls {session.ActiveCount} (+{session.Pending}) | Rows {flow.Board?.IncomingCursor ?? 0}/{flow.Board?.IncomingCount ?? 0} | {session.Phase}\n<size=65%>Bonus +{campaign?.PendingBonus ?? 0} (next stage) | Config: {flow.ConfigurationLabel}</size>";
         }
     }
 }

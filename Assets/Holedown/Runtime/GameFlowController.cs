@@ -23,6 +23,11 @@ namespace Holedown
         public string InitializationError { get; private set; }
         public event Action<BlockView, HitResult> BlockHit;
         public event Action Changed;
+        public event Action AttemptReset;
+        public CampaignState Campaign { get; private set; }
+        bool transitioning;
+        int transitionFrame = -1;
+        public bool IsTransitioning => transitioning;
         public GameSettings Settings => configuration?.Settings ?? settings;
         public string ConfigurationLabel => configuration?.Label ?? "Not loaded";
         public string ConfigurationDirectory { get; private set; }
@@ -32,10 +37,23 @@ namespace Holedown
         void OnDisable()
         {
             aim.FireRequested -= OnFireRequested;
-            aim.CanAim = false;
-            StopAllCoroutines(); launching = null;
-            foreach (var ball in balls.Values) if (ball) { ball.Hit -= OnHit; ball.Returned -= OnReturned; Destroy(ball.gameObject); }
+            ClearAttempt();
+        }
+        void ClearAttempt()
+        {
+            aim.CanAim=false;
+            StopAllCoroutines(); launching=null;
+            foreach(var ball in balls.Values) if(ball){ball.Hit-=OnHit;ball.Returned-=OnReturned;ball.gameObject.SetActive(false);Destroy(ball.gameObject);}
             balls.Clear();
+            AttemptReset?.Invoke();
+            if(boardView) boardView.Clear();
+        }
+        void BeginAttempt()
+        {
+            ClearAttempt();
+            Session=new GameSession(); Board=configuration.CreateBoard(Campaign.StageIndex);
+            aim.Configure(Settings);boardView.Sync(Board);Session.Ready();aim.CanAim=true;
+            Changed?.Invoke();
         }
         void Start()
         {
@@ -46,9 +64,8 @@ namespace Holedown
                     ? System.IO.Path.GetFullPath(externalConfigDirectory)
                     : Application.isEditor ? null : System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Application.dataPath),"Config");
                 configuration = ExternalConfiguration.Load(ConfigurationDirectory,settings,level);
-                Board = configuration.Board;
-                aim.Configure(Settings);
-                boardView.Sync(Board); Session.Ready(); aim.CanAim = true;
+                Campaign=new CampaignState(configuration.Campaign.Stages.Count,Settings.ballsPerRound);
+                BeginAttempt();
             }
             catch (Exception exception)
             {
@@ -60,10 +77,10 @@ namespace Holedown
         void OnFireRequested(Vector2 direction) => TryFire(direction);
         public bool TryFire(Vector2 direction)
         {
-            if (Session == null || direction.y >= 0 || !float.IsFinite(direction.x) || !float.IsFinite(direction.y) || direction.sqrMagnitude < 0.0001f) return false;
+            if (transitioning || Campaign == null || Session == null || direction.y >= 0 || !float.IsFinite(direction.x) || !float.IsFinite(direction.y) || direction.sqrMagnitude < 0.0001f) return false;
             float angle = Mathf.Clamp(Mathf.Atan2(direction.x,-direction.y)*Mathf.Rad2Deg,-Settings.maxAimAngle,Settings.maxAimAngle)*Mathf.Deg2Rad;
             direction = new Vector2(Mathf.Sin(angle),-Mathf.Cos(angle));
-            if (!Session.TryFire(Settings.ballsPerRound)) return false;
+            if (!Session.TryFire(Campaign.EntryBalls)) return false;
             aim.CanAim = false; volleyStarted = Time.time;
             launching = StartCoroutine(LaunchVolley(Session.SessionId,Session.VolleyId,direction));
             Changed?.Invoke(); return true;
@@ -87,8 +104,10 @@ namespace Holedown
             if (!Session.AcceptHit(ball.SessionId,ball.VolleyId,ball.BallId)) return;
             var hit = Board.ApplyHit(blockId);
             if (!hit.Accepted) return;
+            Campaign.RecordHit(blockId,hit);
             var view = boardView.ApplyHit(blockId,hit);
             BlockHit?.Invoke(view,hit);
+            Changed?.Invoke();
         }
         void OnReturned(BallActor ball)
         {
@@ -104,10 +123,31 @@ namespace Holedown
             foreach (var ball in returning) ball.Return();
             Changed?.Invoke();
         }
-        public void Restart()
+        bool EnterTransition()
         {
-            aim.CanAim = false;
-            StopAllCoroutines(); launching = null;
+            if(transitioning || transitionFrame==Time.frameCount)return false;
+            transitioning=true;transitionFrame=Time.frameCount;return true;
+        }
+        public void NextStage()
+        {
+            if(Session?.Phase!=SessionPhase.Won || Campaign==null || Campaign.IsFinalStage || !EnterTransition())return;
+            try{if(Campaign.NextStage())BeginAttempt();}finally{transitioning=false;}
+        }
+        public void RetryStage()
+        {
+            if(Session?.Phase!=SessionPhase.Lost || Campaign==null || !EnterTransition())return;
+            try{if(Campaign.RetryStage())BeginAttempt();}finally{transitioning=false;}
+        }
+        public void RestartRun()
+        {
+            if(Campaign==null || !EnterTransition())return;
+            try{Campaign.RestartRun();BeginAttempt();}finally{transitioning=false;}
+        }
+        public void Restart() => ReloadAndRestart();
+        public void ReloadAndRestart()
+        {
+            if(!EnterTransition())return;
+            ClearAttempt();
             UnityEngine.SceneManagement.SceneManager.LoadScene(gameObject.scene.path);
         }
         void Update()
@@ -122,7 +162,10 @@ namespace Holedown
                 case SessionPhase.Volley:
                 case SessionPhase.Recalling:
                     if (!Session.TryBeginSettlement()) break;
-                    Session.Settle(Board); boardView.Sync(Board);
+                    Session.Settle(Board);
+                    if(Session.Phase==SessionPhase.Won)Campaign.CompleteStage();
+                    else if(Session.Phase==SessionPhase.Lost)Campaign.FailStage();
+                    boardView.Sync(Board);
                     aim.CanAim = Session.Phase == SessionPhase.Aiming;
                     Changed?.Invoke();
                     break;
