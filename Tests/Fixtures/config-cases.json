@@ -1,0 +1,13 @@
+[
+  {"name":"p0-height","path":"levels[0].initialBlocks[0].height","value":2,"error":"height"},
+  {"name":"bad-reward","path":"levels[0].initialBlocks[0].rewardBalls","value":4,"error":"rewardBalls"},
+  {"name":"target-reward","path":"levels[0].incomingRows[3].blocks[0].rewardBalls","value":3,"error":"target"},
+  {"name":"final-reward","path":"levels[2].initialBlocks[0].rewardBalls","value":3,"error":"levels[2]"},
+  {"name":"duplicate-id","path":"levels[1].id","value":"stage-1","error":"id"},
+  {"name":"missing-name","path":"levels[0].name","remove":true,"error":"name"},
+  {"name":"overlap","path":"levels[1].initialBlocks[1].column","value":1,"error":"initialBlocks[1]"},
+  {"name":"missing-height","path":"levels[0].initialBlocks[0].height","remove":true,"error":"height"},
+  {"name":"unknown-field","path":"levels[0]","addKey":"typo","value":1,"error":"typo"},
+  {"name":"settings-v2","file":"settings","path":"schemaVersion","value":2,"error":"schemaVersion"},
+  {"name":"overflow","file":"settings","path":"ballsPerRound","value":2147483647,"error":"Int32"}
+]

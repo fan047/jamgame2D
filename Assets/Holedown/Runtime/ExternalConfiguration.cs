@@ -13,10 +13,13 @@ namespace Holedown
     public sealed class LoadedConfiguration : IDisposable
     {
         public GameSettings Settings { get; }
-        public BoardState Board { get; }
+        public CampaignDefinition Campaign { get; }
+        // Compatibility entry point: each access creates a fresh first-stage board.
+        public BoardState Board => CreateBoard(0);
+        public BoardState CreateBoard(int stageIndex) => Campaign.CreateBoard(stageIndex);
         public string Label { get; }
-        internal LoadedConfiguration(GameSettings settings, BoardState board, string label)
-        { Settings=settings; Board=board; Label=label; }
+        internal LoadedConfiguration(GameSettings settings, CampaignDefinition campaign, string label)
+        { Settings=settings; Campaign=campaign; Label=label; }
         public void Dispose() { Release(Settings); }
         internal static void Release(GameSettings settings)
         {
@@ -38,13 +41,12 @@ namespace Holedown
                 if(!hasSettings && !hasLevel)
                 {
                     settings.Validate();
-                    return new LoadedConfiguration(settings,level.CreateBoard(),"Built-in");
+                    return new LoadedConfiguration(settings,new CampaignDefinition(new[]{new StageDefinition("stage-1","Built-in",level.initialBlocks,level.incomingRows)},settings.ballsPerRound),"Built-in");
                 }
                 if(!hasSettings || !hasLevel) throw new ArgumentException("Config requires both settings.json and level.json. Missing: "+(!hasSettings?settingsPath:levelPath));
                 var s=Read(settingsPath); var l=Read(levelPath);
-                string sv=Header(s,"settings.json"),lv=Header(l,"level.json");
+                string sv=Header(s,"settings.json",1),lv=Header(l,"level.json",1,2);
                 Keys(s,"settings.json","schemaVersion","version","ballsPerRound","ballRadius","ballSpeed","launchInterval","maxAimAngle","recallTimeout");
-                Keys(l,"level.json","schemaVersion","version","initialBlocks","incomingRows");
                 settings.ballsPerRound=Integer(s,"ballsPerRound","settings.json");
                 settings.ballRadius=Number(s,"ballRadius","settings.json",0.5f);
                 settings.ballSpeed=Number(s,"ballSpeed","settings.json");
@@ -53,16 +55,24 @@ namespace Holedown
                 settings.recallTimeout=Number(s,"recallTimeout","settings.json");
                 if(settings.ballsPerRound<=0) throw new ArgumentException("settings.json.ballsPerRound: expected positive integer.");
                 settings.Validate();
-                var initial=Blocks(Array(l,"initialBlocks","level.json"),"level.json.initialBlocks");
-                var rowsArray=Array(l,"incomingRows","level.json"); var rows=new List<RowDefinition>();
-                for(int i=0;i<rowsArray.Count;i++)
+                var stages=new List<StageDefinition>();
+                if(Integer(l,"schemaVersion","level.json")==1)
                 {
-                    string path=$"level.json.incomingRows[{i}]";
-                    var row=Object(rowsArray[i],path); Keys(row,path,"blocks");
-                    rows.Add(new RowDefinition{blocks=Blocks(Array(row,"blocks",path),path+".blocks")});
+                    Keys(l,"level.json","schemaVersion","version","initialBlocks","incomingRows");
+                    stages.Add(ParseStage(l,"level.json",true));
                 }
-                var board=new BoardState(initial,rows);
-                return new LoadedConfiguration(settings,board,$"S:{sv} / L:{lv}");
+                else
+                {
+                    Keys(l,"level.json","schemaVersion","version","levels");
+                    var levels=Array(l,"levels","level.json");
+                    for(int i=0;i<levels.Count;i++)
+                    {
+                        string path=$"level.json.levels[{i}]";var stage=Object(levels[i],path);
+                        Keys(stage,path,"id","name","initialBlocks","incomingRows");
+                        stages.Add(ParseStage(stage,path,false));
+                    }
+                }
+                return new LoadedConfiguration(settings,new CampaignDefinition(stages,settings.ballsPerRound),$"S:{sv} / L:{lv}");
             }
             catch
             {
@@ -71,6 +81,25 @@ namespace Holedown
             }
         }
 
+        static StageDefinition ParseStage(JObject obj,string path,bool legacy)
+        {
+            var initial=Blocks(Array(obj,"initialBlocks",path),path+".initialBlocks",legacy);
+            var rowsArray=Array(obj,"incomingRows",path);var rows=new List<RowDefinition>();
+            for(int i=0;i<rowsArray.Count;i++)
+            {
+                string p=$"{path}.incomingRows[{i}]";var row=Object(rowsArray[i],p);Keys(row,p,"blocks");
+                rows.Add(new RowDefinition{blocks=Blocks(Array(row,"blocks",p),p+".blocks",legacy)});
+            }
+            string id="stage-1",name="Legacy Stage";
+            if(!legacy)
+            {
+                if(obj["id"]?.Type!=JTokenType.String)throw new ArgumentException(path+".id: expected string.");
+                if(obj["name"]?.Type!=JTokenType.String)throw new ArgumentException(path+".name: expected string.");
+                id=(string)obj["id"];name=(string)obj["name"];
+            }
+            try {return new StageDefinition(id,name,initial,rows);}
+            catch(ArgumentException ex) {throw new ArgumentException(ex.Message.StartsWith("level.json")?ex.Message.Replace("level.json",path):path+"."+ex.Message,ex);}
+        }
         static JObject Read(string path)
         {
             try
@@ -80,9 +109,9 @@ namespace Holedown
             catch(Exception ex) when(ex is JsonException || ex is IOException || ex is UnauthorizedAccessException)
             { throw new ArgumentException(Path.GetFileName(path)+": "+ex.Message,ex); }
         }
-        static string Header(JObject obj,string path)
+        static string Header(JObject obj,string path,params int[] supported)
         {
-            if(Integer(obj,"schemaVersion",path)!=1) throw new ArgumentException(path+".schemaVersion: only version 1 is supported.");
+            if(!supported.Contains(Integer(obj,"schemaVersion",path))) throw new ArgumentException(path+".schemaVersion: supported versions: "+string.Join(",",supported)+".");
             if(obj["version"]?.Type!=JTokenType.String || !Regex.IsMatch((string)obj["version"],"^[A-Za-z0-9._-]{1,32}$"))
                 throw new ArgumentException(path+".version: use 1-32 letters, digits, dots, underscores or hyphens.");
             return (string)obj["version"];
@@ -112,15 +141,15 @@ namespace Holedown
                 throw new ArgumentException(path+"."+key+": expected a positive finite number"+(float.IsFinite(exclusiveMaximum)?" below "+exclusiveMaximum:"")+".");
             return result;
         }
-        static List<BlockDefinition> Blocks(JArray array,string path)
+        static List<BlockDefinition> Blocks(JArray array,string path,bool legacy)
         {
             var blocks=new List<BlockDefinition>();
             for(int i=0;i<array.Count;i++)
             {
                 string p=$"{path}[{i}]"; var obj=Object(array[i],p);
-                Keys(obj,p,"column","row","width","health","target");
+                Keys(obj,p,legacy?new[]{"column","row","width","health","target"}:new[]{"column","row","width","height","health","target","rewardBalls"});
                 if(obj["target"]?.Type!=JTokenType.Boolean) throw new ArgumentException(p+".target: expected true or false.");
-                blocks.Add(new BlockDefinition(Integer(obj,"column",p),Integer(obj,"row",p),Integer(obj,"width",p),Integer(obj,"health",p),(bool)obj["target"]));
+                blocks.Add(new BlockDefinition(Integer(obj,"column",p),Integer(obj,"row",p),Integer(obj,"width",p),Integer(obj,"health",p),(bool)obj["target"],legacy?0:Integer(obj,"rewardBalls",p),legacy?1:Integer(obj,"height",p)));
             }
             return blocks;
         }

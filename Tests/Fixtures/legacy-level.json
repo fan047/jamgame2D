@@ -1,0 +1,157 @@
+{
+  "schemaVersion": 1,
+  "version": "demo-1",
+  "initialBlocks": [
+    {
+      "column": 0,
+      "row": 0,
+      "width": 2,
+      "health": 5,
+      "target": false
+    },
+    {
+      "column": 3,
+      "row": 0,
+      "width": 2,
+      "health": 4,
+      "target": false
+    },
+    {
+      "column": 6,
+      "row": 0,
+      "width": 2,
+      "health": 5,
+      "target": false
+    },
+    {
+      "column": 0,
+      "row": 1,
+      "width": 1,
+      "health": 3,
+      "target": false
+    },
+    {
+      "column": 2,
+      "row": 1,
+      "width": 1,
+      "health": 3,
+      "target": false
+    },
+    {
+      "column": 5,
+      "row": 1,
+      "width": 1,
+      "health": 3,
+      "target": false
+    },
+    {
+      "column": 7,
+      "row": 1,
+      "width": 1,
+      "health": 3,
+      "target": false
+    },
+    {
+      "column": 1,
+      "row": 2,
+      "width": 2,
+      "health": 4,
+      "target": false
+    },
+    {
+      "column": 5,
+      "row": 2,
+      "width": 2,
+      "health": 4,
+      "target": false
+    },
+    {
+      "column": 0,
+      "row": 3,
+      "width": 2,
+      "health": 3,
+      "target": false
+    },
+    {
+      "column": 6,
+      "row": 3,
+      "width": 2,
+      "health": 3,
+      "target": false
+    }
+  ],
+  "incomingRows": [
+    {
+      "blocks": [
+        {
+          "column": 1,
+          "row": 0,
+          "width": 1,
+          "health": 3,
+          "target": false
+        },
+        {
+          "column": 3,
+          "row": 0,
+          "width": 2,
+          "health": 4,
+          "target": false
+        },
+        {
+          "column": 6,
+          "row": 0,
+          "width": 1,
+          "health": 3,
+          "target": false
+        }
+      ]
+    },
+    {
+      "blocks": [
+        {
+          "column": 0,
+          "row": 0,
+          "width": 2,
+          "health": 4,
+          "target": false
+        },
+        {
+          "column": 6,
+          "row": 0,
+          "width": 2,
+          "health": 4,
+          "target": false
+        }
+      ]
+    },
+    {
+      "blocks": [
+        {
+          "column": 1,
+          "row": 0,
+          "width": 2,
+          "health": 4,
+          "target": false
+        },
+        {
+          "column": 5,
+          "row": 0,
+          "width": 2,
+          "health": 4,
+          "target": false
+        }
+      ]
+    },
+    {
+      "blocks": [
+        {
+          "column": 3,
+          "row": 0,
+          "width": 2,
+          "health": 10,
+          "target": true
+        }
+      ]
+    }
+  ]
+}

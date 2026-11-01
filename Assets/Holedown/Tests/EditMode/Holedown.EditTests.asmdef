@@ -1,1 +1,1 @@
-{"name":"Holedown.EditTests","references":["Holedown.Rules","Holedown.Runtime","Holedown.Editor"],"includePlatforms":["Editor"],"optionalUnityReferences":["TestAssemblies"]}
+{"name":"Holedown.EditTests","references":["Holedown.Rules","Holedown.Runtime","Holedown.Editor","Unity.Newtonsoft.Json"],"includePlatforms":["Editor"],"overrideReferences":true,"precompiledReferences":["nunit.framework.dll","Newtonsoft.Json.dll"],"optionalUnityReferences":["TestAssemblies"]}
