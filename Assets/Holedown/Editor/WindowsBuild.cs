@@ -9,7 +9,7 @@ namespace Holedown.Editor
 {
     public static class WindowsBuild
     {
-        [MenuItem("Holedown/Build Windows MVP")]
+        [MenuItem("Holedown/Build Windows Growth")]
         public static void Build()
         {
             if (EditorApplication.isPlaying) throw new BuildFailedException("Exit Play Mode before building.");
@@ -27,15 +27,15 @@ namespace Holedown.Editor
                 var report=BuildPipeline.BuildPlayer(new BuildPlayerOptions
                 {
                     scenes=new[]{"Assets/Scenes/SampleScene.unity"},
-                    locationPathName="Builds/Windows/HoledownMVP.exe",
+                    locationPathName="Builds/Windows-Growth/HoledownGrowth.exe",
                     target=BuildTarget.StandaloneWindows64,
                     options=BuildOptions.None
                 });
                 var summary=report.summary;
                 var message=$"result={summary.result}\nerrors={summary.totalErrors}\nwarnings={summary.totalWarnings}\nbytes={summary.totalSize}\nduration={summary.totalTime}\npath={summary.outputPath}";
-                File.WriteAllText("Library/Locus/tmp/windows-build-final.txt",message);
+                File.WriteAllText("Library/Locus/tmp/windows-growth-build-final.txt",message);
                 if(summary.result!=BuildResult.Succeeded) throw new BuildFailedException(message);
-                PreparePlannerFiles("Builds/Windows");
+                PreparePlannerFiles("Builds/Windows-Growth");
                 Debug.Log(message);
             }
             finally
@@ -54,7 +54,7 @@ namespace Holedown.Editor
                 // Rebuilds must not overwrite the planner's work.
                 if(!File.Exists(destination)) File.Copy(Path.Combine("Config",name),destination);
             }
-            foreach(string name in new[]{"index.html","config-model.js","defaults.js","editor.js","styles.css"})
+            foreach(string name in new[]{"index.html","config-model.js","defaults.js","editor-state.js","editor.js","styles.css"})
                 File.Copy(Path.Combine("Tools/PlannerEditor",name),Path.Combine(editor,name),true);
             File.Copy("Tools/PlannerEditor/快速上手.txt",Path.Combine(outputDirectory,"策划快速上手.txt"),true);
         }
