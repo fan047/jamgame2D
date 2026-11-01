@@ -1,18 +1,603 @@
-(function(root) {
-  const block = (column,row,width,health,target=false) => ({column,row,width,health,target});
-  const defaults = {
-    settings: {schemaVersion:1,version:'demo-1',ballsPerRound:12,ballRadius:0.12,ballSpeed:12,launchInterval:0.08,maxAimAngle:75,recallTimeout:30},
-    level: {
-      schemaVersion:1,version:'demo-1',
-      initialBlocks:[block(0,0,2,5),block(3,0,2,4),block(6,0,2,5),block(0,1,1,3),block(2,1,1,3),block(5,1,1,3),block(7,1,1,3),block(1,2,2,4),block(5,2,2,4),block(0,3,2,3),block(6,3,2,3)],
-      incomingRows:[
-        {blocks:[block(1,0,1,3),block(3,0,2,4),block(6,0,1,3)]},
-        {blocks:[block(0,0,2,4),block(6,0,2,4)]},
-        {blocks:[block(1,0,2,4),block(5,0,2,4)]},
-        {blocks:[block(3,0,2,10,true)]}
-      ]
-    }
-  };
-  if(typeof module==='object' && module.exports) module.exports=defaults;
-  else root.PlannerDefaults=defaults;
-})(typeof globalThis!=='undefined'?globalThis:this);
+(function(root){const defaults={
+  "settings": {
+    "schemaVersion": 1,
+    "version": "demo-1",
+    "ballsPerRound": 12,
+    "ballRadius": 0.12,
+    "ballSpeed": 12,
+    "launchInterval": 0.08,
+    "maxAimAngle": 75,
+    "recallTimeout": 30
+  },
+  "level": {
+    "schemaVersion": 2,
+    "version": "growth-1",
+    "levels": [
+      {
+        "id": "stage-1",
+        "name": "第 1 关",
+        "initialBlocks": [
+          {
+            "column": 0,
+            "row": 0,
+            "width": 2,
+            "health": 5,
+            "target": false,
+            "height": 1,
+            "rewardBalls": 0
+          },
+          {
+            "column": 3,
+            "row": 0,
+            "width": 2,
+            "health": 4,
+            "target": false,
+            "height": 1,
+            "rewardBalls": 0
+          },
+          {
+            "column": 6,
+            "row": 0,
+            "width": 2,
+            "health": 5,
+            "target": false,
+            "height": 1,
+            "rewardBalls": 0
+          },
+          {
+            "column": 0,
+            "row": 1,
+            "width": 1,
+            "health": 3,
+            "target": false,
+            "height": 1,
+            "rewardBalls": 0
+          },
+          {
+            "column": 2,
+            "row": 1,
+            "width": 1,
+            "health": 3,
+            "target": false,
+            "height": 1,
+            "rewardBalls": 0
+          },
+          {
+            "column": 5,
+            "row": 1,
+            "width": 1,
+            "health": 3,
+            "target": false,
+            "height": 1,
+            "rewardBalls": 0
+          },
+          {
+            "column": 7,
+            "row": 1,
+            "width": 1,
+            "health": 3,
+            "target": false,
+            "height": 1,
+            "rewardBalls": 0
+          },
+          {
+            "column": 1,
+            "row": 2,
+            "width": 2,
+            "health": 8,
+            "target": false,
+            "height": 1,
+            "rewardBalls": 3
+          },
+          {
+            "column": 5,
+            "row": 2,
+            "width": 2,
+            "health": 4,
+            "target": false,
+            "height": 1,
+            "rewardBalls": 0
+          },
+          {
+            "column": 0,
+            "row": 3,
+            "width": 2,
+            "health": 3,
+            "target": false,
+            "height": 1,
+            "rewardBalls": 0
+          },
+          {
+            "column": 6,
+            "row": 3,
+            "width": 2,
+            "health": 3,
+            "target": false,
+            "height": 1,
+            "rewardBalls": 0
+          }
+        ],
+        "incomingRows": [
+          {
+            "blocks": [
+              {
+                "column": 1,
+                "row": 0,
+                "width": 1,
+                "health": 3,
+                "target": false,
+                "height": 1,
+                "rewardBalls": 0
+              },
+              {
+                "column": 3,
+                "row": 0,
+                "width": 2,
+                "health": 4,
+                "target": false,
+                "height": 1,
+                "rewardBalls": 0
+              },
+              {
+                "column": 6,
+                "row": 0,
+                "width": 1,
+                "health": 3,
+                "target": false,
+                "height": 1,
+                "rewardBalls": 0
+              }
+            ]
+          },
+          {
+            "blocks": [
+              {
+                "column": 0,
+                "row": 0,
+                "width": 2,
+                "health": 4,
+                "target": false,
+                "height": 1,
+                "rewardBalls": 0
+              },
+              {
+                "column": 6,
+                "row": 0,
+                "width": 2,
+                "health": 4,
+                "target": false,
+                "height": 1,
+                "rewardBalls": 0
+              }
+            ]
+          },
+          {
+            "blocks": [
+              {
+                "column": 1,
+                "row": 0,
+                "width": 2,
+                "health": 4,
+                "target": false,
+                "height": 1,
+                "rewardBalls": 0
+              },
+              {
+                "column": 5,
+                "row": 0,
+                "width": 2,
+                "health": 4,
+                "target": false,
+                "height": 1,
+                "rewardBalls": 0
+              }
+            ]
+          },
+          {
+            "blocks": [
+              {
+                "column": 3,
+                "row": 0,
+                "width": 2,
+                "health": 10,
+                "target": true,
+                "height": 1,
+                "rewardBalls": 0
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "stage-2",
+        "name": "第 2 关",
+        "initialBlocks": [
+          {
+            "column": 0,
+            "row": 0,
+            "width": 2,
+            "health": 6,
+            "target": false,
+            "height": 1,
+            "rewardBalls": 0
+          },
+          {
+            "column": 3,
+            "row": 0,
+            "width": 2,
+            "health": 5,
+            "target": false,
+            "height": 1,
+            "rewardBalls": 0
+          },
+          {
+            "column": 6,
+            "row": 0,
+            "width": 2,
+            "health": 6,
+            "target": false,
+            "height": 1,
+            "rewardBalls": 0
+          },
+          {
+            "column": 0,
+            "row": 1,
+            "width": 1,
+            "health": 4,
+            "target": false,
+            "height": 1,
+            "rewardBalls": 0
+          },
+          {
+            "column": 2,
+            "row": 1,
+            "width": 1,
+            "health": 4,
+            "target": false,
+            "height": 1,
+            "rewardBalls": 0
+          },
+          {
+            "column": 5,
+            "row": 1,
+            "width": 1,
+            "health": 4,
+            "target": false,
+            "height": 1,
+            "rewardBalls": 0
+          },
+          {
+            "column": 7,
+            "row": 1,
+            "width": 1,
+            "health": 4,
+            "target": false,
+            "height": 1,
+            "rewardBalls": 0
+          },
+          {
+            "column": 1,
+            "row": 2,
+            "width": 2,
+            "health": 5,
+            "target": false,
+            "height": 1,
+            "rewardBalls": 0
+          },
+          {
+            "column": 5,
+            "row": 2,
+            "width": 2,
+            "health": 12,
+            "target": false,
+            "height": 1,
+            "rewardBalls": 5
+          },
+          {
+            "column": 2,
+            "row": 3,
+            "width": 2,
+            "health": 4,
+            "target": false,
+            "height": 1,
+            "rewardBalls": 0
+          },
+          {
+            "column": 6,
+            "row": 3,
+            "width": 2,
+            "health": 4,
+            "target": false,
+            "height": 1,
+            "rewardBalls": 0
+          }
+        ],
+        "incomingRows": [
+          {
+            "blocks": [
+              {
+                "column": 1,
+                "row": 0,
+                "width": 1,
+                "health": 4,
+                "target": false,
+                "height": 1,
+                "rewardBalls": 0
+              },
+              {
+                "column": 3,
+                "row": 0,
+                "width": 2,
+                "health": 5,
+                "target": false,
+                "height": 1,
+                "rewardBalls": 0
+              },
+              {
+                "column": 6,
+                "row": 0,
+                "width": 1,
+                "health": 4,
+                "target": false,
+                "height": 1,
+                "rewardBalls": 0
+              }
+            ]
+          },
+          {
+            "blocks": [
+              {
+                "column": 0,
+                "row": 0,
+                "width": 2,
+                "health": 5,
+                "target": false,
+                "height": 1,
+                "rewardBalls": 0
+              },
+              {
+                "column": 6,
+                "row": 0,
+                "width": 2,
+                "health": 5,
+                "target": false,
+                "height": 1,
+                "rewardBalls": 0
+              }
+            ]
+          },
+          {
+            "blocks": [
+              {
+                "column": 1,
+                "row": 0,
+                "width": 2,
+                "health": 5,
+                "target": false,
+                "height": 1,
+                "rewardBalls": 0
+              },
+              {
+                "column": 5,
+                "row": 0,
+                "width": 2,
+                "health": 5,
+                "target": false,
+                "height": 1,
+                "rewardBalls": 0
+              }
+            ]
+          },
+          {
+            "blocks": [
+              {
+                "column": 3,
+                "row": 0,
+                "width": 2,
+                "health": 14,
+                "target": true,
+                "height": 1,
+                "rewardBalls": 0
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "stage-3",
+        "name": "第 3 关",
+        "initialBlocks": [
+          {
+            "column": 0,
+            "row": 0,
+            "width": 2,
+            "health": 7,
+            "target": false,
+            "height": 1,
+            "rewardBalls": 0
+          },
+          {
+            "column": 2,
+            "row": 0,
+            "width": 2,
+            "health": 6,
+            "target": false,
+            "height": 1,
+            "rewardBalls": 0
+          },
+          {
+            "column": 6,
+            "row": 0,
+            "width": 2,
+            "health": 7,
+            "target": false,
+            "height": 1,
+            "rewardBalls": 0
+          },
+          {
+            "column": 0,
+            "row": 1,
+            "width": 1,
+            "health": 5,
+            "target": false,
+            "height": 1,
+            "rewardBalls": 0
+          },
+          {
+            "column": 2,
+            "row": 1,
+            "width": 1,
+            "health": 5,
+            "target": false,
+            "height": 1,
+            "rewardBalls": 0
+          },
+          {
+            "column": 5,
+            "row": 1,
+            "width": 1,
+            "health": 5,
+            "target": false,
+            "height": 1,
+            "rewardBalls": 0
+          },
+          {
+            "column": 7,
+            "row": 1,
+            "width": 1,
+            "health": 5,
+            "target": false,
+            "height": 1,
+            "rewardBalls": 0
+          },
+          {
+            "column": 1,
+            "row": 2,
+            "width": 2,
+            "health": 6,
+            "target": false,
+            "height": 1,
+            "rewardBalls": 0
+          },
+          {
+            "column": 5,
+            "row": 2,
+            "width": 2,
+            "health": 6,
+            "target": false,
+            "height": 1,
+            "rewardBalls": 0
+          },
+          {
+            "column": 1,
+            "row": 3,
+            "width": 2,
+            "health": 5,
+            "target": false,
+            "height": 1,
+            "rewardBalls": 0
+          },
+          {
+            "column": 5,
+            "row": 3,
+            "width": 2,
+            "health": 5,
+            "target": false,
+            "height": 1,
+            "rewardBalls": 0
+          }
+        ],
+        "incomingRows": [
+          {
+            "blocks": [
+              {
+                "column": 1,
+                "row": 0,
+                "width": 1,
+                "health": 5,
+                "target": false,
+                "height": 1,
+                "rewardBalls": 0
+              },
+              {
+                "column": 3,
+                "row": 0,
+                "width": 2,
+                "health": 6,
+                "target": false,
+                "height": 1,
+                "rewardBalls": 0
+              },
+              {
+                "column": 6,
+                "row": 0,
+                "width": 1,
+                "health": 5,
+                "target": false,
+                "height": 1,
+                "rewardBalls": 0
+              }
+            ]
+          },
+          {
+            "blocks": [
+              {
+                "column": 0,
+                "row": 0,
+                "width": 2,
+                "health": 6,
+                "target": false,
+                "height": 1,
+                "rewardBalls": 0
+              },
+              {
+                "column": 6,
+                "row": 0,
+                "width": 2,
+                "health": 6,
+                "target": false,
+                "height": 1,
+                "rewardBalls": 0
+              }
+            ]
+          },
+          {
+            "blocks": [
+              {
+                "column": 1,
+                "row": 0,
+                "width": 2,
+                "health": 6,
+                "target": false,
+                "height": 1,
+                "rewardBalls": 0
+              },
+              {
+                "column": 5,
+                "row": 0,
+                "width": 2,
+                "health": 6,
+                "target": false,
+                "height": 1,
+                "rewardBalls": 0
+              }
+            ]
+          },
+          {
+            "blocks": [
+              {
+                "column": 3,
+                "row": 0,
+                "width": 2,
+                "health": 18,
+                "target": true,
+                "height": 1,
+                "rewardBalls": 0
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+};if(typeof module==='object'&&module.exports)module.exports=defaults;else root.PlannerDefaults=defaults;})(typeof globalThis!=='undefined'?globalThis:this);

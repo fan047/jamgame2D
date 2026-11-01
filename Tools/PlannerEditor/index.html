@@ -9,8 +9,11 @@
 <p>修改现有配置，请先同时导入游戏 <code>Config</code> 文件夹中的 <code>settings.json</code> 和 <code>level.json</code>。导出只是下载，不会自动写回游戏目录。</p>
 <div class="actions"><label class="button">导入两份 JSON<input id="importFiles" type="file" accept=".json,application/json" multiple hidden></label><button id="reset" type="button">还原默认示例</button></div>
 </section>
+<div class="actions"><button id="undo" type="button">撤销</button><button id="redo" type="button">重做</button><span>最多 50 步 · 输入框内保留原生撤销</span></div>
 <section>
 <h2>1. 球参数与配置版本</h2>
+<p>settings.json：<strong id="settingsStatus"></strong> · level.json：<strong id="levelStatus"></strong></p>
+<div class="actions"><button id="settingsStamp">生成球参数版本</button><button id="levelStamp">生成关卡版本</button><button id="cancelInputs">取消未提交数值</button></div>
 <div class="fields" id="settingsFields">
 <label>球参数版本<input id="settingsVersion" value="demo-1" maxlength="32" autocomplete="off"></label>
 <label>关卡版本<input id="levelVersion" value="demo-1" maxlength="32" autocomplete="off"></label>
@@ -24,8 +27,9 @@
 </section>
 <section>
 <h2>2. 棋盘与补行</h2>
-<div class="actions"><label>编辑布局 <select id="layout"></select></label><button id="addRow" type="button">在末尾新增补行</button><button id="removeRow" type="button">删除当前补行</button></div>
-<p id="layoutHint" class="hint"></p>
+<div class="actions"><label>关卡 <select id="stage"></select></label><label>编辑布局 <select id="layout"></select></label><button id="addRow" type="button">在末尾新增补行</button><button id="removeRow" type="button">删除当前补行</button></div>
+<p id="layoutHint" class="hint"></p><p id="statistics"></p><p id="entryOptions"></p>
+<div class="actions"><button id="selectOrdinary">只选普通块</button><button id="clearChecks">清空勾选</button><label>批量 <select id="batchMode"><option value="set">设为</option><option value="add">增加（可填负数）</option></select></label><input id="batchValue" type="number" step="1" value="1" aria-label="批量血量"><button id="batchApply">应用整批</button></div><p id="batchSummary"></p>
 <div class="board-layout">
 <div><div class="column-labels" aria-hidden="true"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span></div><div id="board" role="group" aria-label="8 列棋盘"></div><p class="hint">点击空格定位新增块，点击已有块选中编辑。初始棋盘顶部为第 7 行、底部为第 0 行。此处只显示格子，不模拟球运动。</p></div>
 <form id="blockForm">
@@ -36,11 +40,13 @@
 <label>宽度<select id="width"><option value="1">1 格</option><option value="2">2 格（向右）</option></select></label>
 <label>血量<input id="health" type="number" min="1" step="1" value="3" required></label>
 </div>
-<label class="check"><input id="target" type="checkbox">目标块（金色）</label>
+<label>类型<select id="role"><option value="ordinary">普通块</option><option value="reward">奖励块</option><option value="target">目标块</option></select></label><label>奖励球数<select id="rewardBalls"><option value="3">+3</option><option value="5">+5</option></select></label>
+<p id="propertyHint" class="hint">位置、形状、类型需要显式应用；已有块血量失焦或回车即提交。最终关不允许奖励块。P0 仅支持高度 1。</p>
 <p class="hint">只能在最后一条补行中放唯一目标。移动目标时，先取消旧目标或删除旧块，再设置新目标。允许编辑中暂时没有目标，但通过完整校验后才能导出。</p>
 <div class="actions"><button id="applyBlock" type="submit">新增方块</button><button id="newBlock" type="button">取消选择</button><button id="deleteBlock" type="button" disabled>删除选中块</button></div>
 </form>
 </div>
+<div class="table-scroll"><table id="blockTable"><thead><tr><th>勾选</th><th>块</th><th>列 / 行</th><th>宽</th><th>类型</th><th>血量（Tab / Enter 连续编辑）</th></tr></thead><tbody id="blockRows"></tbody></table></div>
 </section>
 <section>
 <h2>3. 校验、导出与试玩</h2>
@@ -52,5 +58,6 @@
 </section>
 <div id="message" role="alert" aria-live="assertive"></div>
 </main>
-<script src="config-model.js"></script><script src="defaults.js"></script><script src="editor.js"></script>
+<dialog id="draftDialog"><h3>有尚未应用的属性</h3><p>位置、形状或类型修改尚未应用。请选择如何处理，再继续操作。</p><div class="actions"><button id="draftApply">应用并继续</button><button id="draftDiscard">丢弃并继续</button><button id="draftCancel">取消操作</button></div></dialog>
+<script src="config-model.js"></script><script src="defaults.js"></script><script src="editor-state.js"></script><script src="editor.js"></script>
 </body></html>

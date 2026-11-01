@@ -1,0 +1,37 @@
+'use strict';
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
+const {pathToFileURL}=require('node:url');
+const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright-core');
+const M=require('../config-model.js');
+const root=path.resolve(__dirname,'../../..'),out=path.join(root,'Library/Locus/tmp/growth-browser-test');fs.mkdirSync(out,{recursive:true});
+(async()=>{
+ const browser=await chromium.launch({executablePath:process.env.BROWSER_EXECUTABLE||'C:/Program Files/Google/Chrome/Application/chrome.exe',headless:true});
+ try{
+ const context=await browser.newContext({acceptDownloads:true,viewport:{width:1500,height:1050}}),page=await context.newPage(),errors=[];
+ page.on('pageerror',e=>{errors.push(e.message);console.error('PAGE',e.message);});page.on('dialog',d=>d.accept());
+ await page.goto(pathToFileURL(path.join(process.env.PLANNER_EDITOR_DIR||path.join(root,'Tools/PlannerEditor'),'index.html')).href);
+ const preview=file=>page.locator('#'+file+'Preview').textContent().then(JSON.parse);
+ assert.match(await page.locator('#validation').innerText(),/校验通过/);assert.equal(await page.locator('#stage option').count(),3);
+ assert.match(await page.locator('#entryOptions').innerText(),/12, 15, 17, 20/);
+ await page.locator('#ballsPerRound').fill('7');assert.equal((await preview('settings')).ballsPerRound,12);await page.locator('#ballsPerRound').press('Tab');assert.equal((await preview('settings')).ballsPerRound,7);
+ const health=page.locator('#blockRows input[type=number]');await health.nth(0).fill('21');await health.nth(0).press('Enter');assert.equal(await health.nth(1).evaluate(el=>el===document.activeElement),true);await health.nth(1).fill('22');await health.nth(1).press('Tab');assert.equal((await preview('level')).levels[0].initialBlocks[1].health,22);
+ await health.nth(0).fill('0');await page.locator('#stage').selectOption('1');assert.equal(await page.locator('#stage').inputValue(),'0');assert.equal((await preview('level')).levels[0].initialBlocks[0].health,21);await page.locator('#cancelInputs').click();assert.equal(await health.nth(0).inputValue(),'21');
+ await page.locator('#board .block').first().click();await page.locator('#role').selectOption('ordinary');await page.locator('#stage').selectOption('1');assert.equal(await page.locator('#draftDialog').isVisible(),true);await page.locator('#draftCancel').click();assert.equal(await page.locator('#stage').inputValue(),'0');
+ await page.locator('#stage').selectOption('1');await page.locator('#draftDiscard').click();assert.equal(await page.locator('#stage').inputValue(),'1');
+ await page.locator('#board .block').first().click();await page.locator('#width').selectOption('1');await page.locator('#stage').selectOption('2');await page.locator('#draftApply').click();assert.equal((await preview('level')).levels[1].initialBlocks[0].width,1);assert.equal(await page.locator('#stage').inputValue(),'2',await page.locator('#message').innerText());assert.equal(await page.locator('#role option[value=reward]').evaluate(el=>el.disabled),true);
+ await page.locator('#undo').click();assert.equal(await page.locator('#stage').inputValue(),'1');assert.equal((await preview('level')).levels[1].initialBlocks[0].width,2);await page.locator('#redo').click();assert.equal((await preview('level')).levels[1].initialBlocks[0].width,1);
+ await page.locator('#stage').selectOption('0');await page.locator('#selectOrdinary').click();assert.match(await page.locator('#batchSummary').innerText(),/普通 10 \/ 奖励 0 \/ 目标 0/);
+ const before=await preview('level');await page.locator('#batchMode').selectOption('add');await page.locator('#batchValue').fill('-100');await page.locator('#batchApply').click();assert.deepEqual(await preview('level'),before);assert.match(await page.locator('#message').innerText(),/整批未应用/);
+ // Failed batch focuses offending field and navigation clears checks; select again.
+ await page.locator('#selectOrdinary').click();await page.locator('#batchValue').fill('2');await page.locator('#batchApply').click();const after=await preview('level');assert.equal(after.levels[0].initialBlocks[0].health,before.levels[0].initialBlocks[0].health+2);assert.equal(after.levels[0].initialBlocks[7].health,before.levels[0].initialBlocks[7].health);
+ await page.locator('#undo').click();assert.deepEqual(await preview('level'),before);await page.locator('#redo').click();assert.deepEqual(await preview('level'),after);await page.locator('#undo').click();await health.nth(0).fill('23');await health.nth(0).press('Enter');assert.equal(await page.locator('#redo').isDisabled(),true);
+ await page.locator('#addRow').click();assert.match(await page.locator('#validation').innerText(),/最后一条/);await page.locator('.error-link').first().click();assert.equal(await page.locator('#layout').inputValue(),'3');await page.locator('#undo').click();assert.equal((await preview('level')).levels[0].incomingRows.length,4);
+ for(const file of ['settings','level']){const wait=page.waitForEvent('download');await page.locator('#export'+(file==='settings'?'Settings':'Level')).click();const download=await wait;await download.saveAs(path.join(out,file+'.json'));}
+ const settings=JSON.parse(fs.readFileSync(path.join(out,'settings.json'))),level=JSON.parse(fs.readFileSync(path.join(out,'level.json')));assert.equal(level.schemaVersion,2);assert.equal(level.levels.length,3);assert.deepEqual(M.validate(settings,level),[]);assert.match(await page.locator('#settingsStatus').innerText(),/已请求导出/);assert.match(await page.locator('#levelStatus').innerText(),/已请求导出/);
+ await page.locator('#ballSpeed').fill('13');await page.locator('#ballSpeed').press('Tab');assert.match(await page.locator('#settingsStatus').innerText(),/有未导出修改/);assert.match(await page.locator('#levelStatus').innerText(),/已请求导出/);
+ const bad=path.join(out,'invalid');fs.mkdirSync(bad,{recursive:true});fs.writeFileSync(path.join(bad,'settings.json'),JSON.stringify({...settings,ballSpeed:-1}));fs.writeFileSync(path.join(bad,'level.json'),JSON.stringify(level));await page.locator('#importFiles').setInputFiles([path.join(bad,'settings.json'),path.join(bad,'level.json')]);await page.waitForFunction(()=>document.querySelector('#message').textContent.includes('导入失败'));assert.equal(await page.locator('#ballSpeed').inputValue(),'13');
+ const legacy=path.join(out,'legacy');fs.mkdirSync(legacy,{recursive:true});fs.copyFileSync(path.join(root,'Config/settings.json'),path.join(legacy,'settings.json'));fs.copyFileSync(path.join(root,'Tests/Fixtures/legacy-level.json'),path.join(legacy,'level.json'));await page.locator('#importFiles').setInputFiles([path.join(legacy,'settings.json'),path.join(legacy,'level.json')]);await page.waitForFunction(()=>document.querySelector('#source').textContent.includes('已导入'));assert.equal(await page.locator('#stage option').count(),1);assert.equal((await preview('level')).schemaVersion,2);
+ await page.locator('#reset').click();await page.locator('#board').scrollIntoViewIfNeeded();await page.screenshot({path:path.join(out,'growth-editor.png'),fullPage:true});assert.deepEqual(errors,[]);
+ console.log('Growth browser PASS: file://, stage navigation, commit/Tab/Enter, invalid drafts, apply/discard/cancel, final rewards, atomic batch, history/context, error location, independent export status, invalid import rollback, legacy normalization.');console.log('Unity-readable exports:',out);await context.close();
+ }finally{await browser.close();}
+})().catch(e=>{console.error(e);process.exitCode=1;});

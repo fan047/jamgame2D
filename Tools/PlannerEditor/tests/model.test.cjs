@@ -4,12 +4,13 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
 const M=require('../config-model.js');
-const defaults=require('../defaults.js');
+const shipped=require('../defaults.js');
+const defaults={settings:shipped.settings,level:JSON.parse(fs.readFileSync(path.resolve(__dirname,'../../../Tests/Fixtures/legacy-level.json'),'utf8'))};
 const root=path.resolve(__dirname,'../../..');
 test('embedded editor defaults match shipped source configs',()=>{
-  assert.deepEqual(defaults.settings,JSON.parse(fs.readFileSync(path.join(root,'Config/settings.json'),'utf8')));
-  assert.deepEqual(defaults.level,JSON.parse(fs.readFileSync(path.join(root,'Config/level.json'),'utf8')));
-  assert.deepEqual(M.validate(defaults.settings,defaults.level),[]);
+  assert.deepEqual(shipped.settings,JSON.parse(fs.readFileSync(path.join(root,'Config/settings.json'),'utf8')));
+  assert.deepEqual(shipped.level,JSON.parse(fs.readFileSync(path.join(root,'Config/level.json'),'utf8')));
+  assert.deepEqual(M.validate(shipped.settings,shipped.level),[]);
 });
 for(const [key,value] of [['ballsPerRound',1.5],['ballsPerRound',0],['ballRadius',0.5],['ballSpeed',NaN],['ballSpeed',1e-100],['ballSpeed',1e100],['maxAimAngle',90],['version','bad version'],['schemaVersion',2]]) {
   test(`reject invalid settings ${key}=${value}`,()=>{

@@ -19,7 +19,7 @@ namespace Holedown.Tests
         [SetUp] public void Setup()
         {
             directory=Path.GetFullPath("Library/Locus/tmp/config-playtests/"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(directory);
-            File.Copy("Config/settings.json",Path.Combine(directory,"settings.json"));File.Copy("Config/level.json",Path.Combine(directory,"level.json"));
+            File.Copy("Config/settings.json",Path.Combine(directory,"settings.json"));File.Copy("Tests/Fixtures/legacy-level.json",Path.Combine(directory,"level.json"));
             SceneManager.sceneLoaded+=Configure;
         }
         void Configure(Scene scene,LoadSceneMode mode)

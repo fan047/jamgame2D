@@ -14,7 +14,7 @@ namespace Holedown.Tests
         {
             directory=Path.GetFullPath("Library/Locus/tmp/config-tests/"+Guid.NewGuid().ToString("N")); Directory.CreateDirectory(directory);
             File.Copy("Config/settings.json",Path.Combine(directory,"settings.json"));
-            File.Copy("Config/level.json",Path.Combine(directory,"level.json"));
+            File.Copy("Tests/Fixtures/legacy-level.json",Path.Combine(directory,"level.json"));
             defaults=ScriptableObject.CreateInstance<GameSettings>();
             level=ScriptableObject.CreateInstance<LevelDefinition>();
             level.incomingRows.Add(new RowDefinition{blocks=new System.Collections.Generic.List<BlockDefinition>{new BlockDefinition(0,0,1,1,true)}});
@@ -59,7 +59,7 @@ namespace Holedown.Tests
         }
         [Test] public void InvalidLevelReportsExactBlockAndCell()
         {
-            Replace("level.json","\"column\": 3, \"row\": 0, \"width\": 2, \"health\": 4","\"column\": 1, \"row\": 0, \"width\": 2, \"health\": 4");
+            Replace("level.json","\"column\": 3","\"column\": 1");
             var error=Assert.Throws<ArgumentException>(()=>ExternalConfiguration.Load(directory,defaults,level));
             StringAssert.Contains("initialBlocks[1]",error.Message); StringAssert.Contains("overlaps",error.Message);
         }
