@@ -7,67 +7,85 @@
   const clone = value => JSON.parse(JSON.stringify(value));
   const object = value => value !== null && typeof value === 'object' && !Array.isArray(value);
   const integer = value => Number.isInteger(value) && value >= -2147483648 && value <= 2147483647;
-  function validate(settings, level) {
-    const errors = [];
-    const fail = (path, message) => errors.push(`${path}：${message}`);
-    function keys(obj, allowed, path) {
-      Object.keys(obj).forEach(key => { if (!allowed.includes(key)) fail(`${path}.${key}`, '未知字段，请检查拼写'); });
-    }
-    function header(obj, path, allowed) {
-      if (!object(obj)) { fail(path, '需要 JSON 对象'); return false; }
-      keys(obj, allowed, path);
-      if (obj.schemaVersion !== 1) fail(`${path}.schemaVersion`, '必须为 1');
-      if (typeof obj.version !== 'string' || !/^[A-Za-z0-9._-]{1,32}$/.test(obj.version)) fail(`${path}.version`, '使用 1–32 个英文字母、数字、点、下划线或连字符');
+  function diagnostics(settings, level) {
+    const errors=[];
+    const fail=(path,message)=>errors.push({path,message});
+    const keys=(obj,allowed,path)=>Object.keys(obj).forEach(k=>{if(!allowed.includes(k))fail(`${path}.${k}`,'未知字段');});
+    function header(obj,path,allowed,versions) {
+      if(!object(obj)){fail(path,'需要 JSON 对象');return false;}
+      keys(obj,allowed,path);
+      if(!versions.includes(obj.schemaVersion))fail(`${path}.schemaVersion`,`仅支持 ${versions.join('/')} 版本`);
+      if(typeof obj.version!=='string'||!/^[A-Za-z0-9._-]{1,32}$/.test(obj.version))fail(`${path}.version`,'使用 1–32 个英文字母、数字、点、下划线或连字符');
       return true;
     }
-    if (header(settings, 'settings.json', ['schemaVersion','version','ballsPerRound','ballRadius','ballSpeed','launchInterval','maxAimAngle','recallTimeout'])) {
-      if (!integer(settings.ballsPerRound) || settings.ballsPerRound <= 0) fail('settings.json.ballsPerRound', '需要正整数（不超过 2147483647）');
-      for (const key of ['ballRadius','ballSpeed','launchInterval','maxAimAngle','recallTimeout']) {
-        const value = settings[key], max = key === 'ballRadius' ? 0.5 : key === 'maxAimAngle' ? 90 : Infinity;
-        if (typeof value !== 'number' || !Number.isFinite(Math.fround(value)) || Math.fround(value) <= 0 || Math.fround(value) >= max)
-          fail(`settings.json.${key}`, `需要有限正数${max === Infinity ? '' : `，且小于 ${max}`}`);
+    if(header(settings,'settings.json',['schemaVersion','version','ballsPerRound','ballRadius','ballSpeed','launchInterval','maxAimAngle','recallTimeout'],[1])) {
+      if(!integer(settings.ballsPerRound)||settings.ballsPerRound<=0)fail('settings.json.ballsPerRound','需要正 Int32 整数');
+      for(const key of ['ballRadius','ballSpeed','launchInterval','maxAimAngle','recallTimeout']) {
+        const v=settings[key],max=key==='ballRadius'?0.5:key==='maxAimAngle'?90:Infinity;
+        if(typeof v!=='number'||!Number.isFinite(Math.fround(v))||Math.fround(v)<=0||Math.fround(v)>=max)fail(`settings.json.${key}`,`需要有限正数${max===Infinity?'':`，且小于 ${max}`}`);
       }
     }
-    if (!header(level, 'level.json', ['schemaVersion','version','initialBlocks','incomingRows'])) return errors;
-    let targets = 0;
-    function blocks(list, path, incoming, last) {
-      if (!Array.isArray(list)) { fail(path, '需要方块数组'); return; }
-      const occupied = new Set();
-      list.forEach((b, index) => {
-        const p = `${path}[${index}]`;
-        if (!object(b)) { fail(p, '需要方块对象'); return; }
-        keys(b, ['column','row','width','health','target'], p);
-        const c = integer(b.column) && b.column >= 0 && b.column <= 7;
-        const r = integer(b.row) && b.row >= 0 && b.row <= 7 && (!incoming || b.row === 0);
-        const w = b.width === 1 || b.width === 2;
-        if (!c) fail(`${p}.column`, '列号必须为 0–7');
-        if (!r) fail(`${p}.row`, incoming ? '补行中的 row 必须为 0' : '行号必须为 0–7');
-        if (!w) fail(`${p}.width`, '宽度只能为 1 或 2');
-        if (c && w && b.column + b.width > 8) fail(p, '方块超出右边界');
-        if (!integer(b.health) || b.health <= 0) fail(`${p}.health`, '血量必须为正整数');
-        if (typeof b.target !== 'boolean') fail(`${p}.target`, '必须为 true 或 false');
-        if (b.target === true) { targets++; if (!incoming || !last) fail(`${p}.target`, '目标必须位于最后一条补行'); }
-        if (c && r && w && b.column + b.width <= 8) {
-          for (let x=b.column; x<b.column+b.width; x++) {
-            const cell = `${x},${b.row}`;
-            if (occupied.has(cell)) fail(p, `与其他块重叠，列 ${x}，行 ${b.row}`);
-            occupied.add(cell);
-          }
-        }
-      });
-    }
-    blocks(level.initialBlocks, 'level.json.initialBlocks', false, false);
-    if (!Array.isArray(level.incomingRows) || level.incomingRows.length === 0) fail('level.json.incomingRows', '至少需要一条补行');
-    else level.incomingRows.forEach((row, i) => {
-      const path = `level.json.incomingRows[${i}]`;
-      if (!object(row)) { fail(path, '需要包含 blocks 的对象'); return; }
-      keys(row, ['blocks'], path);
-      blocks(row.blocks, `${path}.blocks`, true, i === level.incomingRows.length - 1);
+    const v2=level?.schemaVersion===2;
+    if(!header(level,'level.json',v2?['schemaVersion','version','levels']:['schemaVersion','version','initialBlocks','incomingRows'],[1,2]))return errors;
+    const stages=v2?level.levels:[level];
+    if(!Array.isArray(stages)||stages.length===0){fail('level.json.levels','至少需要一关');return errors;}
+    const ids=new Set();let possible=0;
+    stages.forEach((stage,si)=>{
+      const path=v2?`level.json.levels[${si}]`:'level.json';
+      if(!object(stage)){fail(path,'需要关卡对象');return;}
+      if(v2) {
+        keys(stage,['id','name','initialBlocks','incomingRows'],path);
+        if(typeof stage.id!=='string'||!/^[A-Za-z0-9._-]{1,32}$/.test(stage.id)||ids.has(stage.id))fail(`${path}.id`,'关卡 id 必须合法且唯一');
+        ids.add(stage.id);
+        if(typeof stage.name!=='string'||!stage.name.trim()||stage.name.length>40)fail(`${path}.name`,'名称需要 1–40 个字符');
+      }
+      let targets=0,rewards=0;
+      function blocks(list,p,incoming,last) {
+        if(!Array.isArray(list)){fail(p,'需要方块数组');return;}
+        const occupied=new Set();
+        list.forEach((b,bi)=>{
+          const q=`${p}[${bi}]`;
+          if(!object(b)){fail(q,'需要方块对象');return;}
+          keys(b,v2?['column','row','width','height','health','target','rewardBalls']:['column','row','width','health','target'],q);
+          const c=integer(b.column)&&b.column>=0&&b.column<=7,r=integer(b.row)&&b.row>=0&&b.row<=7&&(!incoming||b.row===0),w=b.width===1||b.width===2;
+          if(!c)fail(`${q}.column`,'列号必须为 0–7');
+          if(!r)fail(`${q}.row`,incoming?'补行 row 必须为 0':'行号必须为 0–7');
+          if(!w)fail(`${q}.width`,'宽度只能为 1 或 2');
+          if(c&&w&&b.column+b.width>8)fail(q,'超出右边界');
+          if(v2&&b.height!==1)fail(`${q}.height`,'P0 只支持 height=1，暂不支持竖块');
+          if(!integer(b.health)||b.health<=0)fail(`${q}.health`,'血量必须为正 Int32 整数');
+          if(typeof b.target!=='boolean')fail(`${q}.target`,'必须为 true 或 false');
+          const bonus=v2?b.rewardBalls:0;
+          if(![0,3,5].includes(bonus))fail(`${q}.rewardBalls`,'只能为 0、3、5');
+          if(b.target===true){targets++;if(!incoming||!last)fail(`${q}.target`,'目标必须位于最后一条补行');if(bonus!==0)fail(q,'target 与奖励互斥');}
+          if(bonus===3||bonus===5){rewards++;possible+=bonus;if(si===stages.length-1)fail(q,'最终关不能有奖励块');}
+          if(c&&r&&w&&b.column+b.width<=8)for(let x=b.column;x<b.column+b.width;x++){const cell=`${x},${b.row}`;if(occupied.has(cell))fail(q,`与其他块重叠，列 ${x}，行 ${b.row}`);occupied.add(cell);}
+        });
+      }
+      blocks(stage.initialBlocks,`${path}.initialBlocks`,false,false);
+      if(!Array.isArray(stage.incomingRows)||!stage.incomingRows.length)fail(`${path}.incomingRows`,'至少需要一条补行');
+      else stage.incomingRows.forEach((row,i)=>{const p=`${path}.incomingRows[${i}]`;if(!object(row)){fail(p,'需要 blocks 对象');return;}keys(row,['blocks'],p);blocks(row.blocks,`${p}.blocks`,true,i===stage.incomingRows.length-1);});
+      if(targets!==1)fail(path,`每关必须有且仅有一个目标，当前 ${targets} 个`);
+      if(rewards>1)fail(path,'每关最多一个奖励块');
     });
-    if (targets !== 1) fail('level.json', `整个关卡必须有且仅有一个目标，当前 ${targets} 个`);
+    if(integer(settings?.ballsPerRound)&&settings.ballsPerRound+possible>2147483647)fail('level.json.levels','基础球数加奖励超出 Int32 最大值');
     return errors;
   }
+  const validate=(settings,level)=>diagnostics(settings,level).map(e=>`${e.path}：${e.message}`);
+  function normalize(level) {
+    if(level.schemaVersion===2)return clone(level);
+    const b=value=>({...clone(value),height:1,rewardBalls:0});
+    return {schemaVersion:2,version:level.version,levels:[{id:'stage-1',name:'旧单关',initialBlocks:level.initialBlocks.map(b),incomingRows:level.incomingRows.map(row=>({blocks:row.blocks.map(b)}))}]};
+  }
+  function entryOptions(settings,level,index) {
+    const campaign=normalize(level);let values=[settings.ballsPerRound];
+    for(let i=0;i<index;i++) {const s=campaign.levels[i],bonus=Math.max(0,...[...s.initialBlocks,...s.incomingRows.flatMap(r=>r.blocks)].map(b=>b.rewardBalls));values=[...new Set(values.flatMap(v=>[v,v+bonus]))].sort((a,b)=>a-b);}
+    return values;
+  }
   function placementError(blocks, block, selectedIndex, incoming) {
+    if (block.height!==undefined && block.height!==1) return 'P0 只支持 height=1';
+    if (block.rewardBalls!==undefined && ![0,3,5].includes(block.rewardBalls)) return '奖励只能为 0/3/5';
+    if (block.target && block.rewardBalls>0) return '目标和奖励互斥';
     if (!integer(block.column) || block.column<0 || block.column>7) return '列号必须为 0–7';
     if (!integer(block.row) || block.row<0 || block.row>7 || (incoming && block.row!==0)) return incoming ? '补行必须使用第 0 行' : '行号必须为 0–7';
     if (![1,2].includes(block.width) || block.column+block.width>8) return '宽度必须为 1 或 2，且不能越过第 7 列';
@@ -75,5 +93,5 @@
     if (blocks.some((b,i) => i!==selectedIndex && b.row===block.row && b.column<block.column+block.width && b.column+b.width>block.column)) return '此位置与其他块重叠';
     return null;
   }
-  return {clone, validate, placementError};
+  return {clone, integer, validate, diagnostics, normalize, entryOptions, placementError};
 });
