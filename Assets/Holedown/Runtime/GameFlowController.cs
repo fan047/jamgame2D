@@ -12,7 +12,7 @@ namespace Holedown
         [SerializeField] AimInput aim;
         [SerializeField] BoardView boardView;
         [SerializeField] BallActor ballPrefab;
-        [SerializeField, Tooltip("Optional JSON folder. Empty: Inspector assets in Editor; executable/Config in Player.")]
+        [SerializeField, Tooltip("Optional JSON folder. Empty: project/Config in Editor; executable/Config in Player.")]
         string externalConfigDirectory;
         LoadedConfiguration configuration;
         readonly Dictionary<int, BallActor> balls = new Dictionary<int, BallActor>();
@@ -62,7 +62,7 @@ namespace Holedown
             {
                 ConfigurationDirectory = !string.IsNullOrWhiteSpace(externalConfigDirectory)
                     ? System.IO.Path.GetFullPath(externalConfigDirectory)
-                    : Application.isEditor ? null : System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Application.dataPath),"Config");
+                    : System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Application.dataPath),"Config");
                 configuration = ExternalConfiguration.Load(ConfigurationDirectory,settings,level);
                 Campaign=new CampaignState(configuration.Campaign.Stages.Count,Settings.ballsPerRound);
                 BeginAttempt();
