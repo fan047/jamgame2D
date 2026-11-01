@@ -37,16 +37,16 @@
 <div class="fields block-fields">
 <label>起始列<input id="column" type="number" min="0" max="7" step="1" value="0" required></label>
 <label>行号<input id="row" type="number" min="0" max="7" step="1" value="0" required></label>
-<label>宽度<select id="width"><option value="1">1 格</option><option value="2">2 格（向右）</option></select></label>
+<label>形状<select id="shape"><option value="1x1">1×1 单格</option><option value="2x1">2×1 横双格</option><option value="1x2">1×2 竖双格（仅初始布局）</option></select></label>
 <label>血量<input id="health" type="number" min="1" step="1" value="3" required></label>
 </div>
 <label>类型<select id="role"><option value="ordinary">普通块</option><option value="reward">奖励块</option><option value="target">目标块</option></select></label><label>奖励球数<select id="rewardBalls"><option value="3">+3</option><option value="5">+5</option></select></label>
-<p id="propertyHint" class="hint">位置、形状、类型需要显式应用；已有块血量失焦或回车即提交。最终关不允许奖励块。P0 仅支持高度 1。</p>
+<p id="propertyHint" class="hint">位置、形状、类型需要显式应用；已有块血量失焦或回车即提交。最终关不允许奖励块。竖块仅限初始布局，高度向上延伸。</p><p id="placementHint" class="hint"></p>
 <p class="hint">只能在最后一条补行中放唯一目标。移动目标时，先取消旧目标或删除旧块，再设置新目标。允许编辑中暂时没有目标，但通过完整校验后才能导出。</p>
 <div class="actions"><button id="applyBlock" type="submit">新增方块</button><button id="newBlock" type="button">取消选择</button><button id="deleteBlock" type="button" disabled>删除选中块</button></div>
 </form>
 </div>
-<div class="table-scroll"><table id="blockTable"><thead><tr><th>勾选</th><th>块</th><th>列 / 行</th><th>宽</th><th>类型</th><th>血量（Tab / Enter 连续编辑）</th></tr></thead><tbody id="blockRows"></tbody></table></div>
+<div class="table-scroll"><table id="blockTable"><thead><tr><th>勾选</th><th>块</th><th>列 / 行</th><th>形状</th><th>类型</th><th>血量（Tab / Enter 连续编辑）</th></tr></thead><tbody id="blockRows"></tbody></table></div>
 </section>
 <section>
 <h2>3. 校验、导出与试玩</h2>
