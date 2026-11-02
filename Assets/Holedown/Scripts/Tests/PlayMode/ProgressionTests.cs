@@ -10,7 +10,7 @@ namespace Holedown.Tests
     public sealed class ProgressionTests
     {
         static IEnumerator Load()
-        { yield return SceneManager.LoadSceneAsync("Assets/Scenes/SampleScene.unity"); yield return null; }
+        { yield return SceneManager.LoadSceneAsync("Assets/Scenes/SampleScene.unity"); yield return null; yield return PlaySceneEntry.StartIfReady(); }
         static IEnumerator EmptyRound(GameFlowController flow)
         { Assert.IsTrue(flow.TryFire(Vector2.down)); flow.RequestRecall(); yield return null; yield return null; }
         [UnityTest] public IEnumerator DefeatThenTenRestartsHaveNoResidualState()

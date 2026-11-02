@@ -16,7 +16,7 @@ namespace Holedown.Tests
             try {
                 Time.timeScale=20;
                 // No sceneLoaded override: exercise the user's normal Play button entry.
-                yield return SceneManager.LoadSceneAsync("Assets/Scenes/SampleScene.unity");yield return null;
+                yield return SceneManager.LoadSceneAsync("Assets/Scenes/SampleScene.unity");yield return null;yield return PlaySceneEntry.StartIfReady();
                 var flow=Object.FindFirstObjectByType<GameFlowController>();
                 Assert.IsNull(flow.InitializationError);
                 Assert.AreEqual(Path.GetFullPath("Config"),Path.GetFullPath(flow.ConfigurationDirectory));

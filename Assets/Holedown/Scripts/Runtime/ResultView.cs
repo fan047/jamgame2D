@@ -15,13 +15,13 @@ namespace Holedown
         [SerializeField] TMP_Text advanceLabel;
         void OnEnable() { flow.Changed += Refresh; restart.onClick.AddListener(RestartRun); advance.onClick.AddListener(Advance); Refresh(); }
         void OnDisable() { flow.Changed -= Refresh; restart.onClick.RemoveListener(RestartRun); advance.onClick.RemoveListener(Advance); }
-        void RestartRun() { if(!string.IsNullOrEmpty(flow.InitializationError))flow.ReloadAndRestart();else flow.RestartRun(); }
-        void Advance() { if(flow.Session?.Phase==SessionPhase.Lost)flow.RetryStage();else flow.NextStage(); }
+        void RestartRun() => flow.QueueCommand(!string.IsNullOrEmpty(flow.InitializationError) ? FlowCommand.Reload : FlowCommand.RestartRun);
+        void Advance() => flow.QueueCommand(flow.Session?.Phase == SessionPhase.Lost ? FlowCommand.RetryStage : FlowCommand.NextStage);
         void Refresh()
         {
             bool error = !string.IsNullOrEmpty(flow.InitializationError);
             var phase = flow.Session?.Phase ?? SessionPhase.Initializing;
-            bool ended = phase == SessionPhase.Won || phase == SessionPhase.Lost;
+            bool ended = flow.Phase == AppPhase.Playing && (phase == SessionPhase.Won || phase == SessionPhase.Lost);
             panel.SetActive(ended || error);
             var campaign=flow.Campaign;
             bool next=phase==SessionPhase.Won && campaign!=null && !campaign.IsFinalStage;

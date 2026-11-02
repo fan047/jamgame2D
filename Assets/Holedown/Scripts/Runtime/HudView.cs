@@ -10,10 +10,16 @@ namespace Holedown
         [SerializeField] TMP_Text status;
         [SerializeField] Button recall;
         [SerializeField] Button reload;
-        void OnEnable() { flow.Changed += Refresh; recall.onClick.AddListener(flow.RequestRecall); reload.onClick.AddListener(flow.Restart); Refresh(); }
-        void OnDisable() { flow.Changed -= Refresh; recall.onClick.RemoveListener(flow.RequestRecall); reload.onClick.RemoveListener(flow.Restart); }
+        void Recall() => flow.QueueCommand(FlowCommand.Recall);
+        void Reload() => flow.QueueCommand(FlowCommand.Reload);
+        void OnEnable() { flow.Changed += Refresh; recall.onClick.AddListener(Recall); reload.onClick.AddListener(Reload); Refresh(); }
+        void OnDisable() { flow.Changed -= Refresh; recall.onClick.RemoveListener(Recall); reload.onClick.RemoveListener(Reload); }
         void Refresh()
         {
+            bool playing = flow.Phase == AppPhase.Playing;
+            recall.gameObject.SetActive(playing); reload.gameObject.SetActive(playing);
+            status.gameObject.SetActive(playing);
+            if(!playing) return;
             var session=flow.Session;
             if(session==null) { recall.interactable=false; status.text="Preparing..."; return; }
             recall.interactable=session.Phase==SessionPhase.Volley;

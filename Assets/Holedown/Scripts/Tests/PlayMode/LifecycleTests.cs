@@ -10,7 +10,7 @@ namespace Holedown.Tests
     {
         [UnityTest] public IEnumerator RecallCancelsPendingAndSettlesOnlyOnce()
         {
-            yield return SceneManager.LoadSceneAsync("Assets/Scenes/SampleScene.unity"); yield return null;
+            yield return SceneManager.LoadSceneAsync("Assets/Scenes/SampleScene.unity"); yield return null; yield return PlaySceneEntry.StartIfReady();
             var flow=Object.FindFirstObjectByType<GameFlowController>();
             Assert.IsTrue(flow.TryFire(Vector2.down)); Assert.IsFalse(flow.TryFire(Vector2.down));
             Assert.Greater(flow.Session.Pending,0); Assert.AreEqual(1,flow.Session.ActiveCount);
@@ -23,7 +23,7 @@ namespace Holedown.Tests
         }
         [UnityTest] public IEnumerator TimeoutUsesSameRecallPath()
         {
-            yield return SceneManager.LoadSceneAsync("Assets/Scenes/SampleScene.unity"); yield return null;
+            yield return SceneManager.LoadSceneAsync("Assets/Scenes/SampleScene.unity"); yield return null; yield return PlaySceneEntry.StartIfReady();
             var flow=Object.FindFirstObjectByType<GameFlowController>();
             float original=flow.Settings.recallTimeout;
             try
@@ -37,7 +37,7 @@ namespace Holedown.Tests
         }
         [UnityTest] public IEnumerator NaturalVolleyCompletes()
         {
-            yield return SceneManager.LoadSceneAsync("Assets/Scenes/SampleScene.unity"); yield return null;
+            yield return SceneManager.LoadSceneAsync("Assets/Scenes/SampleScene.unity"); yield return null; yield return PlaySceneEntry.StartIfReady();
             var flow=Object.FindFirstObjectByType<GameFlowController>(); flow.TryFire(Vector2.down);
             float end=Time.time+32;
             while(flow.Session.Phase==SessionPhase.Volley && Time.time<end) yield return null;

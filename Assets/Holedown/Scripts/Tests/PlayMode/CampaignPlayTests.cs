@@ -24,13 +24,17 @@ namespace Holedown.Tests
         [TearDown] public void Cleanup(){SceneManager.sceneLoaded-=Configure;Directory.Delete(directory,true);}
         static IEnumerator Shoot(GameFlowController f)
         {
-            Assert.IsTrue(f.TryFire(new Vector2(-0.5f,-6.5f)));float until=Time.time+10;
-            while((f.Session.Phase==SessionPhase.Volley || f.Session.Phase==SessionPhase.Recalling)&&Time.time<until)yield return null;
-            Assert.Less(Time.time,until,"Physical volley did not finish");
+            Assert.IsTrue(f.TryFire(new Vector2(-0.5f,-6.5f)));float until=Time.realtimeSinceStartup+10;
+            while((f.Session.Phase==SessionPhase.Volley || f.Session.Phase==SessionPhase.Recalling)&&Time.realtimeSinceStartup<until)
+            {
+                Assert.AreEqual(AppPhase.Playing, f.Phase, $"Physical regression interrupted: focus={f.HasFocus}, scale={Time.timeScale}");
+                yield return null;
+            }
+            Assert.Less(Time.realtimeSinceStartup,until,"Physical volley did not finish");
         }
         [UnityTest] public IEnumerator PhysicalThreeStageGrowthAndDoubleNextAreCorrect()
         {
-            yield return SceneManager.LoadSceneAsync("Assets/Scenes/SampleScene.unity");yield return null;var f=UnityEngine.Object.FindFirstObjectByType<GameFlowController>();
+            yield return SceneManager.LoadSceneAsync("Assets/Scenes/SampleScene.unity");yield return null;yield return PlaySceneEntry.StartIfReady();var f=UnityEngine.Object.FindFirstObjectByType<GameFlowController>();
             for(int i=0;i<3;i++)
             {
                 Assert.AreEqual(i,f.Campaign.StageIndex);Assert.AreEqual(i==0?12:i==1?15:20,f.Campaign.EntryBalls);
@@ -46,7 +50,7 @@ namespace Holedown.Tests
         }
         [UnityTest] public IEnumerator TenStageTwoRetriesCannotFarmAndUseLoadedSnapshot()
         {
-            yield return SceneManager.LoadSceneAsync("Assets/Scenes/SampleScene.unity");yield return null;var f=UnityEngine.Object.FindFirstObjectByType<GameFlowController>();
+            yield return SceneManager.LoadSceneAsync("Assets/Scenes/SampleScene.unity");yield return null;yield return PlaySceneEntry.StartIfReady();var f=UnityEngine.Object.FindFirstObjectByType<GameFlowController>();
             yield return Shoot(f);yield return Shoot(f);f.NextStage();yield return null;
             File.WriteAllText(Path.Combine(directory,"level.json"),"changed file must not affect retry");
             for(int i=0;i<10;i++)
@@ -60,7 +64,7 @@ namespace Holedown.Tests
         }
         [UnityTest] public IEnumerator ReloadReadsNewSettingsWhileRestartRunDoesNot()
         {
-            yield return SceneManager.LoadSceneAsync("Assets/Scenes/SampleScene.unity");yield return null;var f=UnityEngine.Object.FindFirstObjectByType<GameFlowController>();
+            yield return SceneManager.LoadSceneAsync("Assets/Scenes/SampleScene.unity");yield return null;yield return PlaySceneEntry.StartIfReady();var f=UnityEngine.Object.FindFirstObjectByType<GameFlowController>();
             string p=Path.Combine(directory,"settings.json");File.WriteAllText(p,File.ReadAllText(p).Replace("\"ballsPerRound\": 12","\"ballsPerRound\": 7"));
             f.RestartRun();yield return null;Assert.AreEqual(12,f.Campaign.EntryBalls);
             f.ReloadAndRestart();yield return null;yield return null;f=UnityEngine.Object.FindFirstObjectByType<GameFlowController>();Assert.AreEqual(7,f.Campaign.EntryBalls);Assert.AreEqual(0,f.Campaign.StageIndex);

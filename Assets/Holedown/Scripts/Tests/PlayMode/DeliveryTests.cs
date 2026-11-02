@@ -10,7 +10,7 @@ namespace Holedown.Tests
     {
         [UnityTest] public IEnumerator DefaultLevelCanBeWonThroughPhysicalVolleys()
         {
-            yield return SceneManager.LoadSceneAsync("Assets/Scenes/SampleScene.unity"); yield return null;
+            yield return SceneManager.LoadSceneAsync("Assets/Scenes/SampleScene.unity"); yield return null; yield return PlaySceneEntry.StartIfReady();
             var flow=Object.FindFirstObjectByType<GameFlowController>();
             for(int round=0;round<5;round++)
             {
@@ -35,7 +35,7 @@ namespace Holedown.Tests
         }
         [UnityTest] public IEnumerator BoardAndUiFitPortraitAndLandscape()
         {
-            yield return SceneManager.LoadSceneAsync("Assets/Scenes/SampleScene.unity"); yield return null;
+            yield return SceneManager.LoadSceneAsync("Assets/Scenes/SampleScene.unity"); yield return null; yield return PlaySceneEntry.StartIfReady();
             var camera=Camera.main;
             foreach(float aspect in new[]{720f/1280f,1280f/720f})
             {

@@ -35,7 +35,7 @@ namespace Holedown.Tests
         }
         static IEnumerator Route(bool first,bool second,float stage2Early,float stage2Late,float stage3Late,int finalRounds)
         {
-            yield return SceneManager.LoadSceneAsync("Assets/Scenes/SampleScene.unity");yield return null;
+            yield return SceneManager.LoadSceneAsync("Assets/Scenes/SampleScene.unity");yield return null;yield return PlaySceneEntry.StartIfReady();
             var flow=UnityEngine.Object.FindFirstObjectByType<GameFlowController>();
             Assert.AreEqual(3,flow.Campaign.StageCount);
             for(int stage=0;stage<3;stage++) {

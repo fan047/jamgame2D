@@ -38,12 +38,12 @@ namespace Holedown.Tests
         }
         [UnityTest] public IEnumerator ReloadDiscardsVolleyAndAppliesNewSnapshotToAimAndBalls()
         {
-            yield return SceneManager.LoadSceneAsync("Assets/Scenes/SampleScene.unity");yield return null;
+            yield return SceneManager.LoadSceneAsync("Assets/Scenes/SampleScene.unity");yield return null;yield return PlaySceneEntry.StartIfReady();
             var flow=UnityEngine.Object.FindFirstObjectByType<GameFlowController>();var oldId=flow.Session.SessionId;
             Assert.AreEqual("S:demo-1 / L:demo-1",flow.ConfigurationLabel);flow.TryFire(Vector2.down);
             Change("\"ballsPerRound\": 12","\"ballsPerRound\": 7");Change("\"ballRadius\": 0.12","\"ballRadius\": 0.2");Change("demo-1","test-2");
             Assert.AreEqual(12,flow.Settings.ballsPerRound);Assert.AreEqual(0.12f,flow.Settings.ballRadius,0.001f);
-            ReloadClick();yield return null;yield return null;
+            flow.QueueCommand(FlowCommand.Reload);yield return null;yield return null;
             flow=UnityEngine.Object.FindFirstObjectByType<GameFlowController>();
             Assert.AreNotEqual(oldId,flow.Session.SessionId);Assert.AreEqual(7,flow.Settings.ballsPerRound);Assert.AreEqual("S:test-2 / L:demo-1",flow.ConfigurationLabel);
             Assert.AreEqual(0,UnityEngine.Object.FindObjectsByType<BallActor>(FindObjectsSortMode.None).Length);
@@ -56,12 +56,12 @@ namespace Holedown.Tests
         {
             Change("\"ballSpeed\": 12","\"ballSpeed\": -1");
             LogAssert.Expect(LogType.Error,new Regex("Initialization failed: settings.json.ballSpeed"));
-            yield return SceneManager.LoadSceneAsync("Assets/Scenes/SampleScene.unity");yield return null;
+            yield return SceneManager.LoadSceneAsync("Assets/Scenes/SampleScene.unity");yield return null;yield return PlaySceneEntry.StartIfReady();
             var flow=UnityEngine.Object.FindFirstObjectByType<GameFlowController>();
             StringAssert.Contains("settings.json.ballSpeed",flow.InitializationError);Assert.IsFalse(flow.TryFire(Vector2.down));
             Assert.IsTrue(GameObject.Find("UI/ResultPanel").activeSelf);
-            Change("\"ballSpeed\": -1","\"ballSpeed\": 18");ReloadClick();yield return null;yield return null;
-            flow=UnityEngine.Object.FindFirstObjectByType<GameFlowController>();Assert.IsNull(flow.InitializationError);Assert.AreEqual(18,flow.Settings.ballSpeed);Assert.AreEqual(SessionPhase.Aiming,flow.Session.Phase);
+            Change("\"ballSpeed\": -1","\"ballSpeed\": 18");flow.QueueCommand(FlowCommand.Reload);yield return null;yield return null;
+            flow=UnityEngine.Object.FindFirstObjectByType<GameFlowController>();Assert.IsNull(flow.InitializationError);Assert.AreEqual(18,flow.Settings.ballSpeed);Assert.AreEqual(AppPhase.Title,flow.Phase);
         }
     }
 }

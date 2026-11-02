@@ -5,6 +5,9 @@ using UnityEngine;
 
 namespace Holedown
 {
+    public enum AppPhase { Loading, Title, Playing, Paused, ConfigError }
+    public enum FlowCommand { Start, Continue, Recall, NextStage, RetryStage, RestartRun, Reload }
+
     public sealed class GameFlowController : MonoBehaviour
     {
         [SerializeField] GameSettings settings;
@@ -31,13 +34,39 @@ namespace Holedown
         public GameSettings Settings => configuration?.Settings ?? settings;
         public string ConfigurationLabel => configuration?.Label ?? "Not loaded";
         public string ConfigurationDirectory { get; private set; }
-        void OnDestroy() { configuration?.Dispose(); }
+        public AppPhase Phase { get; private set; } = AppPhase.Loading;
+        public bool HasFocus { get; private set; } = true;
+        public bool CanSimulate => Phase == AppPhase.Playing && HasFocus;
+        public int InputGeneration { get; private set; }
+        public event Action<bool> PauseChanged;
+        bool hasStarted, ownsPause;
+        float savedTimeScale;
+        PlayerInputController input;
+        FlowCommand? pendingCommand;
+        Vector2? pendingFire;
+        int pendingGeneration;
+        public bool UserInputAllowed => HasFocus && (input == null || input.AcceptsCommands);
+        void OnDestroy() { ReleasePause(); configuration?.Dispose(); }
 
-        void OnEnable() { aim.FireRequested += OnFireRequested; }
+        void OnEnable() { aim.FireRequested += OnFireRequested; input = GetComponent<PlayerInputController>(); }
         void OnDisable()
         {
             aim.FireRequested -= OnFireRequested;
+            ReleasePause();
             ClearAttempt();
+        }
+        void InvalidateInput()
+        {
+            InputGeneration++; pendingCommand = null; pendingFire = null;
+            if(input) input.ResetGestures();
+            if(UnityEngine.EventSystems.EventSystem.current) UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(null);
+        }
+        void SetPhase(AppPhase phase)
+        {
+            Phase = phase; InvalidateInput();
+            aim.CanAim = CanSimulate && Session?.Phase == SessionPhase.Aiming;
+            if(!aim.CanAim) aim.HidePreview();
+            Changed?.Invoke();
         }
         void ClearAttempt()
         {
@@ -52,8 +81,8 @@ namespace Holedown
         {
             ClearAttempt();
             Session=new GameSession(); Board=configuration.CreateBoard(Campaign.StageIndex);
-            aim.Configure(Settings);boardView.Sync(Board);Session.Ready();aim.CanAim=true;
-            Changed?.Invoke();
+            aim.Configure(Settings);boardView.Sync(Board);Session.Ready();
+            SetPhase(AppPhase.Playing);
         }
         void Start()
         {
@@ -65,23 +94,57 @@ namespace Holedown
                     : System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Application.dataPath),"Config");
                 configuration = ExternalConfiguration.Load(ConfigurationDirectory,settings,level);
                 Campaign=new CampaignState(configuration.Campaign.Stages.Count,Settings.ballsPerRound);
-                BeginAttempt();
+                if(hasStarted) BeginAttempt(); else SetPhase(AppPhase.Title);
             }
             catch (Exception exception)
             {
                 InitializationError = exception.Message; aim.CanAim = false;
+                SetPhase(AppPhase.ConfigError);
                 Debug.LogError("Initialization failed: " + exception.Message, this);
             }
             Changed?.Invoke();
         }
-        void OnFireRequested(Vector2 direction) => TryFire(direction);
+        void OnFireRequested(Vector2 direction)
+        {
+            if(!UserInputAllowed || pendingCommand.HasValue) return;
+            pendingFire = direction; pendingGeneration = InputGeneration;
+        }
+        public void QueueCommand(FlowCommand command)
+        {
+            if(!UserInputAllowed) return;
+            // UI commands outrank gameplay requests, but never overwrite another UI command.
+            if(pendingCommand.HasValue && pendingCommand != FlowCommand.Recall) return;
+            pendingCommand = command; pendingFire = null; pendingGeneration = InputGeneration;
+        }
+        void DispatchInput()
+        {
+            var command = pendingCommand; var fire = pendingFire; int generation = pendingGeneration;
+            pendingCommand = null; pendingFire = null;
+            if(generation != InputGeneration || !UserInputAllowed) return;
+            if(command.HasValue) switch(command.Value)
+            {
+                case FlowCommand.Start: StartGame(); break;
+                case FlowCommand.Continue: ContinueGame(); break;
+                case FlowCommand.Recall: RequestRecall(); break;
+                case FlowCommand.NextStage: NextStage(); break;
+                case FlowCommand.RetryStage: RetryStage(); break;
+                case FlowCommand.RestartRun: RestartRun(); break;
+                case FlowCommand.Reload: ReloadAndRestart(); break;
+            }
+            else if(fire.HasValue) TryFire(fire.Value);
+        }
+        public void StartGame()
+        {
+            if(Phase != AppPhase.Title || configuration == null || !UserInputAllowed || !EnterTransition()) return;
+            try { hasStarted = true; BeginAttempt(); } finally { transitioning = false; }
+        }
         public bool TryFire(Vector2 direction)
         {
-            if (transitioning || Campaign == null || Session == null || direction.y >= 0 || !float.IsFinite(direction.x) || !float.IsFinite(direction.y) || direction.sqrMagnitude < 0.0001f) return false;
+            if (!CanSimulate || !UserInputAllowed || transitionFrame == Time.frameCount || transitioning || Campaign == null || Session == null || direction.y >= 0 || !float.IsFinite(direction.x) || !float.IsFinite(direction.y) || direction.sqrMagnitude < 0.0001f) return false;
             float angle = Mathf.Clamp(Mathf.Atan2(direction.x,-direction.y)*Mathf.Rad2Deg,-Settings.maxAimAngle,Settings.maxAimAngle)*Mathf.Deg2Rad;
             direction = new Vector2(Mathf.Sin(angle),-Mathf.Cos(angle));
             if (!Session.TryFire(Campaign.EntryBalls)) return false;
-            aim.CanAim = false; volleyStarted = Time.time;
+            aim.CanAim = false; InvalidateInput(); volleyStarted = Time.time;
             launching = StartCoroutine(LaunchVolley(Session.SessionId,Session.VolleyId,direction));
             Changed?.Invoke(); return true;
         }
@@ -90,6 +153,7 @@ namespace Holedown
             var interval = new WaitForSeconds(Settings.launchInterval);
             while (Session.SessionId == session && Session.VolleyId == volley && Session.Phase == SessionPhase.Volley && Session.Pending > 0)
             {
+                while(!CanSimulate) yield return null;
                 int id = Session.RegisterLaunch();
                 var ball = Instantiate(ballPrefab, AimInput.Origin, Quaternion.identity);
                 balls.Add(id,ball); ball.Hit += OnHit; ball.Returned += OnReturned;
@@ -101,7 +165,7 @@ namespace Holedown
         }
         void OnHit(BallActor ball, int blockId)
         {
-            if (!Session.AcceptHit(ball.SessionId,ball.VolleyId,ball.BallId)) return;
+            if (!CanSimulate || Session == null || !Session.AcceptHit(ball.SessionId,ball.VolleyId,ball.BallId)) return;
             var hit = Board.ApplyHit(blockId);
             if (!hit.Accepted) return;
             Campaign.RecordHit(blockId,hit);
@@ -117,7 +181,8 @@ namespace Holedown
         }
         public void RequestRecall()
         {
-            if (Session == null || !Session.Recall()) return;
+            if (!CanSimulate || !UserInputAllowed || transitionFrame == Time.frameCount || Session == null || !Session.Recall()) return;
+            InvalidateInput();
             if (launching != null) { StopCoroutine(launching); launching = null; }
             var returning = new List<BallActor>(balls.Values);
             foreach (var ball in returning) ball.Return();
@@ -130,33 +195,68 @@ namespace Holedown
         }
         public void NextStage()
         {
-            if(Session?.Phase!=SessionPhase.Won || Campaign==null || Campaign.IsFinalStage || !EnterTransition())return;
+            if(!CanSimulate || !UserInputAllowed || Session?.Phase!=SessionPhase.Won || Campaign==null || Campaign.IsFinalStage || !EnterTransition())return;
             try{if(Campaign.NextStage())BeginAttempt();}finally{transitioning=false;}
         }
         public void RetryStage()
         {
-            if(Session?.Phase!=SessionPhase.Lost || Campaign==null || !EnterTransition())return;
+            if(!CanSimulate || !UserInputAllowed || Session?.Phase!=SessionPhase.Lost || Campaign==null || !EnterTransition())return;
             try{if(Campaign.RetryStage())BeginAttempt();}finally{transitioning=false;}
         }
         public void RestartRun()
         {
-            if(Campaign==null || !EnterTransition())return;
+            if(!CanSimulate || !UserInputAllowed || Campaign==null || !EnterTransition())return;
             try{Campaign.RestartRun();BeginAttempt();}finally{transitioning=false;}
         }
         public void Restart() => ReloadAndRestart();
         public void ReloadAndRestart()
         {
-            if(!EnterTransition())return;
-            ClearAttempt();
-            UnityEngine.SceneManagement.SceneManager.LoadScene(gameObject.scene.path);
+            if(!UserInputAllowed || Phase == AppPhase.Loading || !EnterTransition())return;
+            try
+            {
+                SetPhase(AppPhase.Loading); ClearAttempt(); ReleasePause();
+                configuration?.Dispose(); configuration = null; Campaign = null; Board = null;
+                Session = new GameSession(); InitializationError = null;
+                configuration = ExternalConfiguration.Load(ConfigurationDirectory,settings,level);
+                Campaign = new CampaignState(configuration.Campaign.Stages.Count, Settings.ballsPerRound);
+                if(hasStarted) BeginAttempt(); else SetPhase(AppPhase.Title);
+            }
+            catch(Exception exception)
+            {
+                InitializationError = exception.Message; SetPhase(AppPhase.ConfigError);
+                Debug.LogError("Initialization failed: " + exception.Message, this);
+            }
+            finally { transitioning = false; Changed?.Invoke(); }
         }
-        void Update()
+        public void RequestPause()
         {
-            if (Session != null && Session.Phase == SessionPhase.Volley && Time.time-volleyStarted >= Settings.recallTimeout) RequestRecall();
+            if(!CanSimulate || (Session?.Phase != SessionPhase.Aiming && Session?.Phase != SessionPhase.Volley && Session?.Phase != SessionPhase.Recalling)) return;
+            savedTimeScale = Time.timeScale; ownsPause = true; Time.timeScale = 0;
+            SetPhase(AppPhase.Paused); PauseChanged?.Invoke(true);
+        }
+        public void ContinueGame()
+        {
+            if(Phase != AppPhase.Paused || !UserInputAllowed || !EnterTransition()) return;
+            try { ReleasePause(); SetPhase(AppPhase.Playing); } finally { transitioning = false; }
+        }
+        void ReleasePause()
+        {
+            if(!ownsPause) return;
+            ownsPause = false; Time.timeScale = savedTimeScale; PauseChanged?.Invoke(false);
+        }
+        void OnApplicationFocus(bool focused)
+        {
+            if(!focused) RequestPause();
+            HasFocus = focused; InvalidateInput();
+            if(input) input.FocusChanged(focused);
+            aim.CanAim = CanSimulate && Session?.Phase == SessionPhase.Aiming;
+            Changed?.Invoke();
         }
         void LateUpdate()
         {
-            if (Session == null) return;
+            DispatchInput();
+            if(!CanSimulate || Session == null) return;
+            if(Session.Phase == SessionPhase.Volley && Time.time-volleyStarted >= Settings.recallTimeout) RequestRecall();
             switch (Session.Phase)
             {
                 case SessionPhase.Volley:
@@ -166,6 +266,7 @@ namespace Holedown
                     if(Session.Phase==SessionPhase.Won)Campaign.CompleteStage();
                     else if(Session.Phase==SessionPhase.Lost)Campaign.FailStage();
                     boardView.Sync(Board);
+                    InvalidateInput();
                     aim.CanAim = Session.Phase == SessionPhase.Aiming;
                     Changed?.Invoke();
                     break;

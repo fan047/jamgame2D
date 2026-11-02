@@ -14,7 +14,7 @@ namespace Holedown.Tests
     {
         [UnityTest] public IEnumerator RecallUIBlocksAimAndInvokesOnlyRecall()
         {
-            yield return SceneManager.LoadSceneAsync("Assets/Scenes/SampleScene.unity"); yield return null;
+            yield return SceneManager.LoadSceneAsync("Assets/Scenes/SampleScene.unity"); yield return null; yield return PlaySceneEntry.StartIfReady();
             Canvas.ForceUpdateCanvases();
             var flow=Object.FindFirstObjectByType<GameFlowController>();var aim=Object.FindFirstObjectByType<AimInput>();
             var button=GameObject.Find("UI/Recall").GetComponent<Button>();
@@ -30,7 +30,7 @@ namespace Holedown.Tests
         }
         [UnityTest] public IEnumerator VolleyDestroysBlockAndPlaysRateLimitedFeedback()
         {
-            yield return SceneManager.LoadSceneAsync("Assets/Scenes/SampleScene.unity"); yield return null;
+            yield return SceneManager.LoadSceneAsync("Assets/Scenes/SampleScene.unity"); yield return null; yield return PlaySceneEntry.StartIfReady();
             var flow=Object.FindFirstObjectByType<GameFlowController>();var view=Object.FindFirstObjectByType<BoardView>();
             var victim=view.Views[2];var collider=victim.GetComponent<Collider2D>();
             flow.TryFire(Vector2.down);
