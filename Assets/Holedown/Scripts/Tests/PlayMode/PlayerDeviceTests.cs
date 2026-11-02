@@ -51,6 +51,17 @@ namespace Holedown.Tests
                 InputSystem.QueueStateEvent(mouse, new MouseState { position = position }.WithButton(MouseButton.Left));
                 yield return null; yield return null;
                 Assert.AreEqual(SessionPhase.Volley, flow.Session.Phase);
+                flow.RequestRecall(); yield return null; yield return null;
+                InputSystem.QueueStateEvent(mouse, new MouseState { position = position });
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.Space)); yield return null;
+                flow.SendMessage("OnApplicationFocus", false); flow.SendMessage("OnApplicationFocus", true);
+                yield return null; yield return null; yield return null;
+                flow.ContinueGame();
+                Assert.AreEqual(AppPhase.Playing, flow.Phase, "Held Space must not lock Continue after focus regain");
+                yield return null;
+                InputSystem.QueueStateEvent(mouse, new MouseState { position = position }.WithButton(MouseButton.Left));
+                yield return null; yield return null;
+                Assert.AreEqual(SessionPhase.Volley, flow.Session.Phase, "Held Space must not block a fresh mouse press");
             }
             finally
             {

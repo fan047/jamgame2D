@@ -36,7 +36,7 @@ namespace Holedown
         public string ConfigurationDirectory { get; private set; }
         public AppPhase Phase { get; private set; } = AppPhase.Loading;
         public bool HasFocus { get; private set; } = true;
-        public bool CanSimulate => Phase == AppPhase.Playing && HasFocus;
+        public bool CanSimulate => isActiveAndEnabled && Phase == AppPhase.Playing && HasFocus;
         public int InputGeneration { get; private set; }
         public event Action<bool> PauseChanged;
         bool hasStarted, ownsPause;
@@ -45,7 +45,7 @@ namespace Holedown
         FlowCommand? pendingCommand;
         Vector2? pendingFire;
         int pendingGeneration;
-        public bool UserInputAllowed => HasFocus && (input == null || input.AcceptsCommands);
+        public bool UserInputAllowed => isActiveAndEnabled && HasFocus && (input == null || input.AcceptsCommands);
         void OnDestroy() { ReleasePause(); configuration?.Dispose(); }
 
         void OnEnable() { aim.FireRequested += OnFireRequested; input = GetComponent<PlayerInputController>(); }

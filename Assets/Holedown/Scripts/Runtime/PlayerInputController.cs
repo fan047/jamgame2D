@@ -68,7 +68,7 @@ namespace Holedown
             if(!left) blockFire = false;
             if(!space) blockRecall = false;
             if(!escape) blockPause = false;
-            if(activationBlocked && !left && !space && !escape)
+            if(activationBlocked && !left)
             { activationBlocked = false; activationFrame = Time.frameCount; }
             SyncMaps();
             if(!AcceptsCommands) { aim.HidePreview(); return; }
