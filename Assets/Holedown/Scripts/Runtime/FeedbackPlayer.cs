@@ -9,6 +9,7 @@ namespace Holedown
         [SerializeField] AudioSource audioSource;
         [SerializeField] Sprite fragmentSprite;
         [SerializeField] Material fragmentMaterial;
+        [SerializeField] VisualTheme theme;
         AudioClip hitClip;
         float nextSoundTime;
         public int SoundsPlayed { get; private set; }
@@ -39,8 +40,42 @@ namespace Holedown
         {
             if(Time.time>=nextSoundTime) { audioSource.PlayOneShot(hitClip); nextSoundTime=Time.time+0.05f; SoundsPlayed++; }
             if(!view) return;
-            if(hit.Destroyed) StartCoroutine(Fragments(view.transform.position,view.BaseColor));
+            if(hit.Destroyed)
+            {
+                var position = view.transform.position;
+                StartCoroutine(Fragments(position, view.BaseColor));
+                if(hit.RewardBalls > 0 || hit.IsTarget) StartCoroutine(SpecialFeedback(position, hit.RewardBalls, hit.IsTarget));
+            }
             else view.PlayImpact();
+        }
+        IEnumerator SpecialFeedback(Vector3 position, int reward, bool target)
+        {
+            var root = new GameObject(target ? "TargetFeedback" : "RewardFeedback");
+            root.transform.SetParent(transform); root.transform.position = position;
+            var renderer = root.AddComponent<SpriteRenderer>();
+            renderer.sprite = theme && theme.spark ? theme.spark : fragmentSprite;
+            renderer.sharedMaterial = fragmentMaterial; renderer.sortingOrder = 6;
+            Color color = target ? new Color(1,0.8f,0.35f) : new Color(0.65f,1,0.7f);
+            TMPro.TextMeshPro text = null;
+            if(reward > 0)
+            {
+                var go = new GameObject("RewardValue"); go.transform.SetParent(root.transform,false);
+                text = go.AddComponent<TMPro.TextMeshPro>(); text.text = $"+{reward}\n<size=65%>Next stage</size>";
+                text.fontSize = 3; text.alignment = TMPro.TextAlignmentOptions.Center;
+                text.rectTransform.sizeDelta = new Vector2(2.5f,1); text.GetComponent<MeshRenderer>().sortingOrder = 8;
+            }
+            float duration = reward > 0 ? 0.6f : 0.3f, elapsed = 0;
+            while(elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                float lightDuration = target ? 0.3f : 0.35f;
+                renderer.enabled = elapsed < lightDuration;
+                renderer.color = new Color(color.r,color.g,color.b,0.55f * Mathf.Max(0,1-elapsed/lightDuration));
+                SpriteSizing.Fit(renderer, Vector2.one * (0.3f + elapsed * 2));
+                if(text) { text.transform.position = position + Vector3.up * elapsed; text.alpha = Mathf.Max(0,1-elapsed/duration); text.transform.localScale = new Vector3(1/root.transform.localScale.x,1/root.transform.localScale.y,1); }
+                yield return null;
+            }
+            Destroy(root);
         }
         IEnumerator Fragments(Vector3 position, Color color)
         {
@@ -49,12 +84,13 @@ namespace Holedown
             for(int i=0;i<pieces.Length;i++)
             {
                 var go=new GameObject("Piece");go.transform.SetParent(root.transform,false);go.transform.localScale=Vector3.one*0.13f;
-                var renderer=go.AddComponent<SpriteRenderer>();renderer.sprite=fragmentSprite;renderer.sharedMaterial=fragmentMaterial;renderer.color=color;renderer.sortingOrder=6;
+                var renderer=go.AddComponent<SpriteRenderer>();renderer.sprite=theme && theme.fragment ? theme.fragment : fragmentSprite;renderer.sharedMaterial=fragmentMaterial;renderer.color=theme && theme.originalColors ? Color.white : color;renderer.sortingOrder=6;
+                SpriteSizing.Fit(renderer, Vector2.one * 0.13f);
                 pieces[i]=go.transform;velocities[i]=Quaternion.Euler(0,0,i*72)*Vector3.up*1.8f;
             }
             float elapsed=0;
             while(elapsed<0.3f)
-            { elapsed+=Time.deltaTime;for(int i=0;i<pieces.Length;i++){pieces[i].position+=velocities[i]*Time.deltaTime;pieces[i].localScale=Vector3.one*0.13f*Mathf.Max(0,1-elapsed/0.3f);}yield return null; }
+            {elapsed+=Time.deltaTime;for(int i=0;i<pieces.Length;i++){pieces[i].position+=velocities[i]*Time.deltaTime;SpriteSizing.Fit(pieces[i].GetComponent<SpriteRenderer>(),Vector2.one*0.13f*Mathf.Max(0,1-elapsed/0.3f));}yield return null; }
             Destroy(root);
         }
     }

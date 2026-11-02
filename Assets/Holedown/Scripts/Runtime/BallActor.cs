@@ -6,6 +6,7 @@ namespace Holedown
     [RequireComponent(typeof(Rigidbody2D), typeof(CircleCollider2D))]
     public sealed class BallActor : MonoBehaviour
     {
+        [SerializeField] VisualTheme theme;
         Rigidbody2D body;
         CircleCollider2D circle;
         Transform visual;
@@ -28,7 +29,9 @@ namespace Holedown
             SessionId = session; VolleyId = volley; BallId = ball;
             speed = settings.ballSpeed;
             circle.radius = settings.ballRadius;
-            visual.localScale = Vector3.one * (settings.ballRadius * 2f);
+            var renderer = visual.GetComponent<SpriteRenderer>();
+            if(theme && theme.ball) { renderer.sprite = theme.ball; renderer.color = Color.white; }
+            SpriteSizing.Fit(renderer, Vector2.one * (settings.ballRadius * 2f));
             body.gravityScale = 0; body.linearDamping = 0; body.angularDamping = 0;
             body.constraints = RigidbodyConstraints2D.FreezeRotation;
             body.collisionDetectionMode = CollisionDetectionMode2D.Continuous;

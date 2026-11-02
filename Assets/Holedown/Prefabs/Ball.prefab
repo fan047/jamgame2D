@@ -110,6 +110,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9731bbfe74230c4aada9471dc5a08bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Holedown.Runtime::Holedown.BallActor
+  theme: {fileID: 11400000, guid: 104ba133b5cf0614d8ecc0c8721b0aad, type: 2}
 --- !u!1 &7668950933519268616
 GameObject:
   m_ObjectHideFlags: 0

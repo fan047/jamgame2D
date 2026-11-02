@@ -2323,6 +2323,97 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 924909607}
   m_CullTransparentMesh: 1
+--- !u!1 &935908726
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 935908727}
+  - component: {fileID: 935908728}
+  m_Layer: 0
+  m_Name: Background
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &935908727
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 935908726}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1028796997}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!212 &935908728
+SpriteRenderer:
+  serializedVersion: 2
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 935908726}
+  m_Enabled: 0
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: db7639095b2c7be418b8254b65104209, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 0
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: -20
+  m_MaskInteraction: 0
+  m_Sprite: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_FlipX: 0
+  m_FlipY: 0
+  m_DrawMode: 0
+  m_Size: {x: 1, y: 1}
+  m_AdaptiveModeThreshold: 0.5
+  m_SpriteTileMode: 0
+  m_WasSpriteAssigned: 0
+  m_SpriteSortPoint: 0
 --- !u!1 &985487621
 GameObject:
   m_ObjectHideFlags: 0
@@ -2550,6 +2641,7 @@ GameObject:
   - component: {fileID: 1028796997}
   - component: {fileID: 1028796998}
   - component: {fileID: 1028796999}
+  - component: {fileID: 1028797000}
   m_Layer: 0
   m_Name: Game
   m_TagString: Untagged
@@ -2578,6 +2670,7 @@ Transform:
   - {fileID: 78798208}
   - {fileID: 1970158882}
   - {fileID: 1898611271}
+  - {fileID: 935908727}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1028796998
@@ -2613,6 +2706,23 @@ MonoBehaviour:
   actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   flow: {fileID: 1028796998}
   aim: {fileID: 1970158883}
+--- !u!114 &1028797000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1028796996}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2ea278e0b5e27249a3ff04793ac0108, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Holedown.Runtime::Holedown.SceneVisuals
+  theme: {fileID: 11400000, guid: 104ba133b5cf0614d8ecc0c8721b0aad, type: 2}
+  gameCamera: {fileID: 519420031}
+  background: {fileID: 935908728}
+  launcher: {fileID: 1840627757}
+  startScreen: {fileID: 1404852083}
 --- !u!1 &1104748491
 GameObject:
   m_ObjectHideFlags: 0
@@ -4663,6 +4773,7 @@ MonoBehaviour:
   audioSource: {fileID: 1898611273}
   fragmentSprite: {fileID: 7482667652216324306, guid: 9b51139e69622394b99b0322acd0c44d, type: 3}
   fragmentMaterial: {fileID: 2100000, guid: db7639095b2c7be418b8254b65104209, type: 2}
+  theme: {fileID: 11400000, guid: 104ba133b5cf0614d8ecc0c8721b0aad, type: 2}
 --- !u!82 &1898611273
 AudioSource:
   m_ObjectHideFlags: 0

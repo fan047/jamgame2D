@@ -21,7 +21,7 @@ namespace Holedown.Tests
         static BoardState Board(int health=6)=>new BoardState(new[]{new BlockDefinition(3,2,1,health,false,0,2)},new[]{new RowDefinition{blocks=new List<BlockDefinition>{new BlockDefinition(0,0,1,1,true)}}});
         [UnityTest] public IEnumerator CrackThresholdsSurviveBindingAndAdvance()
         {
-            var board=Board();var view=View(board.Blocks[1]);var cracks=view.transform.Find("Visual/Cracks").GetComponent<SpriteRenderer>();
+            var board=Board();var view=View(board.Blocks[1]);var cracks=view.Cracks;
             Assert.AreEqual(0,view.DamageLevel);Assert.IsFalse(cracks.enabled);
             foreach(int expected in new[]{0,1,1,2,2}) {
                 var hit=board.ApplyHit(1);view.SetHealth(hit.Health,false);Assert.AreEqual(expected,view.DamageLevel);
@@ -34,7 +34,7 @@ namespace Holedown.Tests
         }
         [UnityTest] public IEnumerator RepeatedImpactRestartsFromBaselineWithoutMovingColliderOrText()
         {
-            var view=View(Board().Blocks[1]);var visual=view.Visual.transform;var label=view.GetComponentInChildren<TMPro.TMP_Text>().transform;
+            var view=View(Board().Blocks[1]);var visual=view.ImpactRoot;var label=view.GetComponentInChildren<TMPro.TMP_Text>().transform;
             var baseline=visual.localScale;var labelScale=label.localScale;var collider=view.GetComponent<BoxCollider2D>();var size=collider.size;var position=view.transform.position;
             for(int i=0;i<5;i++) {
                 view.PlayImpact();Assert.AreEqual(baseline,visual.localScale);
