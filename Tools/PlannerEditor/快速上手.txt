@@ -1,9 +1,14 @@
-Holedown 成长版 P1 策划快速上手（不需要 Unity）
+Holedown 输入与美术适配预览版 策划快速上手（不需要 Unity）
 
 每次构建单独保存在 Builds/01、Builds/02……，本运行目录位于对应编号的 Windows 子目录。
 新构建不覆盖旧包；升级时需手动将旧包的 Config 复制到新包，先备份，height=2 配置必须使用 P1 程序。
 
-1. 运行 HoledownGrowth.exe 试玩。
+1. 运行 HoledownGrowth.exe，配置校验成功后显示开始页，点击 Start 进入第 1 关。
+   左键按下发射一轮，按住不会连续发射；Space 或 Recall 按钮召回。
+   Esc 或 Pause 按钮暂停；使用 Continue 明确继续，Esc 不负责继续。
+   切出窗口会自动暂停；返回时首次点击只激活窗口，抬起后重新点击 Continue 恢复。
+   暂停页 Reload + Restart 会放弃本轮、读取文件并从第 1 关重开，不回开始页。
+   当前仍使用占位美术和占位音效，主题接入代码已就绪，不代表正式素材已经验收。
 2. 双击 PlannerEditor/index.html，用 Chrome 或 Edge 打开离线编辑器。
 3. 在编辑器里同时导入本目录 Config/settings.json 和 Config/level.json。
    刚打开编辑器时显示的是内置示例，不会自动读取游戏当前文件。
@@ -44,7 +49,7 @@ Restart Run 从已载入快照的第一关重开，不读取修改后的文件�
 - 两个 JSON 都不存在：使用内置默认配置，HUD 显示 Built-in。
 - 只缺一个、JSON 损坏、字段拼错或关卡非法：显示 Config error，禁止发射，不悄悄回退。
 - 数组下标从 0 开始；incomingRows[1].blocks[2] 指第 2 条补行的第 3 个方块。
-- 修正文件后点击 Reload + Restart；错误面板上的重开按钮同样会重新读取。
+- 修正文件后点击重载；启动前错误修复后回开始页，游戏内错误修复后直接从第 1 关开始。
 - 修改文件不会影响正在飞行的一局，必须主动重载或重新启动。
 
 请先备份原文件；编辑器关闭或刷新前确认已导出。“已请求导出”不是已保存到游戏，请核对下载。
