@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.InputSystem;
 
 namespace Holedown
 {
@@ -41,18 +40,22 @@ namespace Holedown
             var hit = Physics2D.CircleCast(Origin, settings.ballRadius, direction, 30, collisionMask);
             return hit.collider ? hit.centroid : Origin + direction * 30;
         }
-        void Update()
+        public bool TryPointerDirection(Vector2 screen, out Vector2 direction)
+        {
+            direction = default;
+            if (!gameCamera.pixelRect.Contains(screen) || IsPointerOverUI(screen)) return false;
+            var world = gameCamera.ScreenToWorldPoint(new Vector3(screen.x, screen.y, -gameCamera.transform.position.z));
+            return TryDirection(world, settings.maxAimAngle, out direction);
+        }
+        public void SamplePointer(Vector2 screen, bool fire)
         {
             preview.enabled = false;
-            if (!CanAim || Mouse.current == null) return;
-            Vector2 screen = Mouse.current.position.ReadValue();
-            if (!gameCamera.pixelRect.Contains(screen) || IsPointerOverUI(screen)) return;
-            var world = gameCamera.ScreenToWorldPoint(new Vector3(screen.x, screen.y, -gameCamera.transform.position.z));
-            if (!TryDirection(world, settings.maxAimAngle, out var direction)) return;
+            if (!CanAim || !TryPointerDirection(screen, out var direction)) return;
             preview.enabled = true;
             preview.SetPosition(0, Origin); preview.SetPosition(1, PreviewEnd(direction));
-            if (Mouse.current.leftButton.wasPressedThisFrame) FireRequested?.Invoke(direction);
+            if (fire) FireRequested?.Invoke(direction);
         }
+        public void HidePreview() { if (preview) preview.enabled = false; }
         void OnDisable() { if (preview) preview.enabled = false; }
     }
 }

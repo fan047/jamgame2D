@@ -1,4 +1,5 @@
 {
+    "version": 1,
     "name": "InputSystem_Actions",
     "maps": [
         {
@@ -986,6 +987,110 @@
                     "processors": "",
                     "groups": "XR",
                     "action": "TrackedDeviceOrientation",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "HoledownAim",
+            "id": "28627eda-7726-4486-b841-0e09ff9c6cad",
+            "actions": [
+                {
+                    "name": "Point",
+                    "type": "Value",
+                    "id": "912f9ab7-8ff4-4264-9cda-ac8fec982f36",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Fire",
+                    "type": "Button",
+                    "id": "80969a8a-ba0e-4d69-8b0f-70ad2689a693",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "efc7eb3c-c586-4995-a60c-70933c9a44f1",
+                    "path": "<Mouse>/position",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Point",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "747bf39d-3de7-438e-9560-db2156bc4bd2",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Fire",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "HoledownVolley",
+            "id": "fc3edb4b-a1a7-4603-8af7-66c05e705171",
+            "actions": [
+                {
+                    "name": "Recall",
+                    "type": "Button",
+                    "id": "82ffa20c-8a5e-45c4-9ecc-0f6f0f08c6cb",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "ba1e2c01-9ae9-46ce-be0b-d45f5cd28d83",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Recall",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "HoledownSystem",
+            "id": "fa8e7881-99cd-4f88-9e5e-dd7db15c1910",
+            "actions": [
+                {
+                    "name": "Pause",
+                    "type": "Button",
+                    "id": "13015e19-fcdc-4a20-a489-266b238f2c11",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "07d1efd6-e787-406b-b315-d6cc448776dd",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Pause",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
