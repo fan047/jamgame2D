@@ -18,15 +18,21 @@ MonoBehaviour:
   logoContainsTitle: 0
   ball: {fileID: 21300000, guid: 268a25d2c321d074fae3e43d9e357b21, type: 3}
   blockSquare: {fileID: 21300000, guid: 046b2c643ac78f04da2d2adf5afe39a2, type: 3}
-  blockWide: {fileID: 7482667652216324306, guid: 9b51139e69622394b99b0322acd0c44d, type: 3}
-  blockTall: {fileID: 7482667652216324306, guid: 9b51139e69622394b99b0322acd0c44d, type: 3}
-  crackLight: {fileID: 21300000, guid: e9f9dcaf7a0ef7342b2cba11e6984f34, type: 3}
-  crackHeavy: {fileID: 21300000, guid: 2be9317173ac7a04aa0415dfb96a9b1c, type: 3}
-  rewardBadge: {fileID: 0}
-  targetBadge: {fileID: 0}
+  blockWide: {fileID: 21300000, guid: 9e81dbdb1f2689240b9dc474f1ddf2a9, type: 3}
+  blockTall: {fileID: 21300000, guid: 97f173ecc5b0470498498c493eaa1eea, type: 3}
+  rewardSquare: {fileID: 21300000, guid: 4ebd09ff0c24154469e1538af08e832f, type: 3}
+  rewardWide: {fileID: 21300000, guid: 5331e73afd2cddd40aa8f5a89f670dcd, type: 3}
+  rewardTall: {fileID: 21300000, guid: 8e8d4d6eb8533b740a6627a6f2fe9360, type: 3}
+  targetSquare: {fileID: 21300000, guid: 10175533b008dcf46af096c8b9f633fd, type: 3}
+  targetWide: {fileID: 21300000, guid: 8f1835da9523157479a7793cff632905, type: 3}
+  targetTall: {fileID: 21300000, guid: 3fb8fe193adccee4eb5d7209ab91e56c, type: 3}
+  crackLight: {fileID: 21300000, guid: 789c3723c130c7340b162df2b3e94d1e, type: 3}
+  crackHeavy: {fileID: 21300000, guid: 516c2dcc905ccb741bb8b81fb6580aa3, type: 3}
+  rewardBadge: {fileID: 21300000, guid: 528f0bd860ed493439dfb7b0804ef6b0, type: 3}
+  targetBadge: {fileID: 21300000, guid: 917b23f9b2f72b64c9a9c869952c6ce8, type: 3}
   background: {fileID: 21300000, guid: 316c8f4c2ae246241b0f4b34f5acd5c1, type: 3}
   launcher: {fileID: 21300000, guid: c4c001baf16321941ad622ade831af73, type: 3}
-  titleLogo: {fileID: 0}
-  fragment: {fileID: 0}
-  spark: {fileID: 0}
+  titleLogo: {fileID: 21300000, guid: 5a88f49a0d5d4434db34145081c94b51, type: 3}
+  fragment: {fileID: 21300000, guid: 27c1865662718e34ab26c9e40f4869c0, type: 3}
+  spark: {fileID: 21300000, guid: 63216fa8a3c6de149aff22d7bbfef6d2, type: 3}
   flashMaterial: {fileID: 2100000, guid: 66531bb9f79745345a5e09d8318e36c4, type: 2}

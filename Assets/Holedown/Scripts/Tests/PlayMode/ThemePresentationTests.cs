@@ -36,6 +36,46 @@ namespace Holedown.Tests
             finally { Object.DestroyImmediate(theme); foreach(var sprite in sprites) Object.DestroyImmediate(sprite); Object.DestroyImmediate(texture); }
         }
         [Test]
+        public void ShippedThemeBindsAllRolesWithoutChangingColliders()
+        {
+            var theme=AssetDatabase.LoadAssetAtPath<VisualTheme>("Assets/Holedown/Data/VisualTheme.asset");
+            var prefab=AssetDatabase.LoadAssetAtPath<BlockView>("Assets/Holedown/Prefabs/Block.prefab");
+            Assert.IsTrue(theme.originalColors); Assert.IsFalse(theme.logoContainsTitle);
+            foreach(var sprite in new[]{theme.ball,theme.background,theme.launcher,theme.crackLight,theme.crackHeavy,theme.rewardBadge,theme.targetBadge,theme.titleLogo,theme.fragment,theme.spark}) Assert.IsNotNull(sprite);
+            for(int role=0;role<3;role++) for(int shape=0;shape<3;shape++)
+            {
+                int width=shape==1?2:1,height=shape==2?2:1;
+                var definition=new BlockDefinition(0,0,width,12,role==2,role==1?5:0,height);
+                // Rendering fixture deliberately covers target-tall too; production rules prohibit tall incoming rows.
+                var state=(BlockState)System.Activator.CreateInstance(typeof(BlockState),
+                    System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic,null,new object[]{1,definition,0},null);
+                var view=Object.Instantiate(prefab);
+                try
+                {
+                    view.Bind(state);
+                    Assert.AreSame(theme.Block(width,height,role==2,role==1?5:0),view.Visual.sprite);
+                    Assert.AreEqual(Color.white,view.Visual.color);
+                    Assert.AreEqual(new Vector2(width-.1f,height-.1f),view.GetComponent<BoxCollider2D>().size);
+                    var badge=view.transform.Find("RoleBadge").GetComponent<SpriteRenderer>();
+                    Assert.AreEqual(role>0,badge.enabled);
+                    if(role>0) Assert.AreSame(role==2?theme.targetBadge:theme.rewardBadge,badge.sprite);
+                    view.SetHealth(8,role==2); Assert.AreSame(theme.crackLight,view.Cracks.sprite);
+                    view.SetHealth(4,role==2); Assert.AreSame(theme.crackHeavy,view.Cracks.sprite);
+                    view.Bind(state); Assert.IsFalse(view.Cracks.enabled);
+                }
+                finally { Object.DestroyImmediate(view.gameObject); }
+            }
+            foreach(var guid in AssetDatabase.FindAssets("t:Texture2D",new[]{"Assets/Holedown/Art/Theme"}))
+            {
+                var path=AssetDatabase.GUIDToAssetPath(guid);var importer=(TextureImporter)AssetImporter.GetAtPath(path);
+                Assert.AreEqual(SpriteImportMode.Single,importer.spriteImportMode,path);
+                Assert.AreEqual(FilterMode.Point,importer.filterMode,path);Assert.IsFalse(importer.mipmapEnabled,path);
+                Assert.AreEqual(TextureImporterCompression.Uncompressed,importer.textureCompression,path);
+                var sprite=AssetDatabase.LoadAssetAtPath<Sprite>(path);
+                Assert.AreEqual(new Rect(0,0,sprite.texture.width,sprite.texture.height),sprite.rect,path);
+            }
+        }
+        [Test]
         public void NativeSpriteSizesFitWithoutChangingPhysics()
         {
             var texture = new Texture2D(128,64);
