@@ -67,7 +67,10 @@ namespace Holedown.Tests
             var ball = UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<BallActor>("Assets/Holedown/Prefabs/Ball.prefab"),AimInput.Origin,Quaternion.identity);
             ball.Launch(settings,Guid.NewGuid(),1,1,Vector2.down);
             Assert.AreEqual(0.2f,ball.GetComponent<CircleCollider2D>().radius,0.001f);
-            Assert.AreEqual(0.4f,ball.GetComponentInChildren<SpriteRenderer>().transform.localScale.x,0.001f);
+            // Authored sprites have native dimensions/PPU; verify world diameter, not placeholder local scale.
+            var renderer=ball.GetComponentInChildren<SpriteRenderer>();
+            Assert.AreEqual(0.4f,renderer.bounds.size.x,0.001f);
+            Assert.AreEqual(0.4f,renderer.bounds.size.y,0.001f);
             Assert.AreEqual(Vector3.one,ball.transform.localScale);
             ball.Return(); UnityEngine.Object.Destroy(settings); yield return null;
         }
