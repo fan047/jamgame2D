@@ -14,6 +14,8 @@ namespace Holedown
         readonly List<RaycastResult> uiHits = new List<RaycastResult>();
         PointerEventData pointer;
         EventSystem pointerSystem;
+        BoardCamera boardCamera;
+        void Awake() { if(gameCamera) boardCamera = gameCamera.GetComponent<BoardCamera>(); }
         public static readonly Vector2 Origin = new Vector2(4, 9);
         public bool CanAim { get; set; }
         public void Configure(GameSettings runtimeSettings) { settings = runtimeSettings; }
@@ -43,6 +45,8 @@ namespace Holedown
         public bool TryPointerDirection(Vector2 screen, out Vector2 direction)
         {
             direction = default;
+            // Projection must reflect a resize before this Update's pointer conversion.
+            if(boardCamera) boardCamera.Synchronize();
             if (!gameCamera.pixelRect.Contains(screen) || IsPointerOverUI(screen)) return false;
             var world = gameCamera.ScreenToWorldPoint(new Vector3(screen.x, screen.y, -gameCamera.transform.position.z));
             return TryDirection(world, settings.maxAimAngle, out direction);

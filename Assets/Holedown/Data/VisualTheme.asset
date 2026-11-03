@@ -12,17 +12,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e994108b193e4a46bb80a58f8a206f8, type: 3}
   m_Name: VisualTheme
   m_EditorClassIdentifier: Holedown.Runtime::Holedown.VisualTheme
-  originalColors: 0
-  ball: {fileID: -2413806693520163455, guid: 438a524a1b9768b4cac175db2ff6e9de, type: 3}
-  blockSquare: {fileID: 7482667652216324306, guid: 9b51139e69622394b99b0322acd0c44d, type: 3}
+  originalColors: 1
+  fixedStage: 1
+  stageSize: {x: 9.4, y: 16.702232}
+  logoContainsTitle: 0
+  ball: {fileID: 21300000, guid: 268a25d2c321d074fae3e43d9e357b21, type: 3}
+  blockSquare: {fileID: 21300000, guid: 046b2c643ac78f04da2d2adf5afe39a2, type: 3}
   blockWide: {fileID: 7482667652216324306, guid: 9b51139e69622394b99b0322acd0c44d, type: 3}
   blockTall: {fileID: 7482667652216324306, guid: 9b51139e69622394b99b0322acd0c44d, type: 3}
   crackLight: {fileID: 21300000, guid: e9f9dcaf7a0ef7342b2cba11e6984f34, type: 3}
   crackHeavy: {fileID: 21300000, guid: 2be9317173ac7a04aa0415dfb96a9b1c, type: 3}
   rewardBadge: {fileID: 0}
   targetBadge: {fileID: 0}
-  background: {fileID: 0}
-  launcher: {fileID: 0}
+  background: {fileID: 21300000, guid: 316c8f4c2ae246241b0f4b34f5acd5c1, type: 3}
+  launcher: {fileID: 21300000, guid: c4c001baf16321941ad622ade831af73, type: 3}
   titleLogo: {fileID: 0}
   fragment: {fileID: 0}
   spark: {fileID: 0}
