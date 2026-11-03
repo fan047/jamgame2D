@@ -55,7 +55,7 @@ namespace Holedown
             var renderer = root.AddComponent<SpriteRenderer>();
             renderer.sprite = theme && theme.spark ? theme.spark : fragmentSprite;
             renderer.sharedMaterial = fragmentMaterial; renderer.sortingOrder = 6;
-            Color color = target ? new Color(1,0.8f,0.35f) : new Color(0.65f,1,0.7f);
+            Color color = theme && theme.originalColors && theme.spark ? Color.white : target ? new Color(1,0.8f,0.35f) : new Color(0.65f,1,0.7f);
             TMPro.TextMeshPro text = null;
             if(reward > 0)
             {

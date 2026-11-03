@@ -40,7 +40,7 @@ namespace Holedown
             targetSize = size;
             if(theme)
             {
-                var sprite = theme.Block(block.Width, block.Height); if(sprite) visual.sprite = sprite;
+                var sprite = theme.Block(block.Width, block.Height, block.IsTarget, block.RewardBalls); if(sprite) visual.sprite = sprite;
                 if(theme.crackLight) lightCracks = theme.crackLight;
                 if(theme.crackHeavy) heavyCracks = theme.crackHeavy;
                 if(theme.flashMaterial) { visual.sharedMaterial = theme.flashMaterial; if(cracks) cracks.sharedMaterial = theme.flashMaterial; }
@@ -54,7 +54,7 @@ namespace Holedown
             {
                 roleBadge.sprite = theme ? block.IsTarget ? theme.targetBadge : reward > 0 ? theme.rewardBadge : null : null;
                 roleBadge.enabled = roleBadge.sprite;
-                roleBadge.transform.localPosition = new Vector3(size.x * 0.32f, size.y * 0.32f, 0);
+                roleBadge.transform.localPosition = new Vector3(-size.x * 0.32f, size.y * 0.32f, 0);
                 SpriteSizing.Fit(roleBadge, Vector2.one * 0.25f);
             }
             SetHealth(block.Health, block.IsTarget);

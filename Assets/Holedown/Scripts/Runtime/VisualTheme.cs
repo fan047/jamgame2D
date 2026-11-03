@@ -12,9 +12,25 @@ namespace Holedown
         public Vector2 stageSize = new Vector2(9.4f, 16.702232f);
         public bool logoContainsTitle = true;
         public Sprite ball, blockSquare, blockWide, blockTall;
+        public Sprite rewardSquare, rewardWide, rewardTall;
+        public Sprite targetSquare, targetWide, targetTall;
         public Sprite crackLight, crackHeavy, rewardBadge, targetBadge;
         public Sprite background, launcher, titleLogo, fragment, spark;
         public Material flashMaterial;
         public Sprite Block(int width, int height) => width == 2 ? blockWide : height == 2 ? blockTall : blockSquare;
+        readonly System.Collections.Generic.HashSet<int> missingRoles = new System.Collections.Generic.HashSet<int>();
+        public Sprite Block(int width, int height, bool target, int reward)
+        {
+            var ordinary = Block(width, height);
+            if (!target && reward <= 0) return ordinary;
+            int shape = width == 2 ? 1 : height == 2 ? 2 : 0;
+            var selected = target
+                ? shape == 1 ? targetWide : shape == 2 ? targetTall : targetSquare
+                : shape == 1 ? rewardWide : shape == 2 ? rewardTall : rewardSquare;
+            if (selected) return selected;
+            if (missingRoles.Add(shape + (target ? 3 : 0)))
+                Debug.LogWarning($"VisualTheme '{name}': missing {(target ? "target" : "reward")} {width}x{height}; using ordinary sprite.", this);
+            return ordinary ? ordinary : blockSquare;
+        }
     }
 }

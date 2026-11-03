@@ -10,6 +10,32 @@ namespace Holedown.Tests
     public sealed class ThemePresentationTests
     {
         [Test]
+        public void RoleSelectionCoversNineSlotsAndFallsBackOncePerMissingSlot()
+        {
+            var theme = ScriptableObject.CreateInstance<VisualTheme>();
+            var texture = new Texture2D(3,3);
+            var sprites = new Sprite[9];
+            for (int i=0;i<9;i++) sprites[i]=Sprite.Create(texture,new Rect(i%3,i/3,1,1),Vector2.one*.5f);
+            try
+            {
+                theme.blockSquare=sprites[0]; theme.blockWide=sprites[1]; theme.blockTall=sprites[2];
+                theme.rewardSquare=sprites[3]; theme.rewardWide=sprites[4]; theme.rewardTall=sprites[5];
+                theme.targetSquare=sprites[6]; theme.targetWide=sprites[7]; theme.targetTall=sprites[8];
+                for(int role=0;role<3;role++) for(int shape=0;shape<3;shape++)
+                    Assert.AreSame(sprites[role*3+shape],theme.Block(shape==1?2:1,shape==2?2:1,role==2,role==1?3:0));
+                Assert.AreSame(sprites[8],theme.Block(1,2,true,5),"Target identity takes precedence");
+                theme.targetTall=null;
+                LogAssert.Expect(LogType.Warning,"VisualTheme '': missing target 1x2; using ordinary sprite.");
+                Assert.AreSame(sprites[2],theme.Block(1,2,true,0));
+                Assert.AreSame(sprites[2],theme.Block(1,2,true,0));
+                theme.rewardWide=null;
+                LogAssert.Expect(LogType.Warning,"VisualTheme '': missing reward 2x1; using ordinary sprite.");
+                Assert.AreSame(sprites[1],theme.Block(2,1,false,5));
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally { Object.DestroyImmediate(theme); foreach(var sprite in sprites) Object.DestroyImmediate(sprite); Object.DestroyImmediate(texture); }
+        }
+        [Test]
         public void NativeSpriteSizesFitWithoutChangingPhysics()
         {
             var texture = new Texture2D(128,64);
