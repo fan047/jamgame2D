@@ -48,6 +48,25 @@ namespace Holedown.Tests
             }
             Assert.IsTrue(f.Campaign.IsFinalStage);Assert.AreEqual(8,f.Campaign.ConfirmedBonus);
         }
+        [UnityTest] public IEnumerator PhysicalNineStageRunConfirmsGrowthAcrossBothGroupBoundaries()
+        {
+            string Block(int reward,bool target)=>$"{{\"column\":3,\"row\":{(target?0:2)},\"width\":1,\"height\":1,\"health\":1,\"target\":{target.ToString().ToLowerInvariant()},\"rewardBalls\":{reward}}}";
+            var stages=new string[9];
+            for(int i=0;i<9;i++)stages[i]=$"{{\"id\":\"nine-{i}\",\"name\":\"Fixture {i}\",\"initialBlocks\":[{Block(i<8?i+1:0,false)}],\"incomingRows\":[{{\"blocks\":[{Block(0,true)}]}}]}}";
+            File.WriteAllText(Path.Combine(directory,"level.json"),"{\"schemaVersion\":2,\"version\":\"nine-test-only\",\"levels\":["+string.Join(",",stages)+"]}");
+            yield return SceneManager.LoadSceneAsync("Assets/Scenes/SampleScene.unity");yield return null;yield return PlaySceneEntry.StartIfReady();
+            var f=UnityEngine.Object.FindFirstObjectByType<GameFlowController>();
+            for(int i=0;i<9;i++)
+            {
+                Assert.IsFalse(f.IsPlannerTest);Assert.AreEqual(i,f.Campaign.StageIndex);Assert.AreEqual(9,f.Campaign.StageCount);
+                int expected=12+i*(i+1)/2;Assert.AreEqual(expected,f.EntryBalls);
+                yield return Shoot(f);Assert.AreEqual(i<8?i+1:0,f.Campaign.PendingBonus);Assert.AreEqual(expected,f.EntryBalls);
+                yield return Shoot(f);Assert.AreEqual(SessionPhase.Won,f.Session.Phase);
+                var session=f.Session.SessionId;f.NextStage();yield return null;
+                if(i<8)Assert.AreNotEqual(session,f.Session.SessionId);else Assert.AreEqual(session,f.Session.SessionId);
+            }
+            Assert.IsTrue(f.Campaign.IsFinalStage);Assert.AreEqual(36,f.Campaign.ConfirmedBonus);Assert.AreEqual(48,f.EntryBalls);
+        }
         [UnityTest] public IEnumerator TenStageTwoRetriesCannotFarmAndUseLoadedSnapshot()
         {
             yield return SceneManager.LoadSceneAsync("Assets/Scenes/SampleScene.unity");yield return null;yield return PlaySceneEntry.StartIfReady();var f=UnityEngine.Object.FindFirstObjectByType<GameFlowController>();
