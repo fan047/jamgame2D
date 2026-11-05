@@ -16,6 +16,15 @@ namespace Holedown
         public Sprite targetSquare, targetWide, targetTall;
         public Sprite crackLight, crackHeavy, rewardBadge, targetBadge;
         public Sprite background, launcher, titleLogo, fragment, spark;
+        [Tooltip("Stages 1–3, 4–6 and 7–9. Missing slots fall back to background.")]
+        public Sprite backgroundStages1To3, backgroundStages4To6, backgroundStages7To9;
+        public Sprite Background(int stageIndex)
+        {
+            var selected = stageIndex >= 0 && stageIndex < 3 ? backgroundStages1To3
+                : stageIndex >= 3 && stageIndex < 6 ? backgroundStages4To6
+                : stageIndex >= 6 && stageIndex < 9 ? backgroundStages7To9 : null;
+            return selected ? selected : background;
+        }
         public Material flashMaterial;
         public Sprite Block(int width, int height) => width == 2 ? blockWide : height == 2 ? blockTall : blockSquare;
         readonly System.Collections.Generic.HashSet<int> missingRoles = new System.Collections.Generic.HashSet<int>();

@@ -43,6 +43,34 @@ namespace Holedown.Tests
             var f=UnityEngine.Object.FindFirstObjectByType<GameFlowController>();yield return Ready(f);
             Assert.AreEqual(AppPhase.PlannerSelection,f.Phase);Assert.IsNotNull(UnityEngine.Object.FindFirstObjectByType<PlannerTestView>());
         }
+        [UnityTest] public IEnumerator BackgroundUpdatesAcrossGroupsAndReloadWithMissingSlotFallback()
+        {
+            yield return Load();
+            var f=UnityEngine.Object.FindFirstObjectByType<GameFlowController>();
+            var visuals=UnityEngine.Object.FindFirstObjectByType<SceneVisuals>();
+            var serialized=new SerializedObject(visuals);
+            var theme=(VisualTheme)serialized.FindProperty("theme").objectReferenceValue;
+            var renderer=(SpriteRenderer)serialized.FindProperty("background").objectReferenceValue;
+            var old1=theme.backgroundStages1To3;var old2=theme.backgroundStages4To6;var old3=theme.backgroundStages7To9;
+            var texture=new Texture2D(2,2);var second=Sprite.Create(texture,new Rect(0,0,2,2),Vector2.one*.5f);var third=Sprite.Create(texture,new Rect(0,0,2,2),Vector2.one*.5f);
+            try
+            {
+                theme.backgroundStages1To3=theme.background;theme.backgroundStages4To6=second;theme.backgroundStages7To9=third;
+                foreach(int index in new[]{2,3,5,6,8})
+                {
+                    f.QueuePlannerTest("s"+index,PlannerBallMode.BaseOnly,1);yield return null;yield return null;
+                    Assert.AreSame(index<3?theme.background:index<6?second:third,renderer.sprite);
+                    f.ReloadAndRestart();yield return null;yield return null;
+                    Assert.AreSame(index<3?theme.background:index<6?second:third,renderer.sprite);
+                }
+                theme.backgroundStages7To9=null;f.ReloadAndRestart();yield return null;yield return null;Assert.AreSame(theme.background,renderer.sprite);
+            }
+            finally
+            {
+                theme.backgroundStages1To3=old1;theme.backgroundStages4To6=old2;theme.backgroundStages7To9=old3;
+                UnityEngine.Object.Destroy(second);UnityEngine.Object.Destroy(third);UnityEngine.Object.Destroy(texture);
+            }
+        }
         [UnityTest] public IEnumerator ModesReloadByStableIdAndManualBallCountDrivesVolley()
         {
             yield return Load();var f=UnityEngine.Object.FindFirstObjectByType<GameFlowController>();

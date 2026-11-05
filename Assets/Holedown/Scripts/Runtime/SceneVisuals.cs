@@ -11,9 +11,20 @@ namespace Holedown
         [SerializeField] SpriteRenderer launcher;
         [SerializeField] StartScreenView startScreen;
         [SerializeField] RectTransform stageCanvas;
+        GameFlowController flow;
+        void RefreshBackground()
+        {
+            if (!theme || !background) return;
+            var selected = theme.Background(flow && flow.Campaign != null ? flow.Campaign.StageIndex : -1);
+            if (background.sprite != selected) background.sprite = selected;
+            background.enabled = selected;
+        }
+        void OnDestroy() { if (flow) flow.Changed -= RefreshBackground; }
         void Start()
         {
             if(!theme) return;
+            flow = GetComponent<GameFlowController>();
+            if (flow) flow.Changed += RefreshBackground;
             var cameraRig = gameCamera.GetComponent<BoardCamera>();
             if(cameraRig) cameraRig.ConfigureTheme(theme);
             if(theme.fixedStage && stageCanvas)
@@ -22,7 +33,7 @@ namespace Holedown
                 var position = stageCanvas.position;
                 stageCanvas.position = new Vector3(BoardCamera.StageCenter.x,BoardCamera.StageCenter.y,position.z);
             }
-            background.sprite = theme.background; background.enabled = theme.background;
+            RefreshBackground();
             if(theme.launcher) { launcher.sprite = theme.launcher; launcher.color = Color.white; SpriteSizing.Fit(launcher, Vector2.one * 0.3f); }
             if(startScreen && theme.titleLogo)
             {
