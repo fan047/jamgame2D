@@ -1,19 +1,53 @@
 <!doctype html>
 <html lang="zh-CN">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Holedown 策划配置工具</title><link rel="stylesheet" href="styles.css"></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><title>水晶矿洞 · 关卡工作台</title><link rel="stylesheet" href="styles.css"></head>
 <body>
-<header><h1>Holedown 策划配置工具</h1><p>离线使用 · 不需要 Unity · 不上传文件</p></header>
+<a class="skip-link" href="#workspace">跳到关卡编辑</a>
+<header class="app-header">
+<div class="brand"><span class="crystal-mark" aria-hidden="true"></span><div><h1>水晶矿洞<span>关卡工作台</span></h1><p>离线编辑，本地导出，不上传文件</p></div></div>
+<nav aria-label="工作区导航"><a href="#workspace">关卡编辑</a><a href="#values">数值表</a><a href="#settings">球参数</a><a href="#delivery">校验与导出</a></nav>
+</header>
 <main>
-<section class="notice">
-<strong id="source">当前编辑：内置默认示例，不是游戏当前文件。</strong>
-<p>修改现有配置，请先同时导入游戏 <code>Config</code> 文件夹中的 <code>settings.json</code> 和 <code>level.json</code>。导出只是下载，不会自动写回游戏目录。</p>
-<div class="actions"><label class="button">导入两份 JSON<input id="importFiles" type="file" accept=".json,application/json" multiple hidden></label><button id="reset" type="button">还原默认示例</button></div>
+<section class="notice" aria-label="配置来源">
+<div><strong id="source">当前编辑：内置默认示例，不是游戏当前文件。</strong><p>请先导入游戏 Config 中的两份 JSON。下载不会自动写回游戏。</p></div>
+<div class="actions"><label class="button primary">导入两份 JSON<input id="importFiles" type="file" accept=".json,application/json" multiple hidden></label><button id="reset" type="button" class="quiet">还原默认示例</button></div>
 </section>
-<div class="actions"><button id="undo" type="button">撤销</button><button id="redo" type="button">重做</button><span>最多 50 步 · 输入框内保留原生撤销</span></div>
-<section>
-<h2>1. 球参数与配置版本</h2>
-<p>settings.json：<strong id="settingsStatus"></strong> · level.json：<strong id="levelStatus"></strong></p>
-<div class="actions"><button id="settingsStamp">生成球参数版本</button><button id="levelStamp">生成关卡版本</button><button id="cancelInputs">取消未提交数值</button></div>
+<div class="history-bar"><div class="actions"><button id="undo" type="button">撤销</button><button id="redo" type="button">重做</button><span class="hint">最多 50 步，输入框保留原生撤销</span></div><span class="hint">修改后请校验并导出</span></div>
+
+<section id="workspace" class="workspace">
+<div class="section-heading"><div><h2>关卡编辑</h2><p class="hint">选中方块编辑属性，或点空格新增。整关补行都在下方。</p></div><div class="legend" aria-label="方块图例"><span class="ordinary-key">普通</span><span class="reward-key">奖励</span><span class="target-key">目标</span></div></div>
+<div class="actions stage-selectors"><label>关卡 <select id="stage"></select></label><label>跳到布局 <select id="layout"></select></label><button id="addRow" type="button">在末尾新增补行</button><button id="removeRow" type="button">删除当前补行</button></div>
+<div class="actions stage-tools"><label>关名<input id="stageName" maxlength="40"></label><button id="addStage" type="button">新增关</button><button id="duplicateStage" type="button">复制当前关</button><button id="stageUp" type="button">前移</button><button id="stageDown" type="button">后移</button><button id="deleteStage" type="button" class="danger">删除当前关</button></div>
+<p id="statistics" class="statistics"></p>
+<details class="analysis-details"><summary>球数边界与发射分析</summary><p id="entryOptions"></p><p id="launchAnalysis" class="hint"></p></details>
+<div class="board-layout">
+<div class="board-panel"><div class="panel-heading"><h3>整关预览</h3><span class="hint">八列对齐 · 向下浏览补行</span></div><div id="board" role="group" aria-label="整关总览：初始棋盘与全部补行" tabindex="0"></div><p id="layoutHint" class="hint"></p><p class="hint board-help">点击方块跨布局编辑；用上方下拉框跳到指定补行。这里不模拟球运动。</p></div>
+<div class="editor-inspector"><div class="panel-heading"><h3>方块属性</h3><a href="#values">去数值表</a></div><p id="editingContext" class="hint" aria-live="polite"></p>
+<form id="blockForm">
+<h3 id="selectionTitle">新增方块</h3>
+<div class="fields block-fields">
+<label>起始列<input id="column" type="number" min="0" max="7" step="1" value="0" required></label>
+<label>行号<input id="row" type="number" min="0" max="7" step="1" value="0" required></label>
+<label>形状<select id="shape"><option value="1x1">1×1 单格</option><option value="2x1">2×1 横双格</option><option value="1x2">1×2 竖双格（仅初始布局）</option></select></label>
+<label>血量<input id="health" type="number" min="1" step="1" value="3" required></label>
+</div>
+<div class="fields block-fields role-fields"><label>类型<select id="role"><option value="ordinary">普通块</option><option value="reward">奖励块</option><option value="target">目标块</option></select></label><label>奖励球数<input id="rewardBalls" type="number" min="1" max="2147483647" step="1" value="3"></label></div><div id="rewardShortcuts" class="actions reward-shortcuts"><span class="hint">奖励快捷值</span><button type="button" data-reward="3">+3</button><button type="button" data-reward="5">+5</button><button type="button" data-reward="8">+8</button><button type="button" data-reward="10">+10</button></div>
+<p id="propertyHint" class="hint">位置、形状和类型需点击应用；已有块血量失焦或回车即提交。</p><p id="placementHint" class="hint" role="status"></p>
+<details class="rules-help"><summary>放置与目标规则</summary><p class="hint">最终关不允许奖励块。竖块仅限初始布局，高度向上延伸。只能在最后一条补行中放唯一目标。移动目标前，先取消旧目标或删除旧块。允许编辑中暂时没有目标，但通过完整校验后才能导出。</p></details>
+<div class="actions property-actions"><button id="applyBlock" class="primary" type="submit">新增方块</button><button id="newBlock" type="button">取消选择</button><button id="deleteBlock" class="danger" type="button" disabled>删除选中块</button></div>
+</form>
+</div>
+</div>
+<div id="values" class="values-panel">
+<div class="section-heading"><div><h3>当前布局数值表</h3><p class="hint" id="tableHelp">勾选后批量修改。Tab 切换输入框，Enter 连续编辑血量。奖励球数为 0 时是普通块。</p></div><a href="#workspace">回到预览</a></div>
+<div class="batch-controls"><div class="actions selection-tools"><button id="selectOrdinary">只选普通块</button><button id="selectRewards">只选奖励块</button><button id="selectTargets">只选目标块</button><button id="clearChecks">清空勾选</button></div><div class="actions"><label>修改字段<select id="batchField"><option value="health">血量</option><option value="rewardBalls">奖励球数</option></select></label><label>修改方式<select id="batchMode"><option value="set">设为</option><option value="add">增加（可填负数）</option><option value="multiply">乘倍率（四舍五入）</option></select></label><input id="batchValue" type="number" step="any" value="1" aria-label="批量数值"><button id="batchApply" class="primary">应用整批</button></div><p id="batchSummary" class="hint"></p><p id="batchPreview" role="status"></p></div>
+<div class="table-scroll" role="region" aria-label="当前布局数值表，可横向滚动" tabindex="0"><table id="blockTable" aria-describedby="tableHelp"><colgroup><col class="check-column"><col class="index-column"><col class="position-column"><col class="shape-column"><col class="role-column"><col class="number-column"><col class="number-column"></colgroup><thead><tr><th scope="col">勾选</th><th scope="col">方块</th><th scope="col">列 / 行</th><th scope="col">形状</th><th scope="col">类型</th><th scope="col">血量</th><th scope="col">奖励球数</th></tr></thead><tbody id="blockRows"></tbody></table></div>
+<p class="hint narrow-table-hint">表格可左右滚动，数值列保留完整输入宽度。</p>
+</div>
+</section>
+<section id="settings">
+<div class="section-heading"><div><h2>球参数与配置版本</h2><p class="hint">全局参数影响所有关卡，修改后重新导出。</p></div><a href="#workspace">回到关卡</a></div>
+<p class="file-status">settings.json：<strong id="settingsStatus"></strong><span>level.json：<strong id="levelStatus"></strong></span></p>
 <div class="fields" id="settingsFields">
 <label>球参数版本<input id="settingsVersion" value="demo-1" maxlength="32" autocomplete="off"></label>
 <label>关卡版本<input id="levelVersion" value="demo-1" maxlength="32" autocomplete="off"></label>
@@ -23,39 +57,13 @@
 <label>发射间隔（秒）<input id="launchInterval" type="number" min="0.001" step="any"></label>
 <label>最大角度（相对正下方）<input id="maxAimAngle" type="number" min="0.001" max="89.999" step="any"></label>
 <label>自动召回（秒）<input id="recallTimeout" type="number" min="0.001" step="any"></label>
-</div><p class="hint">版本只用英文字母、数字、点、下划线或连字符（1–32 字符）。默认球直径 0.24，大于标准块间隙 0.1；钻缝需要留出实际通道。</p>
+</div><div class="actions"><button id="settingsStamp">生成球参数版本</button><button id="levelStamp">生成关卡版本</button><button id="cancelInputs">取消未提交数值</button></div>
+<p class="hint">版本只用英文字母、数字、点、下划线或连字符（1–32 字符）。默认球直径 0.24，大于标准块间隙 0.1；钻缝需要留出实际通道。</p>
 </section>
-<section>
-<h2>2. 整关总览与编辑</h2>
-<div class="actions"><label>关卡 <select id="stage"></select></label><label>跳到布局 <select id="layout"></select></label><button id="addRow" type="button">在末尾新增补行</button><button id="removeRow" type="button">删除当前补行</button></div>
-<div class="actions"><label>关名<input id="stageName" maxlength="40"></label><button id="addStage" type="button">新增关</button><button id="duplicateStage" type="button">复制当前关</button><button id="stageUp" type="button">前移</button><button id="stageDown" type="button">后移</button><button id="deleteStage" type="button">删除当前关</button></div>
-<p id="layoutHint" class="hint"></p><p id="statistics"></p><p id="entryOptions"></p>
-<div class="actions"><button id="selectOrdinary">只选普通块</button><button id="selectRewards">只选奖励块</button><button id="selectTargets">只选目标块</button><button id="clearChecks">清空勾选</button><label>字段<select id="batchField"><option value="health">血量</option><option value="rewardBalls">奖励球数</option></select></label><label>批量 <select id="batchMode"><option value="set">设为</option><option value="add">增加（可填负数）</option><option value="multiply">乘倍率（四舍五入）</option></select></label><input id="batchValue" type="number" step="any" value="1" aria-label="批量数值"><button id="batchApply">应用整批</button></div><p id="batchSummary"></p><p id="batchPreview" role="status"></p><p id="launchAnalysis" class="hint"></p>
-<div class="board-layout">
-<div><div id="board" role="group" aria-label="整关总览：初始棋盘与全部补行" tabindex="0"></div><p class="hint">整关八列对齐，向下滚动浏览全部补行；下拉可跳到指定组。点击空格新增，点击方块编辑。初始顶部 row 7、底部 row 0，补行均为局部 row 0；不模拟球运动。</p></div>
-<div class="editor-inspector"><p id="editingContext" class="hint" aria-live="polite"></p>
-<form id="blockForm">
-<h3 id="selectionTitle">新增方块</h3>
-<div class="fields block-fields">
-<label>起始列<input id="column" type="number" min="0" max="7" step="1" value="0" required></label>
-<label>行号<input id="row" type="number" min="0" max="7" step="1" value="0" required></label>
-<label>形状<select id="shape"><option value="1x1">1×1 单格</option><option value="2x1">2×1 横双格</option><option value="1x2">1×2 竖双格（仅初始布局）</option></select></label>
-<label>血量<input id="health" type="number" min="1" step="1" value="3" required></label>
-</div>
-<label>类型<select id="role"><option value="ordinary">普通块</option><option value="reward">奖励块</option><option value="target">目标块</option></select></label><label>奖励球数<input id="rewardBalls" type="number" min="1" max="2147483647" step="1" value="3"></label><span id="rewardShortcuts"><button type="button" data-reward="3">+3</button><button type="button" data-reward="5">+5</button><button type="button" data-reward="8">+8</button><button type="button" data-reward="10">+10</button></span>
-<p id="propertyHint" class="hint">位置、形状、类型需要显式应用；已有块血量失焦或回车即提交。最终关不允许奖励块。竖块仅限初始布局，高度向上延伸。</p><p id="placementHint" class="hint"></p>
-<p class="hint">只能在最后一条补行中放唯一目标。移动目标时，先取消旧目标或删除旧块，再设置新目标。允许编辑中暂时没有目标，但通过完整校验后才能导出。</p>
-<div class="actions"><button id="applyBlock" type="submit">新增方块</button><button id="newBlock" type="button">取消选择</button><button id="deleteBlock" type="button" disabled>删除选中块</button></div>
-</form>
-<h3>当前布局数值表</h3>
-<div class="table-scroll"><table id="blockTable"><thead><tr><th>勾选</th><th>块</th><th>列 / 行</th><th>形状</th><th>类型</th><th>血量（Tab / Enter 连续编辑）</th><th>奖励球数（0 为普通）</th></tr></thead><tbody id="blockRows"></tbody></table></div>
-</div>
-</div>
-</section>
-<section>
-<h2>3. 校验、导出与试玩</h2>
+<section id="delivery">
+<div class="section-heading"><div><h2>校验与导出</h2><p class="hint">下载两份配置后，手动替换游戏目录中的文件。</p></div></div>
 <div id="validation" role="status" aria-live="polite"></div>
-<div class="actions"><button id="exportSettings" type="button">下载 settings.json</button><button id="exportLevel" type="button">下载 level.json</button></div>
+<div class="actions export-actions"><button id="exportSettings" class="primary" type="button">下载 settings.json</button><button id="exportLevel" class="primary" type="button">下载 level.json</button></div>
 <ol><li>通过校验后，分别下载两份配置。</li><li>把下载文件替换到 <strong>游戏 exe 同目录的 Config 文件夹</strong>，确保名称完全为 settings.json 和 level.json（不是 settings (1).json）。</li><li>切回游戏点击 <strong>重载并重开</strong>（正式模式）或 <strong>重载当前关</strong>（策划测试），旧局会被丢弃，从新配置重新开始。</li><li>检查 HUD 的球参／关卡版本是否与这里一致，再开始试玩。</li></ol>
 <p>两个文件都缺失时游戏使用内置配置；只缺一个或文件错误时会报错并禁止发射。浏览器校验不能代替游戏实射验证，尤其是通道宽度与高速碰撞。</p>
 <details><summary>查看导出的 JSON</summary><h3>settings.json</h3><pre id="settingsPreview"></pre><h3>level.json</h3><pre id="levelPreview"></pre></details>

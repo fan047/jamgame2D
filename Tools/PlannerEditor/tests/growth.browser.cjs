@@ -12,7 +12,9 @@ const root=path.resolve(__dirname,'../../..'),out=path.join(root,'Library/Locus/
  await page.goto(pathToFileURL(path.join(process.env.PLANNER_EDITOR_DIR||path.join(root,'Tools/PlannerEditor'),'index.html')).href);
  const preview=file=>page.locator('#'+file+'Preview').textContent().then(JSON.parse);
  assert.match(await page.locator('#validation').innerText(),/校验通过/);assert.equal(await page.locator('#stage option').count(),3);
+ await page.locator('.analysis-details summary').click();
  assert.match(await page.locator('#entryOptions').innerText(),/最低（无前关奖励）12，满奖（前关全拿）20/);
+ await page.locator('.analysis-details summary').click();
  for(let i=0;i<6;i++)await page.locator('#duplicateStage').click();assert.equal(await page.locator('#stage option').count(),9);
  let managed=await preview('level');assert.equal(new Set(managed.levels.map(s=>s.id)).size,9);const selectedId=managed.levels[Number(await page.locator('#stage').inputValue())].id;
  await page.locator('#stageUp').click();managed=await preview('level');assert.equal(managed.levels[Number(await page.locator('#stage').inputValue())].id,selectedId);
