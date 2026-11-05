@@ -72,14 +72,31 @@
     deleteBlock(){const index=this.context.selected;if(index<0)return;const path=this.blockPath;this.perform('删除块',data=>{get(data,path).splice(index,1);data.context.selected=-1;data.context.checked=[];});}
     addRow(){const index=this.context.stage;this.perform('新增补行',data=>{data.level.levels[index].incomingRows.push({blocks:[]});data.context.layout=data.level.levels[index].incomingRows.length-1;data.context.selected=-1;data.context.checked=[];});}
     removeRow(){if(this.context.layout<0||this.stage.incomingRows.length<=1)return;const si=this.context.stage,li=this.context.layout;this.perform('删除补行',data=>{const rows=data.level.levels[si].incomingRows;rows.splice(li,1);data.context.layout=Math.min(li,rows.length-1);data.context.selected=-1;data.context.checked=[];});}
-    selectOrdinary(){this.context.checked=this.blocks.flatMap((b,i)=>!b.target&&!b.rewardBalls?[i]:[]);}
+    selectRole(role){this.context.checked=this.blocks.flatMap((b,i)=>(role==='target'?b.target:role==='reward'?!b.target&&b.rewardBalls>0:!b.target&&!b.rewardBalls)?[i]:[]);}
+    selectOrdinary(){this.selectRole('ordinary');}
     summary(indices=this.context.checked){const result={ordinary:0,reward:0,target:0,total:indices.length};indices.forEach(i=>{const b=this.blocks[i];result[b.target?'target':b.rewardBalls?'reward':'ordinary']++;});return result;}
-    batch(mode,value){
-      if(!M.integer(value)||(mode==='set'&&value<=0))throw new Error('设值需要正整数，加减需要整数');
+    batchPlan(mode,value,field='health'){
+      if(!['health','rewardBalls'].includes(field)||!['set','add','multiply'].includes(mode))throw new Error('未知批量操作');
+      if(mode==='multiply'?(!Number.isFinite(value)||value<0):!M.integer(value))throw new Error('设值／加减需要 Int32 整数；倍率需要非负有限数');
       const indices=[...new Set(this.context.checked)],path=this.blockPath;
       if(!indices.length)throw new Error('请先勾选方块');
-      const values=indices.map(i=>{if(!this.blocks[i])throw new Error('选中块已失效');const result=mode==='set'?value:this.blocks[i].health+value;if(!M.integer(result)||result<=0){const error=new Error(`第 ${i+1} 块结果不是合法正整数，整批未应用`);error.path=`${path}[${i}].health`;throw error;}return result;});
-      this.perform('批量血量',data=>indices.forEach((i,j)=>get(data,path)[i].health=values[j]));
+      const plan=indices.map(i=>{
+        const block=this.blocks[i];if(!block)throw new Error('选中块已失效');
+        const result=mode==='set'?value:mode==='add'?block[field]+value:Math.round(block[field]*value);
+        let reason=!M.integer(result)||(field==='health'?result<=0:result<0)?'结果超出合法整数范围':null;
+        if(field==='rewardBalls'&&result>0&&(block.target||this.context.stage===this.level.levels.length-1))reason=block.target?'目标块不能有奖励':'最终关不能有奖励';
+        if(reason){const error=new Error(`第 ${i+1} 块 ${field}：${reason}，整批未应用`);error.path=`${path}[${i}].${field}`;throw error;}
+        return {index:i,before:block[field],after:result};
+      });
+      const candidate=M.clone(this.data);plan.forEach(p=>get(candidate,path)[p.index][field]=p.after);
+      const overflow=M.diagnostics(candidate.settings,candidate.level).find(e=>e.message.includes('Int32 最大值'));
+      if(overflow){const error=new Error(`${overflow.path}：${overflow.message}，整批未应用`);error.path=overflow.path;throw error;}
+      return plan;
+    }
+    batch(mode,value,field='health'){
+      if(!this.flush())throw new Error('请先修正或取消未提交输入');
+      const plan=this.batchPlan(mode,value,field),path=this.blockPath;
+      this.perform(field==='health'?'批量血量':'批量奖励',data=>plan.forEach(p=>get(data,path)[p.index][field]=p.after));
     }
   }
   function version(now=new Date()) {const pad=(n,w=2)=>String(n).padStart(w,'0');return `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}-${pad(now.getMilliseconds(),3)}`;}
