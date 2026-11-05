@@ -27,13 +27,14 @@ namespace Holedown
             bool next=phase==SessionPhase.Won && campaign!=null && !campaign.IsFinalStage && !flow.IsPlannerTest;
             advance.gameObject.SetActive(!error && (next || phase==SessionPhase.Lost || (flow.IsPlannerTest && ended)));
             advance.interactable=!flow.IsTransitioning;restart.interactable=!flow.IsTransitioning;
-            advanceLabel.text=flow.IsPlannerTest?"Retest stage":phase==SessionPhase.Lost?"Retry Stage":"Next Stage";
-            var restartLabel=restart.GetComponentInChildren<TMP_Text>();if(restartLabel)restartLabel.text=flow.IsPlannerTest?"Stage selection":"Restart Run";
-            title.text = error ? "Config error" : flow.IsPlannerTest ? phase==SessionPhase.Won?"Test stage clear":"Test defeat" : phase == SessionPhase.Won ? next ? "Stage Clear" : "Run Complete" : "Defeat";
+            advanceLabel.text=flow.IsPlannerTest?"重测本关":phase==SessionPhase.Lost?"重试本关":"进入下一关";
+            var restartLabel=restart.GetComponentInChildren<TMP_Text>();if(restartLabel)restartLabel.text=error?"重新读取配置":flow.IsPlannerTest?"返回选关":"重新开始全程";
+            title.text = error ? "配置错误" : flow.IsPlannerTest ? phase==SessionPhase.Won?"测试通关":"测试失败" : phase == SessionPhase.Won ? next ? "本关通关" : "全程通关" : "挑战失败";
+            reason.enableAutoSizing = true; reason.fontSizeMin = 18; reason.fontSizeMax = error ? 24 : 32;
             reason.fontSize = error ? 24 : 32;
             reason.rectTransform.sizeDelta = new Vector2(800,error ? 170 : 80);
             reason.rectTransform.anchoredPosition = new Vector2(0,error ? 10 : 20);
-            reason.text = error ? flow.InitializationError : flow.IsPlannerTest ? $"ID: {flow.StageId} | Entry balls: {flow.EntryBalls}\nThis test does not advance the formal run." : phase == SessionPhase.Lost ? "Blocks reached the danger line" : next ? $"Bonus +{campaign.PendingBonus}\nNext stage: {campaign.NextEntryBalls} balls per round" : "All stages completed";
+            reason.text = error ? ChineseText.Error(flow.InitializationError) : flow.IsPlannerTest ? $"关卡标识：{flow.StageId} | 入关 {flow.EntryBalls} 球\n本次测试不推进正式流程。" : phase == SessionPhase.Lost ? "方块到达危险线" : next ? $"本关奖励 +{campaign.PendingBonus}\n下一关每轮 {campaign.NextEntryBalls} 球" : "已完成全部关卡";
         }
     }
 }

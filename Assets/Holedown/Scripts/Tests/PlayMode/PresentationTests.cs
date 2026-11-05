@@ -29,7 +29,7 @@ namespace Holedown.Tests
             yield return null; yield return null;
             Assert.AreEqual(1,flow.Session.Round); Assert.AreEqual(SessionPhase.Aiming,flow.Session.Phase);
             Assert.IsFalse(button.interactable);
-            StringAssert.Contains("Balls 0",GameObject.Find("UI/Status").GetComponent<TMP_Text>().text);
+            StringAssert.Contains("在场 0 球",GameObject.Find("UI/Status").GetComponent<TMP_Text>().text);
         }
         [UnityTest] public IEnumerator VolleyDestroysBlockAndPlaysRateLimitedFeedback()
         {

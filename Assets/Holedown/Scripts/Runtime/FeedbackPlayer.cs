@@ -44,11 +44,11 @@ namespace Holedown
             {
                 var position = view.transform.position;
                 StartCoroutine(Fragments(position, view.BaseColor));
-                if(hit.RewardBalls > 0 || hit.IsTarget) StartCoroutine(SpecialFeedback(position, hit.RewardBalls, hit.IsTarget));
+                if(hit.RewardBalls > 0 || hit.IsTarget) StartCoroutine(SpecialFeedback(position, hit.RewardBalls, hit.IsTarget, view.GetComponentInChildren<TMPro.TMP_Text>(true).font));
             }
             else view.PlayImpact();
         }
-        IEnumerator SpecialFeedback(Vector3 position, int reward, bool target)
+        IEnumerator SpecialFeedback(Vector3 position, int reward, bool target, TMPro.TMP_FontAsset font)
         {
             var root = new GameObject(target ? "TargetFeedback" : "RewardFeedback");
             root.transform.SetParent(transform); root.transform.position = position;
@@ -60,7 +60,7 @@ namespace Holedown
             if(reward > 0)
             {
                 var go = new GameObject("RewardValue"); go.transform.SetParent(root.transform,false);
-                text = go.AddComponent<TMPro.TextMeshPro>(); text.text = $"+{reward}\n<size=65%>Next stage</size>";
+                text = go.AddComponent<TMPro.TextMeshPro>(); text.font=font; text.text = $"+{reward}\n<size=65%>下关生效</size>";
                 text.fontSize = 3; text.alignment = TMPro.TextAlignmentOptions.Center;
                 text.rectTransform.sizeDelta = new Vector2(2.5f,1); text.GetComponent<MeshRenderer>().sortingOrder = 8;
             }

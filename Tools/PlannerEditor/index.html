@@ -56,7 +56,7 @@
 <h2>3. 校验、导出与试玩</h2>
 <div id="validation" role="status" aria-live="polite"></div>
 <div class="actions"><button id="exportSettings" type="button">下载 settings.json</button><button id="exportLevel" type="button">下载 level.json</button></div>
-<ol><li>通过校验后，分别下载两份配置。</li><li>把下载文件替换到 <strong>游戏 exe 同目录的 Config 文件夹</strong>，确保名称完全为 settings.json 和 level.json（不是 settings (1).json）。</li><li>切回游戏点击 <strong>Reload + Restart</strong>，旧局会被丢弃，从新配置重新开始。</li><li>检查 HUD 的 S（球参数）/ L（关卡）版本是否与这里一致，再开始试玩。</li></ol>
+<ol><li>通过校验后，分别下载两份配置。</li><li>把下载文件替换到 <strong>游戏 exe 同目录的 Config 文件夹</strong>，确保名称完全为 settings.json 和 level.json（不是 settings (1).json）。</li><li>切回游戏点击 <strong>重载并重开</strong>（正式模式）或 <strong>重载当前关</strong>（策划测试），旧局会被丢弃，从新配置重新开始。</li><li>检查 HUD 的球参／关卡版本是否与这里一致，再开始试玩。</li></ol>
 <p>两个文件都缺失时游戏使用内置配置；只缺一个或文件错误时会报错并禁止发射。浏览器校验不能代替游戏实射验证，尤其是通道宽度与高速碰撞。</p>
 <details><summary>查看导出的 JSON</summary><h3>settings.json</h3><pre id="settingsPreview"></pre><h3>level.json</h3><pre id="levelPreview"></pre></details>
 </section>

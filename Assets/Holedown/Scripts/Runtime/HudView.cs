@@ -16,16 +16,16 @@ namespace Holedown
         void OnDisable() { flow.Changed -= Refresh; recall.onClick.RemoveListener(Recall); reload.onClick.RemoveListener(Reload); }
         void Refresh()
         {
-            var reloadLabel=reload.GetComponentInChildren<TMP_Text>();if(reloadLabel)reloadLabel.text=flow.IsPlannerTest?"Reload current":"Reload + Restart";
+            var reloadLabel=reload.GetComponentInChildren<TMP_Text>();if(reloadLabel)reloadLabel.text=flow.IsPlannerTest?"重载当前关":"重载并重开";
             bool playing = flow.Phase == AppPhase.Playing;
             recall.gameObject.SetActive(playing); reload.gameObject.SetActive(playing);
             status.gameObject.SetActive(playing);
             if(!playing) return;
             var session=flow.Session;
-            if(session==null) { recall.interactable=false; status.text="Preparing..."; return; }
+            if(session==null) { recall.interactable=false; status.text="正在准备…"; return; }
             recall.interactable=session.Phase==SessionPhase.Volley;
             var campaign=flow.Campaign;
-            status.text=$"Stage {(campaign?.StageIndex ?? 0)+1}/{campaign?.StageCount ?? 1} | Per Round {flow.EntryBalls} | Round {session.Round + (session.Phase==SessionPhase.Aiming?1:0)}\nBalls {session.ActiveCount} (+{session.Pending}) | Rows {flow.Board?.IncomingCursor ?? 0}/{flow.Board?.IncomingCount ?? 0} | {session.Phase}\n<size=65%>Bonus +{campaign?.PendingBonus ?? 0} (next stage) | Config: {flow.ConfigurationLabel}</size>";
+            status.text=$"第 {(campaign?.StageIndex ?? 0)+1}/{campaign?.StageCount ?? 1} 关 | 每轮 {flow.EntryBalls} 球 | 第 {session.Round + (session.Phase==SessionPhase.Aiming?1:0)} 轮\n在场 {session.ActiveCount} 球（待发 {session.Pending}）| 补行 {flow.Board?.IncomingCursor ?? 0}/{flow.Board?.IncomingCount ?? 0} | {ChineseText.Session(session.Phase)}\n<size=65%>待确认奖励 +{campaign?.PendingBonus ?? 0}（下关生效）| 配置：{ChineseText.Configuration(flow.ConfigurationLabel)}</size>";
         }
     }
 }

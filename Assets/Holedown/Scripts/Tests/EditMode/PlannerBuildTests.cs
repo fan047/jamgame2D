@@ -20,6 +20,8 @@ namespace Holedown.Tests
                 StringAssert.Contains("跳到布局",File.ReadAllText(Path.Combine(output,"策划快速上手.txt")));
                 StringAssert.Contains("\"schemaVersion\": 2",File.ReadAllText(Path.Combine(output,"Config","level.json")));
                 Assert.IsTrue(File.Exists(Path.Combine(output,"策划快速上手.txt")));
+                StringAssert.Contains("SIL OPEN FONT LICENSE",File.ReadAllText(Path.Combine(output,"ThirdPartyNotices","NotoSansCJK-OFL.txt")));
+                Assert.IsTrue(File.Exists(Path.Combine(output,"ThirdPartyNotices","NotoSansCJK-Source.txt")));
                 StringAssert.Contains("--planner-test",File.ReadAllText(Path.Combine(output,"策划测试.cmd")));
                 string example=Path.Combine(output,"Config","Examples","level-vertical.json");
                 Assert.AreEqual(File.ReadAllText("Config/Examples/level-vertical.json"),File.ReadAllText(example));

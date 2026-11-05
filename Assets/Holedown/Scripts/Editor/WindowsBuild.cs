@@ -72,6 +72,9 @@ namespace Holedown.Editor
             if(!File.Exists(verticalExample))File.Copy("Config/Examples/level-vertical.json",verticalExample);
             foreach(string name in new[]{"index.html","config-model.js","defaults.js","editor-state.js","editor.js","styles.css"})
                 File.Copy(Path.Combine("Tools/PlannerEditor",name),Path.Combine(editor,name),true);
+            string notices=Path.Combine(outputDirectory,"ThirdPartyNotices");Directory.CreateDirectory(notices);
+            File.Copy("Assets/Holedown/Fonts/NotoSansCJK/OFL.txt",Path.Combine(notices,"NotoSansCJK-OFL.txt"),true);
+            File.Copy("Assets/Holedown/Fonts/NotoSansCJK/README.txt",Path.Combine(notices,"NotoSansCJK-Source.txt"),true);
             File.Copy("Tools/PlannerTest.cmd",Path.Combine(outputDirectory,"策划测试.cmd"),true);
             File.Copy("Tools/PlannerEditor/快速上手.txt",Path.Combine(outputDirectory,"策划快速上手.txt"),true);
         }
