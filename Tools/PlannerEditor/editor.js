@@ -43,6 +43,8 @@
   function renderSelectors(){
     $('stage').replaceChildren();state.level.levels.forEach((s,i)=>$('stage').add(new Option(`${i+1}. ${s.name} (${s.id})`,i)));$('stage').value=state.context.stage;
     $('layout').replaceChildren();$('layout').add(new Option('初始棋盘（8 行）',-1));state.stage.incomingRows.forEach((_,i)=>$('layout').add(new Option(`第 ${i+1} 次补行${i===state.stage.incomingRows.length-1?'（最后一条）':''}`,i)));$('layout').value=state.context.layout;
+    $('deleteStage').disabled=state.level.levels.length<=1;$('stageUp').disabled=state.context.stage===0;$('stageDown').disabled=state.context.stage===state.level.levels.length-1;
+    $('stageName').value=state.stage.name;$('stageName').dataset.path=`level.levels[${state.context.stage}].name`;
     $('removeRow').disabled=state.context.layout<0||state.stage.incomingRows.length<=1;
     $('layoutHint').textContent=state.context.layout<0?'初始棋盘下方 row 0，上方 row 7；推进至 row 8 失败。':'补行全部位于 row 0；唯一目标必须放在最后一条补行。';
   }
@@ -68,7 +70,7 @@
       const input=document.createElement('input');input.type='number';input.step='1';input.min='1';input.value=b.health;input.setAttribute('aria-label',`第 ${i+1} 块血量`);markInput(input,`${state.blockPath}[${i}].health`);const cell=document.createElement('td');cell.append(input);tr.append(cell);$('blockRows').append(tr);
     });
   }
-  function render(){syncHealth();renderSelectors();fillProperty();renderBoard();renderTable();refresh();}
+  function render(){numeric.forEach(key=>$(key).value=state.settings[key]);$('settingsVersion').value=state.settings.version;$('levelVersion').value=state.level.version;renderSelectors();fillProperty();renderBoard();renderTable();refresh();}
   function select(index,column=null,row=0){state.context.selected=index;fillProperty(column??0,row);if(index<0&&column!==null)propertyPending=true;renderBoard();refresh();}
   function propertyBlock(){
     const [width,height]=$('shape').value.split('x').map(Number);
@@ -98,6 +100,13 @@
   $('draftCancel').onclick=()=>{continuation=null;$('draftDialog').close();renderSelectors();};
   $('draftDialog').addEventListener('cancel',()=>{continuation=null;renderSelectors();});
   $('stage').onchange=()=>{const target=Number($('stage').value);guard(()=>{state.navigate(target);render();});renderSelectors();};
+  $('stageName').oninput=()=>{const d=state.stageInput($('stageName').dataset.path,$('stageName').value);$('stageName').classList.toggle('invalid',!!d.error);refresh();};
+  $('stageName').onblur=()=>{if(commit($('stageName'),$('stageName').dataset.path))renderSelectors();};
+  $('stageName').onkeydown=e=>{if(e.key==='Enter')e.target.blur();if(e.key==='Escape'){state.cancelInput(e.target.dataset.path);e.target.classList.remove('invalid');renderSelectors();refresh();}};
+  $('addStage').onclick=()=>guard(()=>{state.addStage();render();});
+  $('duplicateStage').onclick=()=>guard(()=>{state.addStage(true);render();});
+  $('deleteStage').onclick=()=>guard(()=>{if(confirm(`删除关卡 ${state.stage.name}（${state.stage.id}）？可撤销。`)){state.deleteStage();render();}});
+  $('stageUp').onclick=()=>guard(()=>{state.moveStage(-1);render();});$('stageDown').onclick=()=>guard(()=>{state.moveStage(1);render();});
   $('layout').onchange=()=>{const target=Number($('layout').value);guard(()=>{state.navigate(state.context.stage,target);render();});renderSelectors();};
   $('newBlock').onclick=()=>guard(()=>select(-1));$('deleteBlock').onclick=()=>guard(()=>{state.deleteBlock();render();});
   $('addRow').onclick=()=>guard(()=>{state.addRow();render();});$('removeRow').onclick=()=>guard(()=>{if(confirm('删除当前补行及其中全部方块？')){state.removeRow();render();}});

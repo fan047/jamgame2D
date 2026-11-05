@@ -28,6 +28,7 @@
 <section>
 <h2>2. 棋盘与补行</h2>
 <div class="actions"><label>关卡 <select id="stage"></select></label><label>编辑布局 <select id="layout"></select></label><button id="addRow" type="button">在末尾新增补行</button><button id="removeRow" type="button">删除当前补行</button></div>
+<div class="actions"><label>关名<input id="stageName" maxlength="40"></label><button id="addStage" type="button">新增关</button><button id="duplicateStage" type="button">复制当前关</button><button id="stageUp" type="button">前移</button><button id="stageDown" type="button">后移</button><button id="deleteStage" type="button">删除当前关</button></div>
 <p id="layoutHint" class="hint"></p><p id="statistics"></p><p id="entryOptions"></p>
 <div class="actions"><button id="selectOrdinary">只选普通块</button><button id="clearChecks">清空勾选</button><label>批量 <select id="batchMode"><option value="set">设为</option><option value="add">增加（可填负数）</option></select></label><input id="batchValue" type="number" step="1" value="1" aria-label="批量血量"><button id="batchApply">应用整批</button></div><p id="batchSummary"></p>
 <div class="board-layout">

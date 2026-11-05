@@ -30,7 +30,7 @@
     status(file){if(this.exported[file]&&equal(this.data[file],this.exported[file]))return '已请求导出，请核对下载';if(equal(this.data[file],this.baseline[file]))return '未修改';return '有未导出修改';}
     markExport(file){if(this.hasDrafts||M.validate(this.settings,this.level).length)throw new Error('有错误或未提交输入，不能导出');this.exported[file]=M.clone(this.data[file]);}
     stageInput(path,raw){
-      const value=path.endsWith('.version')?raw:raw.trim()===''?NaN:Number(raw);
+      const value=path.endsWith('.version')||path.endsWith('.name')?raw:raw.trim()===''?NaN:Number(raw);
       const candidate=M.clone(this.data);put(candidate,path,value);
       const jsonPath=path.replace(/^settings/,'settings.json').replace(/^level/,'level.json');
       const error=M.diagnostics(candidate.settings,candidate.level).find(e=>e.path===jsonPath);
@@ -40,6 +40,28 @@
     flush(){for(const p of Object.keys(this.drafts))if(!this.commitInput(p))return false;return true;}
     cancelInput(path){delete this.drafts[path];return this.read(path);}
     navigate(stage,layout=-1,selected=-1){if(!this.flush())return false;this.context.stage=stage;this.context.layout=layout;this.context.selected=selected;this.context.checked=[];return true;}
+    stageOperation(label,mutator){if(!this.flush())throw new Error('请先修正或取消未提交输入');return this.perform(label,mutator);}
+    uniqueStageId(prefix='stage'){
+      const ids=new Set(this.level.levels.map(s=>s.id));let n=1;
+      while(ids.has(`${prefix.slice(0,22)}-${n}`))n++;
+      return `${prefix.slice(0,22)}-${n}`;
+    }
+    addStage(copy=false){
+      if(!this.flush())throw new Error('请先修正或取消未提交输入');
+      const id=this.uniqueStageId(copy?this.stage.id+'-copy':'stage');
+      const stage=copy?M.clone(this.stage):{id,name:'新关卡',initialBlocks:[],incomingRows:[{blocks:[]}]};
+      stage.id=id;if(copy)stage.name=(stage.name+' 副本').slice(0,40);
+      this.stageOperation(copy?'复制关卡':'新增关卡',data=>{const index=data.context.stage+1;data.level.levels.splice(index,0,stage);data.context={stage:index,layout:-1,selected:-1,checked:[]};});
+      return id;
+    }
+    deleteStage(){
+      if(this.level.levels.length<=1)throw new Error('至少保留一关');
+      this.stageOperation('删除关卡',data=>{data.level.levels.splice(data.context.stage,1);data.context={stage:Math.min(data.context.stage,data.level.levels.length-1),layout:-1,selected:-1,checked:[]};});
+    }
+    moveStage(offset){
+      const index=this.context.stage,target=index+offset;if(target<0||target>=this.level.levels.length)return false;
+      return this.stageOperation('重排关卡',data=>{const [stage]=data.level.levels.splice(index,1);data.level.levels.splice(target,0,stage);data.context.stage=target;});
+    }
     applyBlock(block){
       const error=M.placementError(this.blocks,block,this.context.selected,this.context.layout>=0);if(error)throw new Error(error);
       if(block.rewardBalls>0&&this.context.stage===this.level.levels.length-1)throw new Error('最终关不能设置奖励块');

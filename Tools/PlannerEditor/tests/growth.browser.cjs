@@ -13,6 +13,12 @@ const root=path.resolve(__dirname,'../../..'),out=path.join(root,'Library/Locus/
  const preview=file=>page.locator('#'+file+'Preview').textContent().then(JSON.parse);
  assert.match(await page.locator('#validation').innerText(),/校验通过/);assert.equal(await page.locator('#stage option').count(),3);
  assert.match(await page.locator('#entryOptions').innerText(),/最低（无前关奖励）12，满奖（前关全拿）20/);
+ for(let i=0;i<6;i++)await page.locator('#duplicateStage').click();assert.equal(await page.locator('#stage option').count(),9);
+ let managed=await preview('level');assert.equal(new Set(managed.levels.map(s=>s.id)).size,9);const selectedId=managed.levels[Number(await page.locator('#stage').inputValue())].id;
+ await page.locator('#stageUp').click();managed=await preview('level');assert.equal(managed.levels[Number(await page.locator('#stage').inputValue())].id,selectedId);
+ await page.locator('#stageName').fill('测试关名');await page.locator('#stageName').press('Tab');assert.equal((await preview('level')).levels[Number(await page.locator('#stage').inputValue())].name,'测试关名');
+ await page.locator('#deleteStage').click();assert.equal(await page.locator('#stage option').count(),8);await page.locator('#undo').click();assert.equal(await page.locator('#stage option').count(),9);
+ await page.locator('#reset').click();assert.equal(await page.locator('#stage option').count(),3);
  await page.locator('#ballsPerRound').fill('7');assert.equal((await preview('settings')).ballsPerRound,12);await page.locator('#ballsPerRound').press('Tab');assert.equal((await preview('settings')).ballsPerRound,7);
  const health=page.locator('#blockRows input[type=number]');await health.nth(0).fill('21');await health.nth(0).press('Enter');assert.equal(await health.nth(1).evaluate(el=>el===document.activeElement),true);await health.nth(1).fill('22');await health.nth(1).press('Tab');assert.equal((await preview('level')).levels[0].initialBlocks[1].health,22);
  await health.nth(0).fill('0');await page.locator('#stage').selectOption('1');assert.equal(await page.locator('#stage').inputValue(),'0');assert.equal((await preview('level')).levels[0].initialBlocks[0].health,21);await page.locator('#cancelInputs').click();assert.equal(await health.nth(0).inputValue(),'21');
