@@ -33,6 +33,7 @@
 <div class="actions"><button id="selectOrdinary">只选普通块</button><button id="selectRewards">只选奖励块</button><button id="selectTargets">只选目标块</button><button id="clearChecks">清空勾选</button><label>字段<select id="batchField"><option value="health">血量</option><option value="rewardBalls">奖励球数</option></select></label><label>批量 <select id="batchMode"><option value="set">设为</option><option value="add">增加（可填负数）</option><option value="multiply">乘倍率（四舍五入）</option></select></label><input id="batchValue" type="number" step="any" value="1" aria-label="批量数值"><button id="batchApply">应用整批</button></div><p id="batchSummary"></p><p id="batchPreview" role="status"></p><p id="launchAnalysis" class="hint"></p>
 <div class="board-layout">
 <div><div id="board" role="group" aria-label="整关总览：初始棋盘与全部补行" tabindex="0"></div><p class="hint">整关八列对齐，向下滚动浏览全部补行；下拉可跳到指定组。点击空格新增，点击方块编辑。初始顶部 row 7、底部 row 0，补行均为局部 row 0；不模拟球运动。</p></div>
+<div class="editor-inspector"><p id="editingContext" class="hint" aria-live="polite"></p>
 <form id="blockForm">
 <h3 id="selectionTitle">新增方块</h3>
 <div class="fields block-fields">
@@ -46,8 +47,10 @@
 <p class="hint">只能在最后一条补行中放唯一目标。移动目标时，先取消旧目标或删除旧块，再设置新目标。允许编辑中暂时没有目标，但通过完整校验后才能导出。</p>
 <div class="actions"><button id="applyBlock" type="submit">新增方块</button><button id="newBlock" type="button">取消选择</button><button id="deleteBlock" type="button" disabled>删除选中块</button></div>
 </form>
-</div>
+<h3>当前布局数值表</h3>
 <div class="table-scroll"><table id="blockTable"><thead><tr><th>勾选</th><th>块</th><th>列 / 行</th><th>形状</th><th>类型</th><th>血量（Tab / Enter 连续编辑）</th><th>奖励球数（0 为普通）</th></tr></thead><tbody id="blockRows"></tbody></table></div>
+</div>
+</div>
 </section>
 <section>
 <h2>3. 校验、导出与试玩</h2>

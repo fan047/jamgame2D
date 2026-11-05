@@ -21,7 +21,7 @@
     input.addEventListener('blur',()=>commit(input,path));
     input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();if(!commit(input,path))return;const inputs=[...document.querySelectorAll('#blockRows input[data-path$=".health"]')];const i=inputs.indexOf(input);if(i>=0&&inputs[i+1])inputs[i+1].focus();else input.blur();}if(e.key==='Escape'){state.cancelInput(path);input.value=state.read(path);input.classList.remove('invalid');refresh();}});
   }
-  function commit(input,path){if(!state.commitInput(path)){message('输入无效，请修正或按 Esc 取消。',true);return false;}input.classList.remove('invalid');renderBoard();syncHealth();refresh();return true;}
+  function commit(input,path){if(!state.commitInput(path)){message('输入无效，请修正或按 Esc 取消。',true);return false;}input.classList.remove('invalid');if(!propertyPending)fillProperty();renderBoard();syncHealth();refresh();return true;}
   function syncHealth(){document.querySelectorAll('[data-path]').forEach(input=>{if(document.activeElement!==input&&!state.drafts[input.dataset.path])input.value=state.read(input.dataset.path);});}
   numeric.forEach(key=>markInput($(key),`settings.${key}`));markInput($('settingsVersion'),'settings.version');markInput($('levelVersion'),'level.version');
   function refresh(){
@@ -34,7 +34,7 @@
     if(!errors.length&&!state.firstInvalid)box.textContent=`校验通过 · ${state.level.levels.length} 关 · 形状 1×1 / 2×1 / 1×2 · 导出后仍需游戏实射验证。`;
     errors.forEach(error=>{const button=document.createElement('button');button.type='button';button.className='error-link';button.textContent=`${error.path}：${error.message}`;button.onclick=()=>guard(()=>locate(error.path));box.append(button);});
     drafts.filter(([,d])=>d.error).forEach(([path,d])=>{const p=document.createElement('p');p.textContent=`${path}：${d.error}（未提交）`;box.append(p);});
-    const sum=state.summary();$('batchSummary').textContent=`已选 ${sum.total}：普通 ${sum.ordinary} / 奖励 ${sum.reward} / 目标 ${sum.target}。整批成功才生效，一次撤销。`;
+    const sum=state.summary();$('batchSummary').textContent=`作用范围：第 ${state.context.stage+1} 关 · ${layoutName()}；已选 ${sum.total}：普通 ${sum.ordinary} / 奖励 ${sum.reward} / 目标 ${sum.target}。整批成功才生效，一次撤销。`;
     const all=[...state.stage.initialBlocks,...state.stage.incomingRows.flatMap(r=>r.blocks)];
     $('statistics').textContent=`本布局 ${state.blocks.length} 块 / 总血量 ${state.blocks.reduce((n,b)=>n+b.health,0)}；本关 ${all.length} 块 / 总血量 ${all.reduce((n,b)=>n+b.health,0)}`;
     const options=state.level.levels.map((_,i)=>M.entryOptions(state.settings,state.level,i));$('entryOptions').textContent='入关球数边界：'+options.map((v,i)=>`第 ${i+1} 关：最低（无前关奖励）${v[0]}，满奖（前关全拿）${v[v.length-1]}`).join('；');
@@ -50,6 +50,7 @@
     $('deleteStage').disabled=state.level.levels.length<=1;$('stageUp').disabled=state.context.stage===0;$('stageDown').disabled=state.context.stage===state.level.levels.length-1;
     $('stageName').value=state.stage.name;$('stageName').dataset.path=`level.levels[${state.context.stage}].name`;
     $('removeRow').disabled=state.context.layout<0||state.stage.incomingRows.length<=1;
+    $('editingContext').textContent=`当前位置：第 ${state.context.stage+1} 关 · ${state.stage.name}（${state.stage.id}）· ${layoutName()}`;
     $('layoutHint').textContent=state.context.layout<0?'初始棋盘下方 row 0，上方 row 7；推进至 row 8 失败。':'补行全部位于 row 0；唯一目标必须放在最后一条补行。';
   }
   function fillProperty(column=0,row=0){
@@ -57,26 +58,40 @@
     ['column','row','health'].forEach(key=>$(key).value=b[key]);$('shape').value=`${b.width}x${b.height}`;$('shape').querySelector('[value="1x2"]').disabled=state.context.layout>=0;$('role').value=role(b);$('rewardBalls').value=b.rewardBalls||3;
     $('role').querySelector('[value="reward"]').disabled=state.context.stage===state.level.levels.length-1;
     $('rewardBalls').disabled=role(b)!=='reward';$('row').disabled=state.context.layout>=0;
-    $('selectionTitle').textContent=selected<0?'新增方块':`编辑第 ${selected+1} 块`;$('applyBlock').textContent=selected<0?'新增方块':'应用属性修改';$('deleteBlock').disabled=selected<0;propertyPending=false;
+    $('selectionTitle').textContent=`第 ${state.context.stage+1} 关 · ${layoutName()} · `+(selected<0?'新增方块':`编辑第 ${selected+1} 块`);$('applyBlock').textContent=selected<0?'新增方块':'应用属性修改';$('deleteBlock').disabled=selected<0;propertyPending=false;
     $('health').removeAttribute('data-path');if(selected>=0)$('health').dataset.path=`${state.blockPath}[${selected}].health`;
   }
   function layoutName(layout=state.context.layout){return layout<0?'初始棋盘':`补行 ${layout+1}${layout===state.stage.incomingRows.length-1?'（最后一条）':''}`;}
   function layoutGroup(layout=state.context.layout){return $('board').querySelector(`.layout-group[data-layout="${layout}"]`);}
   function scrollToLayout(){const group=layoutGroup();if(group){$('board').scrollTop=group.offsetTop;$('board').scrollIntoView({block:'nearest'});}}
   function renderBoard(){
-    const board=$('board'),top=board.scrollTop,left=board.scrollLeft;board.replaceChildren();
+    const board=$('board'),top=board.dataset.stage===state.stage.id?board.scrollTop:0,left=board.scrollLeft;
+    // Keep existing buttons alive during blur commits: removing a pressed button loses its click.
+    if(board.dataset.stage!==state.stage.id){board.replaceChildren();board.dataset.stage=state.stage.id;}
     const layouts=[state.stage.initialBlocks,...state.stage.incomingRows.map(r=>r.blocks)];
     layouts.forEach((blocks,position)=>{
       const layout=position-1,count=layout<0?8:1,active=layout===state.context.layout;
-      const group=document.createElement('div');group.className='layout-group'+(active?' active':'');group.dataset.layout=layout;
-      const title=document.createElement('h3');title.textContent=layoutName(layout)+(active?' · 当前编辑':'');group.append(title);
-      const columns=document.createElement('div');columns.className='column-labels';columns.setAttribute('aria-hidden','true');
-      for(let col=0;col<8;col++){const label=document.createElement('span');label.textContent=col;columns.append(label);}group.append(columns);
-      const grid=document.createElement('div');grid.className='layout-grid';grid.style.gridTemplateRows=`repeat(${count},minmax(0,1fr))`;grid.setAttribute('aria-label',layoutName(layout));
-      for(let row=count-1;row>=0;row--)for(let col=0;col<8;col++){const cell=document.createElement('button');cell.type='button';cell.className='cell';cell.textContent='+';cell.style.gridColumn=col+1;cell.style.gridRow=count-row;cell.setAttribute('aria-label',`${layoutName(layout)} 空格 列${col} 行${row}`);cell.onclick=()=>guard(()=>select(-1,col,row,layout));grid.append(cell);}
-      blocks.forEach((b,i)=>{const button=document.createElement('button');button.type='button';button.dataset.block=i;button.className=`block${b.target?' goal':''}${b.rewardBalls?' reward':''}${active&&state.context.selected===i?' selected':''}`;button.style.gridColumn=`${b.column+1} / span ${b.width}`;button.style.gridRow=`${count-b.row-b.height+1} / span ${b.height}`;button.textContent=`${b.target?'★ ':''}${b.health}${b.rewardBalls?` +${b.rewardBalls}`:''}`;button.title=`${layoutName(layout)} 第 ${i+1} 块，血量 ${b.health}，列 ${b.column} 行 ${b.row}，形状 ${b.width}×${b.height}，${roleName(b)}`;button.onclick=()=>guard(()=>select(i,null,0,layout));grid.append(button);});
-      group.append(grid);board.append(group);
+      let group=layoutGroup(layout);
+      if(!group){
+        group=document.createElement('div');group.dataset.layout=layout;
+        group.append(document.createElement('h3'));
+        const columns=document.createElement('div');columns.className='column-labels';columns.setAttribute('aria-hidden','true');
+        for(let col=0;col<8;col++){const label=document.createElement('span');label.textContent=col;columns.append(label);}group.append(columns);
+        const grid=document.createElement('div');grid.className='layout-grid';grid.style.gridTemplateRows=`repeat(${count},minmax(0,1fr))`;
+        for(let row=count-1;row>=0;row--)for(let col=0;col<8;col++){const cell=document.createElement('button');cell.type='button';cell.className='cell';cell.textContent='+';cell.style.gridColumn=col+1;cell.style.gridRow=count-row;cell.dataset.column=col;cell.dataset.row=row;cell.onclick=()=>guard(()=>select(-1,col,row,layout));grid.append(cell);}
+        group.append(grid);board.append(group);
+      }
+      group.className='layout-group'+(active?' active':'');group.querySelector('h3').textContent=layoutName(layout)+(active?' · 当前编辑':'');
+      const grid=group.querySelector('.layout-grid');grid.setAttribute('aria-label',layoutName(layout));
+      grid.querySelectorAll('.cell').forEach(cell=>cell.setAttribute('aria-label',`${layoutName(layout)} 空格 列${cell.dataset.column} 行${cell.dataset.row}`));
+      blocks.forEach((b,i)=>{
+        let button=grid.querySelector(`[data-block="${i}"]`);
+        if(!button){button=document.createElement('button');button.type='button';button.dataset.block=i;button.onclick=()=>guard(()=>select(i,null,0,layout));grid.append(button);}
+        button.className=`block${b.target?' goal':''}${b.rewardBalls?' reward':''}${active&&state.context.selected===i?' selected':''}`;button.style.gridColumn=`${b.column+1} / span ${b.width}`;button.style.gridRow=`${count-b.row-b.height+1} / span ${b.height}`;button.textContent=`${b.target?'★ ':''}${b.health}${b.rewardBalls?` +${b.rewardBalls}`:''}`;button.title=`${layoutName(layout)} 第 ${i+1} 块，血量 ${b.health}，列 ${b.column} 行 ${b.row}，形状 ${b.width}×${b.height}，${roleName(b)}`;
+      });
+      grid.querySelectorAll('[data-block]').forEach(button=>{if(Number(button.dataset.block)>=blocks.length)button.remove();});
     });
+    board.querySelectorAll('.layout-group').forEach(group=>{if(Number(group.dataset.layout)>=state.stage.incomingRows.length)group.remove();});
     board.scrollTop=top;board.scrollLeft=left;
   }
   function renderTable(){
@@ -120,7 +135,7 @@
   $('draftDiscard').onclick=()=>{propertyPending=false;fillProperty();const next=continuation;continuation=null;$('draftDialog').close();attempt(next);};
   $('draftCancel').onclick=()=>{continuation=null;$('draftDialog').close();renderSelectors();};
   $('draftDialog').addEventListener('cancel',()=>{continuation=null;renderSelectors();});
-  $('stage').onchange=()=>{const target=Number($('stage').value);guard(()=>{state.navigate(target);render();});renderSelectors();};
+  $('stage').onchange=()=>{const target=Number($('stage').value);guard(()=>{state.navigate(target);render();scrollToLayout();});renderSelectors();};
   $('stageName').oninput=()=>{const d=state.stageInput($('stageName').dataset.path,$('stageName').value);$('stageName').classList.toggle('invalid',!!d.error);refresh();};
   $('stageName').onblur=()=>{if(commit($('stageName'),$('stageName').dataset.path))renderSelectors();};
   $('stageName').onkeydown=e=>{if(e.key==='Enter')e.target.blur();if(e.key==='Escape'){state.cancelInput(e.target.dataset.path);e.target.classList.remove('invalid');renderSelectors();refresh();}};
@@ -152,10 +167,10 @@
     if(si){state.navigate(Number(si[1]),li?Number(li[1]):-1,bi?Number(bi[1]):-1);render();scrollToLayout();}
     const input=inputFor(clean);if(input){input.focus();input.scrollIntoView({block:'center'});}else $('board').scrollIntoView({block:'center'});
   }
-  $('reset').onclick=()=>guard(()=>{if(!confirm('用默认示例替换当前内容？未导出修改会丢失。'))return;state.replace(PlannerDefaults.settings,PlannerDefaults.level);render();$('source').textContent='当前编辑：成长版内置默认示例，不是游戏当前文件。';});
+  $('reset').onclick=()=>guard(()=>{if(!confirm('用默认示例替换当前内容？未导出修改会丢失。'))return;state.replace(PlannerDefaults.settings,PlannerDefaults.level);render();scrollToLayout();$('source').textContent='当前编辑：成长版内置默认示例，不是游戏当前文件。';});
   $('importFiles').onchange=async()=>{
     const files=Array.from($('importFiles').files);$('importFiles').value='';
-    try{const s=files.find(f=>f.name==='settings.json'),l=files.find(f=>f.name==='level.json');if(files.length!==2||!s||!l)throw new Error('请同时选择 settings.json 和 level.json 两份文件。');const settings=M.parse(await s.text()),level=M.parse(await l.text());const errors=M.validate(settings,level);if(errors.length)throw new Error('导入失败，当前内容保持不变：\n'+errors.slice(0,8).join('\n'));guard(()=>{if(state.hasUnexported&&!confirm('导入会替换未导出的修改，继续？'))return;state.replace(settings,level);render();$('source').textContent=`当前编辑：已导入两份配置，${state.level.levels.length} 关。旧 v1 将导出为 v2。`;message('导入完成；不会自动写回原文件。');});}catch(e){message(e.message,true);}
+    try{const s=files.find(f=>f.name==='settings.json'),l=files.find(f=>f.name==='level.json');if(files.length!==2||!s||!l)throw new Error('请同时选择 settings.json 和 level.json 两份文件。');const settings=M.parse(await s.text()),level=M.parse(await l.text());const errors=M.validate(settings,level);if(errors.length)throw new Error('导入失败，当前内容保持不变：\n'+errors.slice(0,8).join('\n'));guard(()=>{if(state.hasUnexported&&!confirm('导入会替换未导出的修改，继续？'))return;state.replace(settings,level);render();scrollToLayout();$('source').textContent=`当前编辑：已导入两份配置，${state.level.levels.length} 关。旧 v1 将导出为 v2。`;message('导入完成；不会自动写回原文件。');});}catch(e){message(e.message,true);}
   };
   function download(file){guard(()=>{state.markExport(file);const blob=new Blob([JSON.stringify(state[file],null,2)+'\n'],{type:'application/json;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=file+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);refresh();message(`已请求导出 ${file}.json，请核对下载并替换游戏 Config 文件，再 Reload + Restart；不是已保存到游戏。`);});}
   $('exportSettings').onclick=()=>download('settings');$('exportLevel').onclick=()=>download('level');

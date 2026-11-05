@@ -32,7 +32,7 @@ const root=path.resolve(__dirname,'../../..'),out=path.join(root,'Library/Locus/
   await page.locator('#board').evaluate(e=>e.scrollTop=0);assert.equal(await group.isVisible(),true);
   await page.locator('#addRow').click();assert.equal(await page.locator('.layout-group').count(),9);assert.equal(await page.locator('.layout-group[data-layout="7"] .block').count(),0);assert.match(await page.locator('.layout-group[data-layout="7"] h3').innerText(),/最后一条/);
   await page.locator('#undo').click();assert.equal(await page.locator('.layout-group').count(),8);
-  await page.locator('#board').scrollIntoViewIfNeeded();await page.screenshot({path:path.join(out,'stage3-overview.png'),fullPage:true});
+  await page.locator('#board').scrollIntoViewIfNeeded();await page.screenshot({path:path.join(out,'stage3-overview.png'),fullPage:false});
   assert.deepEqual(errors,[]);console.log('Overview browser PASS: verified stage3 initial + seven rows, eight-column alignment, vertical blocks, final target, jump/scroll and empty row undo.');
   await context.close();
  }finally{await browser.close();}
