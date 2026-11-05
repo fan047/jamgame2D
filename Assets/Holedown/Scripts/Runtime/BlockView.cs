@@ -57,6 +57,11 @@ namespace Holedown
                 roleBadge.transform.localPosition = new Vector3(-size.x * 0.32f, size.y * 0.32f, 0);
                 SpriteSizing.Fit(roleBadge, Vector2.one * 0.25f);
             }
+            label.rectTransform.sizeDelta = size * 0.85f;
+            label.enableAutoSizing = true;
+            label.fontSizeMin = 0.1f;
+            label.fontSizeMax = 4f;
+            label.textWrappingMode = TextWrappingModes.NoWrap;
             SetHealth(block.Health, block.IsTarget);
         }
         public void SetHealth(int health, bool target)
