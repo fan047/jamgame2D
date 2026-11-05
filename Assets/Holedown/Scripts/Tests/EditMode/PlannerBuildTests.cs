@@ -14,7 +14,10 @@ namespace Holedown.Tests
                 Holedown.Editor.WindowsBuild.PreparePlannerFiles(output);
                 foreach(string name in new[]{"settings.json","level.json"}) Assert.IsTrue(File.Exists(Path.Combine(output,"Config",name)));
                 Assert.IsTrue(File.Exists(Path.Combine(output,"PlannerEditor","index.html")));
-                Assert.AreEqual(File.ReadAllText("Tools/PlannerEditor/editor-state.js"),File.ReadAllText(Path.Combine(output,"PlannerEditor","editor-state.js")));
+                foreach(string name in new[]{"index.html","config-model.js","defaults.js","editor-state.js","editor.js","styles.css"})
+                    Assert.AreEqual(File.ReadAllText(Path.Combine("Tools/PlannerEditor",name)),File.ReadAllText(Path.Combine(output,"PlannerEditor",name)),name);
+                StringAssert.Contains("整关总览",File.ReadAllText(Path.Combine(output,"策划快速上手.txt")));
+                StringAssert.Contains("跳到布局",File.ReadAllText(Path.Combine(output,"策划快速上手.txt")));
                 StringAssert.Contains("\"schemaVersion\": 2",File.ReadAllText(Path.Combine(output,"Config","level.json")));
                 Assert.IsTrue(File.Exists(Path.Combine(output,"策划快速上手.txt")));
                 StringAssert.Contains("--planner-test",File.ReadAllText(Path.Combine(output,"策划测试.cmd")));
