@@ -5,10 +5,10 @@ Unity 2D 弹球消块项目。此页整理工程入口与目录职责；功能�
 ## 快速入口
 
 - **开发环境**：Unity `6000.4.3f1`，URP、New Input System；用 Unity Hub 打开本目录。
-- **游戏入口**：[SampleScene](Assets/Scenes/SampleScene.unity)，打开后进入 Play Mode，点击 Start 进入第 1 关。左键发射、Space 召回、Esc／Pause 暂停、Continue 恢复。
+- **游戏入口**：[SampleScene](Assets/Scenes/SampleScene.unity)，打开后进入 Play Mode，点击“开始游戏”进入第 1 关。左键发射、空格召回、Esc／“暂停”暂停、“继续游戏”恢复。
 - **策划工具**：[离线编辑器](Tools/PlannerEditor/index.html)，用 Chrome / Edge 打开，无需服务器；操作见[快速上手](Tools/PlannerEditor/快速上手.txt)。
-- **项目配置**：[球参数](Config/settings.json)、[关卡](Config/level.json)。工具不会自动读取这两份文件，需手动导入；导出后需手动替换，再在游戏中点击 `Reload + Restart`。
-- **当前交付**：[策划工具整关总览 · 构建 09](Docs/成长版/策划工具整关总览交付说明.md)，Windows 目录 `Builds/09/Windows`；支持整关浏览、跨组点击编辑与跳到补行。玩法程序沿用[构建 08](Docs/成长版/九关程序扩展预览交付说明.md)，支持九关与指定关测试，正式配置仍为策划确认的三关；正式九关及两张新背景待提供。现有美术接入见[构建 05](Docs/成长版/正式美术样片交付说明.md)，正式 UI 见[开放简报](Docs/成长版/UI美术制作清单.md)。
+- **项目配置**：[球参数](Config/settings.json)、[关卡](Config/level.json)。工具不会自动读取这两份文件，需手动导入；导出后需手动替换，再在游戏中点击“重载并重开”。
+- **当前交付**：[全中文界面 · 构建 10](Docs/成长版/全中文界面交付说明.md)，Windows 目录 `Builds/10/Windows`；整个游戏界面、策划测试与配置错误提示中文化，嵌入中文字体。继承[构建 09](Docs/成长版/策划工具整关总览交付说明.md)的整关浏览、跨组编辑与跳到补行，以及[构建 08](Docs/成长版/九关程序扩展预览交付说明.md)的九关程序与指定关测试能力。正式配置仍为策划确认的三关；正式九关及两张新背景待提供。现有美术接入见[构建 05](Docs/成长版/正式美术样片交付说明.md)，正式 UI 见[开放简报](Docs/成长版/UI美术制作清单.md)。
 
 ## 目录职责
 
@@ -40,7 +40,7 @@ Unity 2D 弹球消块项目。此页整理工程入口与目录职责；功能�
 
 - Editor 默认读取项目根目录的 `Config`；Player 默认读取 exe 同目录的 `Config`。显式配置目录可覆盖默认值。
 - 两份 JSON 都缺失时才回退内置配置；只缺一份或内容非法会报错并停止发射。
-- `Restart Run` 使用已加载快照；普通模式读取磁盘修改需用 `Reload + Restart`，从第一关重开。
+- “重新开始全程”使用已加载快照；普通模式读取磁盘修改需用“重载并重开”，从第一关重开。
 - Player 同目录 `策划测试.cmd` 用 `--planner-test` 启动选关测试，支持基础／满前关／手填球数；该模式重载按稳定 ID 回当前关，失败保留旧局。
 - 文档总览见 [Docs/README.md](Docs/README.md)；工程配置和工具默认值已同步构建 05 策划三关基线，来源哈希见构建 08 交付说明。
 - [竖块示例](Config/Examples/level-vertical.json)需先备份原配置，再复制为 `Config/level.json`；体验后恢复备份并重载。示例不是正式默认种子。
