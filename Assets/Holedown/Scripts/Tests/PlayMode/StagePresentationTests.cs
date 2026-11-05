@@ -16,6 +16,9 @@ namespace Holedown.Tests
             var camera=Camera.main; var rig=camera.GetComponent<BoardCamera>();
             var background=GameObject.Find("Game/Background").GetComponent<SpriteRenderer>();
             var stage=new Vector2(9.4f,9.4f*1672/941);
+            var oldTarget=camera.targetTexture;
+            var target=new RenderTexture(540,960,0);
+            camera.targetTexture=target;
             try
             {
                 foreach(float aspect in new[]{540f/960,1280f/720,0.3f})
@@ -37,7 +40,7 @@ namespace Holedown.Tests
                 foreach(string name in new[]{"Left","Right","Bottom"}) Assert.IsTrue(GameObject.Find("Game/"+name).GetComponent<BoxCollider2D>().enabled);
                 Assert.AreEqual(new Vector3(4,9,0),GameObject.Find("Game/Launcher").transform.position);
             }
-            finally { camera.ResetAspect(); rig.Synchronize(); }
+            finally { camera.targetTexture=oldTarget;Object.Destroy(target);camera.ResetAspect(); rig.Synchronize(); }
         }
         [UnityTest]
         public IEnumerator PointerSamplingSynchronizesProjectionInResizeFrame()
@@ -45,6 +48,10 @@ namespace Holedown.Tests
             yield return SceneManager.LoadSceneAsync("Assets/Scenes/SampleScene.unity"); yield return null;
             yield return PlaySceneEntry.StartIfReady();
             var camera=Camera.main;var rig=camera.GetComponent<BoardCamera>();
+            // Fractional Editor GameView pixels (DPI scaling) round ScreenToWorldPoint differently.
+            // Use an integer-sized render surface, just like an actual Player backbuffer.
+            var oldTarget=camera.targetTexture;
+            var target=new RenderTexture(300,1000,0);camera.targetTexture=target;
             try
             {
                 camera.aspect=1280f/720; rig.Synchronize();
@@ -56,7 +63,7 @@ namespace Holedown.Tests
                 Assert.IsTrue(AimInput.TryDirection(world,75,out var expected));
                 Assert.Less(Vector2.Distance(expected,actual),0.0001f);
             }
-            finally { camera.ResetAspect(); rig.Synchronize(); }
+            finally { camera.targetTexture=oldTarget;Object.Destroy(target);camera.ResetAspect(); rig.Synchronize(); }
         }
     }
 }

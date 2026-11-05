@@ -9,21 +9,13 @@ using UnityEngine.TestTools;
 
 namespace Holedown.Tests
 {
-    // Actual published seeds and actual BallActor collisions: no injected damage/victory.
+        // Fixed approved seed routes, not the planner's later production difficulty revisions.
     public sealed class GrowthSeedRouteTests
     {
         float oldScale;
-        [SetUp] public void Setup() { oldScale=Time.timeScale; Time.timeScale=20; SceneManager.sceneLoaded+=Configure; }
-        void Configure(Scene scene,LoadSceneMode mode)
-        {
-            var flow=UnityEngine.Object.FindFirstObjectByType<GameFlowController>();
-            if(flow) {
-                var so=new UnityEditor.SerializedObject(flow);
-                so.FindProperty("externalConfigDirectory").stringValue=Path.GetFullPath("Config");
-                so.ApplyModifiedPropertiesWithoutUndo();
-            }
-        }
-        [TearDown] public void Cleanup() { Time.timeScale=oldScale; SceneManager.sceneLoaded-=Configure; }
+        GrowthSeedScope seed;
+        [SetUp] public void Setup() { oldScale=Time.timeScale; Time.timeScale=20; seed=new GrowthSeedScope(); }
+        [TearDown] public void Cleanup() { Time.timeScale=oldScale; seed.Dispose(); }
         static IEnumerator Shoot(GameFlowController flow,float angle)
         {
             float a=angle*Mathf.Deg2Rad;

@@ -10,6 +10,9 @@ namespace Holedown.Tests
 {
     public sealed class PlayerDeviceTests
     {
+        GrowthSeedScope seed;
+        [SetUp] public void Setup() { seed = new GrowthSeedScope(); }
+        [TearDown] public void Cleanup() { seed.Dispose(); }
         [UnityTest]
         public IEnumerator RealPressHoldRecallAndPauseRespectFlowGates()
         {

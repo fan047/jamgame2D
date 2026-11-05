@@ -8,7 +8,10 @@ namespace Holedown.Tests
 {
     public sealed class DeliveryTests
     {
-        [UnityTest] public IEnumerator DefaultLevelCanBeWonThroughPhysicalVolleys()
+        GrowthSeedScope seed;
+        [SetUp] public void Setup() { seed = new GrowthSeedScope(); }
+        [TearDown] public void Cleanup() { seed.Dispose(); }
+        [UnityTest] public IEnumerator FixedSeedCanBeWonThroughPhysicalVolleys()
         {
             yield return SceneManager.LoadSceneAsync("Assets/Scenes/SampleScene.unity"); yield return null; yield return PlaySceneEntry.StartIfReady();
             var flow=Object.FindFirstObjectByType<GameFlowController>();

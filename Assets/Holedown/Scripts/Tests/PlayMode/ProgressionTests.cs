@@ -9,6 +9,9 @@ namespace Holedown.Tests
 {
     public sealed class ProgressionTests
     {
+        GrowthSeedScope seed;
+        [SetUp] public void Setup() { seed = new GrowthSeedScope(); }
+        [TearDown] public void Cleanup() { seed.Dispose(); }
         static IEnumerator Load()
         { yield return SceneManager.LoadSceneAsync("Assets/Scenes/SampleScene.unity"); yield return null; yield return PlaySceneEntry.StartIfReady(); }
         static IEnumerator EmptyRound(GameFlowController flow)

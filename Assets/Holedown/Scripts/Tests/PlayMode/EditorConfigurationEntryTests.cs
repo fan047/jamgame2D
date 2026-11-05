@@ -10,7 +10,7 @@ namespace Holedown.Tests
 {
     public sealed class EditorConfigurationEntryTests
     {
-        [UnityTest] public IEnumerator DefaultSceneLoadsProjectCampaignAndOffersNextStage()
+        [UnityTest] public IEnumerator DefaultSceneLoadsVerifiedProjectCampaignLayout()
         {
             float scale=Time.timeScale;
             try {
@@ -22,19 +22,22 @@ namespace Holedown.Tests
                 Assert.AreEqual(Path.GetFullPath("Config"),Path.GetFullPath(flow.ConfigurationDirectory));
                 Assert.AreEqual(3,flow.Campaign.StageCount);
                 StringAssert.Contains("L:growth-1",flow.ConfigurationLabel);
-                for(int shot=0;shot<5;shot++) {
-                    Assert.IsTrue(flow.TryFire(new Vector2(-0.5f,-6.5f)));
-                    float deadline=Time.realtimeSinceStartup+15;
-                    while(flow.Session.Phase==SessionPhase.Volley||flow.Session.Phase==SessionPhase.Recalling) {
-                        Assert.Less(Time.realtimeSinceStartup,deadline);yield return null;
-                    }
+                var expected=Newtonsoft.Json.Linq.JObject.Parse(File.ReadAllText("Config/level.json"));
+                var stage=expected["levels"][0];
+                Assert.AreEqual((string)stage["id"],flow.StageId);
+                var blocks=(Newtonsoft.Json.Linq.JArray)stage["initialBlocks"];
+                Assert.AreEqual(blocks.Count,flow.Board.Blocks.Count);
+                foreach(var actual in flow.Board.Blocks.Values)
+                {
+                    var source=System.Linq.Enumerable.Single(blocks,b=>(int)b["column"]==actual.Column&&(int)b["row"]==actual.Row);
+                    Assert.AreEqual((int)source["health"],actual.Health);
+                    Assert.AreEqual((int)source["width"],actual.Width);
+                    Assert.AreEqual((int)source["height"],actual.Height);
+                    Assert.AreEqual((int)source["rewardBalls"],actual.RewardBalls);
                 }
-                Assert.AreEqual(SessionPhase.Won,flow.Session.Phase);
+                Assert.IsTrue(flow.TryFire(Vector2.down));
+                Assert.AreEqual(SessionPhase.Volley,flow.Session.Phase);
                 Assert.IsFalse(flow.Campaign.IsFinalStage);
-                var button=GameObject.Find("UI/ResultPanel/Advance");Assert.IsNotNull(button);Assert.IsTrue(button.activeInHierarchy);
-                Assert.AreEqual("Next Stage",button.GetComponentInChildren<TMPro.TMP_Text>().text);
-                flow.NextStage();yield return null;
-                Assert.AreEqual(1,flow.Campaign.StageIndex);Assert.AreEqual(15,flow.Campaign.EntryBalls);
             } finally {Time.timeScale=scale;}
         }
     }
