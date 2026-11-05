@@ -8,7 +8,7 @@ Unity 2D 弹球消块项目。此页整理工程入口与目录职责；功能�
 - **游戏入口**：[SampleScene](Assets/Scenes/SampleScene.unity)，打开后进入 Play Mode，点击 Start 进入第 1 关。左键发射、Space 召回、Esc／Pause 暂停、Continue 恢复。
 - **策划工具**：[离线编辑器](Tools/PlannerEditor/index.html)，用 Chrome / Edge 打开，无需服务器；操作见[快速上手](Tools/PlannerEditor/快速上手.txt)。
 - **项目配置**：[球参数](Config/settings.json)、[关卡](Config/level.json)。工具不会自动读取这两份文件，需手动导入；导出后需手动替换，再在游戏中点击 `Reload + Restart`。
-- **文档总览**：[Docs/README.md](Docs/README.md)。本轮交付为[输入与美术适配预览版](Docs/成长版/输入与美术适配交付说明.md)，Windows 包位于 `Builds/04/Windows`；既有玩法背景见[成长版 P1](Docs/成长版/P1交付说明.md)。正式美术素材仍待 A／B 批交付验收，见[视觉与素材交接](VISUAL_DESIGN.md)。
+- **当前交付**：[九关程序扩展预览 · 构建 08](Docs/成长版/九关程序扩展预览交付说明.md)，Windows 目录 `Builds/08/Windows`。程序支持九关与指定关测试，正式配置仍为策划确认的三关；正式九关及两张新背景待提供。现有 19 张游戏图的来源与接入见[构建 05](Docs/成长版/正式美术样片交付说明.md)，正式 UI 仍见[开放简报](Docs/成长版/UI美术制作清单.md)。
 
 ## 目录职责
 
@@ -19,7 +19,7 @@ Unity 2D 弹球消块项目。此页整理工程入口与目录职责；功能�
 | `Assets/Holedown/Scripts/Editor` | Unity 编辑器与 Windows 构建入口；程序集 `Holedown.Editor` |
 | `Assets/Holedown/Scripts/Tests` | Unity EditMode / PlayMode 测试及各自程序集 |
 | `Assets/Holedown/Art` | 游戏图片与材质，包括现有占位裂痕 |
-| `Assets/Holedown/Data` | 内置关卡、默认设置、物理材质与 VisualTheme 素材引用配置（当前使用占位图） |
+| `Assets/Holedown/Data` | 内置关卡、默认设置、物理材质与 VisualTheme 素材引用配置；分组背景缺图回退既有主题 |
 | `Assets/Holedown/Prefabs` | 球与方块预制体 |
 | `Assets/Scenes` | 游戏场景 |
 | `Assets/Settings` | 渲染管线配置与场景模板 |
@@ -40,7 +40,9 @@ Unity 2D 弹球消块项目。此页整理工程入口与目录职责；功能�
 
 - Editor 默认读取项目根目录的 `Config`；Player 默认读取 exe 同目录的 `Config`。显式配置目录可覆盖默认值。
 - 两份 JSON 都缺失时才回退内置配置；只缺一份或内容非法会报错并停止发射。
-- `Restart Run` 使用已加载快照；读取磁盘修改需使用 `Reload + Restart` 或重新启动。
+- `Restart Run` 使用已加载快照；普通模式读取磁盘修改需用 `Reload + Restart`，从第一关重开。
+- Player 同目录 `策划测试.cmd` 用 `--planner-test` 启动选关测试，支持基础／满前关／手填球数；该模式重载按稳定 ID 回当前关，失败保留旧局。
+- 文档总览见 [Docs/README.md](Docs/README.md)；工程配置和工具默认值已同步构建 05 策划三关基线，来源哈希见构建 08 交付说明。
 - [竖块示例](Config/Examples/level-vertical.json)需先备份原配置，再复制为 `Config/level.json`；体验后恢复备份并重载。示例不是正式默认种子。
 - 配置版本兼容性、操作细节和限制见[策划快速上手](Tools/PlannerEditor/快速上手.txt)与[P1 交付说明](Docs/成长版/P1交付说明.md)。
 
