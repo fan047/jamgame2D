@@ -8,7 +8,7 @@ Unity 2D 弹球消块项目。此页整理工程入口与目录职责；功能�
 - **游戏入口**：[SampleScene](Assets/Scenes/SampleScene.unity)，打开后进入 Play Mode，点击 Start 进入第 1 关。左键发射、Space 召回、Esc／Pause 暂停、Continue 恢复。
 - **策划工具**：[离线编辑器](Tools/PlannerEditor/index.html)，用 Chrome / Edge 打开，无需服务器；操作见[快速上手](Tools/PlannerEditor/快速上手.txt)。
 - **项目配置**：[球参数](Config/settings.json)、[关卡](Config/level.json)。工具不会自动读取这两份文件，需手动导入；导出后需手动替换，再在游戏中点击 `Reload + Restart`。
-- **当前交付**：[九关程序扩展预览 · 构建 08](Docs/成长版/九关程序扩展预览交付说明.md)，Windows 目录 `Builds/08/Windows`。程序支持九关与指定关测试，正式配置仍为策划确认的三关；正式九关及两张新背景待提供。现有 19 张游戏图的来源与接入见[构建 05](Docs/成长版/正式美术样片交付说明.md)，正式 UI 仍见[开放简报](Docs/成长版/UI美术制作清单.md)。
+- **当前交付**：[策划工具整关总览 · 构建 09](Docs/成长版/策划工具整关总览交付说明.md)，Windows 目录 `Builds/09/Windows`；支持整关浏览、跨组点击编辑与跳到补行。玩法程序沿用[构建 08](Docs/成长版/九关程序扩展预览交付说明.md)，支持九关与指定关测试，正式配置仍为策划确认的三关；正式九关及两张新背景待提供。现有美术接入见[构建 05](Docs/成长版/正式美术样片交付说明.md)，正式 UI 见[开放简报](Docs/成长版/UI美术制作清单.md)。
 
 ## 目录职责
 
