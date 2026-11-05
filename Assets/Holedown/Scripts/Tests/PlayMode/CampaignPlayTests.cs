@@ -62,6 +62,24 @@ namespace Holedown.Tests
             }
             f.RestartRun();yield return null;Assert.AreEqual(0,f.Campaign.StageIndex);Assert.AreEqual(12,f.Campaign.EntryBalls);Assert.IsNull(f.InitializationError);
         }
+        [UnityTest] public IEnumerator FourCustomRewardBlocksUseRealHitsAndDoNotIncreaseCurrentVolley()
+        {
+            string Block(int c,int reward,bool target=false)=>$"{{\"column\":{c},\"row\":0,\"width\":1,\"height\":1,\"health\":1,\"target\":{target.ToString().ToLowerInvariant()},\"rewardBalls\":{reward}}}";
+            string Stage(string id,string initial)=>$"{{\"id\":\"{id}\",\"name\":\"{id}\",\"initialBlocks\":[{initial}],\"incomingRows\":[{{\"blocks\":[{Block(7,0,true)}]}}]}}";
+            File.WriteAllText(Path.Combine(directory,"level.json"),"{\"schemaVersion\":2,\"version\":\"multi-reward\",\"levels\":["+Stage("multi",string.Join(",",new[]{Block(0,3),Block(2,5),Block(4,8),Block(6,11)}))+","+Stage("final","")+"]}");
+            yield return SceneManager.LoadSceneAsync("Assets/Scenes/SampleScene.unity");yield return null;yield return PlaySceneEntry.StartIfReady();
+            var f=UnityEngine.Object.FindFirstObjectByType<GameFlowController>();
+            foreach(int reward in new[]{3,5,8,11})
+            {
+                BlockState next=null;foreach(var b in f.Board.Blocks.Values)if(b.RewardBalls==reward){next=b;break;}
+                if(next==null)continue; // A previous volley may physically hit more than one reward.
+                var destination=new Vector2(next.Column+.5f,next.Row+.5f);
+                Assert.IsTrue(f.TryFire(destination-AimInput.Origin));float until=Time.realtimeSinceStartup+40;
+                while(f.Session.Phase==SessionPhase.Volley||f.Session.Phase==SessionPhase.Recalling){Assert.AreEqual(AppPhase.Playing,f.Phase,$"focus={f.HasFocus}");Assert.Less(Time.realtimeSinceStartup,until);yield return null;}
+                Assert.AreEqual(12,f.Campaign.EntryBalls);yield return null;
+            }
+            Assert.AreEqual(27,f.Campaign.PendingBonus);
+        }
         [UnityTest] public IEnumerator ReloadReadsNewSettingsWhileRestartRunDoesNot()
         {
             yield return SceneManager.LoadSceneAsync("Assets/Scenes/SampleScene.unity");yield return null;yield return PlaySceneEntry.StartIfReady();var f=UnityEngine.Object.FindFirstObjectByType<GameFlowController>();

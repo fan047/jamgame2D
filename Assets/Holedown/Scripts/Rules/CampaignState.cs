@@ -24,7 +24,7 @@ namespace Holedown
         }
         public bool RecordHit(int blockId, HitResult hit)
         {
-            if(StageCompleted || StageFailed || IsFinalStage || !hit.Accepted || !hit.Destroyed || (hit.RewardBalls!=3 && hit.RewardBalls!=5) || rewardedBlocks.Contains(blockId)) return false;
+            if(StageCompleted || StageFailed || IsFinalStage || !hit.Accepted || !hit.Destroyed || hit.RewardBalls<=0 || rewardedBlocks.Contains(blockId)) return false;
             int value=checked(PendingBonus+hit.RewardBalls);
             checked { _ = BaseBalls+ConfirmedBonus+value; }
             rewardedBlocks.Add(blockId); PendingBonus=value; return true;

@@ -49,7 +49,7 @@
         ids.add(stage.id);
         if(typeof stage.name!=='string'||!stage.name.trim()||stage.name.length>40)fail(`${path}.name`,'名称需要 1–40 个字符');
       }
-      let targets=0,rewards=0;
+      let targets=0,rewardSum=0;
       function blocks(list,p,incoming,last) {
         if(!Array.isArray(list)){fail(p,'需要方块数组');return;}
         const occupied=new Set();
@@ -68,9 +68,9 @@
           if(!integer(b.health)||b.health<=0)fail(`${q}.health`,'血量必须为正 Int32 整数');
           if(typeof b.target!=='boolean')fail(`${q}.target`,'必须为 true 或 false');
           const bonus=v2?b.rewardBalls:0;
-          if(![0,3,5].includes(bonus))fail(`${q}.rewardBalls`,'只能为 0、3、5');
+          if(!integer(bonus)||bonus<0)fail(`${q}.rewardBalls`,'需要非负 Int32 整数');
           if(b.target===true){targets++;if(!incoming||!last)fail(`${q}.target`,'目标必须位于最后一条补行');if(bonus!==0)fail(q,'target 与奖励互斥');}
-          if(bonus===3||bonus===5){rewards++;possible+=bonus;if(si===stages.length-1)fail(q,'最终关不能有奖励块');}
+          if(integer(bonus)&&bonus>0){rewardSum+=bonus;if(si===stages.length-1)fail(`${q}.rewardBalls`,'最终关不能有奖励块');}
           if(c&&r&&w&&h&&b.column+b.width<=8&&b.row+height<=8)for(let y=b.row;y<b.row+height;y++)for(let x=b.column;x<b.column+b.width;x++){const cell=`${x},${y}`;if(occupied.has(cell))fail(q,`与其他块重叠，列 ${x}，行 ${y}`);occupied.add(cell);}
         });
       }
@@ -78,7 +78,8 @@
       if(!Array.isArray(stage.incomingRows)||!stage.incomingRows.length)fail(`${path}.incomingRows`,'至少需要一条补行');
       else stage.incomingRows.forEach((row,i)=>{const p=`${path}.incomingRows[${i}]`;if(!object(row)){fail(p,'需要 blocks 对象');return;}keys(row,['blocks'],p);blocks(row.blocks,`${p}.blocks`,true,i===stage.incomingRows.length-1);});
       if(targets!==1)fail(path,`每关必须有且仅有一个目标，当前 ${targets} 个`);
-      if(rewards>1)fail(path,'每关最多一个奖励块');
+      if(rewardSum>2147483647)fail(`${path}.rewardBalls`,'本关奖励合计超出 Int32 最大值');
+      possible+=rewardSum;
     });
     if(integer(settings?.ballsPerRound)&&settings.ballsPerRound+possible>2147483647)fail('level.json.levels','基础球数加奖励超出 Int32 最大值');
     return errors;
@@ -89,16 +90,17 @@
     const b=value=>({...clone(value),height:1,rewardBalls:0});
     return {schemaVersion:2,version:level.version,levels:[{id:'stage-1',name:'旧单关',initialBlocks:level.initialBlocks.map(b),incomingRows:level.incomingRows.map(row=>({blocks:row.blocks.map(b)}))}]};
   }
+  function stageReward(stage) { return [...stage.initialBlocks,...stage.incomingRows.flatMap(r=>r.blocks)].reduce((n,b)=>n+b.rewardBalls,0); }
   function entryOptions(settings,level,index) {
-    const campaign=normalize(level);let values=[settings.ballsPerRound];
-    for(let i=0;i<index;i++) {const s=campaign.levels[i],bonus=Math.max(0,...[...s.initialBlocks,...s.incomingRows.flatMap(r=>r.blocks)].map(b=>b.rewardBalls));values=[...new Set(values.flatMap(v=>[v,v+bonus]))].sort((a,b)=>a-b);}
-    return values;
+    const campaign=normalize(level);
+    const maximum=settings.ballsPerRound+campaign.levels.slice(0,index).reduce((n,s)=>n+stageReward(s),0);
+    return maximum===settings.ballsPerRound?[maximum]:[settings.ballsPerRound,maximum];
   }
   function placementError(blocks, block, selectedIndex, incoming) {
     const height=block.height??1;
     if (![1,2].includes(height)) return '高度必须为 1 或 2';
     if (height===2&&(incoming||block.width!==1)) return '竖块仅支持初始布局的 1×2，补行高度必须为 1';
-    if (block.rewardBalls!==undefined && ![0,3,5].includes(block.rewardBalls)) return '奖励只能为 0/3/5';
+    if (block.rewardBalls!==undefined && (!integer(block.rewardBalls)||block.rewardBalls<0)) return '奖励需要非负 Int32 整数';
     if (block.target && block.rewardBalls>0) return '目标和奖励互斥';
     if (!integer(block.column) || block.column<0 || block.column>7) return '列号必须为 0–7';
     if (!integer(block.row) || block.row<0 || block.row>7 || (incoming && block.row!==0)) return incoming ? '补行必须使用第 0 行' : '行号必须为 0–7';
@@ -108,5 +110,5 @@
     if (blocks.some((b,i) => i!==selectedIndex && b.row<block.row+height && b.row+(b.height??1)>block.row && b.column<block.column+block.width && b.column+b.width>block.column)) return '此位置与其他块重叠';
     return null;
   }
-  return {clone, parse, integer, validate, diagnostics, normalize, entryOptions, placementError};
+  return {clone, parse, integer, validate, diagnostics, normalize, stageReward, entryOptions, placementError};
 });

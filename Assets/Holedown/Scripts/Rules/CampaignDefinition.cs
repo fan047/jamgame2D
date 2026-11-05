@@ -18,11 +18,14 @@ namespace Holedown
             if(string.IsNullOrWhiteSpace(name) || name.Length>40) throw new ArgumentException("name: expected 1-40 characters.");
             BoardState.Validate(initialBlocks,incomingRows);
             Id=id;Name=name;
-            foreach(var d in initialBlocks){initial.Add(Copy(d));PossibleReward+=d.rewardBalls;}
+            long possibleReward = 0;
+            foreach(var d in initialBlocks){initial.Add(Copy(d));possibleReward+=d.rewardBalls;}
             foreach(var row in incomingRows)
             {
-                var copy=new RowDefinition();foreach(var d in row.blocks){copy.blocks.Add(Copy(d));PossibleReward+=d.rewardBalls;}rows.Add(copy);
+                var copy=new RowDefinition();foreach(var d in row.blocks){copy.blocks.Add(Copy(d));possibleReward+=d.rewardBalls;}rows.Add(copy);
             }
+            if(possibleReward>int.MaxValue) throw new ArgumentException("rewardBalls: stage reward sum exceeds Int32 maximum.");
+            PossibleReward=(int)possibleReward;
         }
         static BlockDefinition Copy(BlockDefinition d)=>new BlockDefinition(d.column,d.row,d.width,d.health,d.target,d.rewardBalls,d.height);
         public BoardState CreateBoard()=>new BoardState(initial,rows);

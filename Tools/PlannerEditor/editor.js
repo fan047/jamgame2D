@@ -37,7 +37,7 @@
     const sum=state.summary();$('batchSummary').textContent=`已选 ${sum.total}：普通 ${sum.ordinary} / 奖励 ${sum.reward} / 目标 ${sum.target}。整批成功才生效，一次撤销。`;
     const all=[...state.stage.initialBlocks,...state.stage.incomingRows.flatMap(r=>r.blocks)];
     $('statistics').textContent=`本布局 ${state.blocks.length} 块 / 总血量 ${state.blocks.reduce((n,b)=>n+b.health,0)}；本关 ${all.length} 块 / 总血量 ${all.reduce((n,b)=>n+b.health,0)}`;
-    const options=state.level.levels.map((_,i)=>M.entryOptions(state.settings,state.level,i));$('entryOptions').textContent='可能入关球数（不是连续区间）：'+options.map((v,i)=>`第 ${i+1} 关 [${v.join(', ')}]`).join('；');
+    const options=state.level.levels.map((_,i)=>M.entryOptions(state.settings,state.level,i));$('entryOptions').textContent='入关球数边界：'+options.map((v,i)=>`第 ${i+1} 关：最低（无前关奖励）${v[0]}，满奖（前关全拿）${v[v.length-1]}`).join('；');
     $('settingsPreview').textContent=JSON.stringify(state.settings,null,2);$('levelPreview').textContent=JSON.stringify(state.level,null,2);renderPreview();
   }
   function renderSelectors(){
@@ -87,6 +87,7 @@
     if(['column','row','health'].some(k=>$(k).value.trim()===''))throw new Error('位置和血量不能为空');
     state.applyBlock(block);propertyPending=false;render();
   }
+  document.querySelectorAll('[data-reward]').forEach(button=>button.onclick=()=>{if($('rewardBalls').disabled)return;$('rewardBalls').value=button.dataset.reward;propertyPending=true;refresh();});
   ['column','row','shape','role','rewardBalls'].forEach(id=>$(id).addEventListener('input',()=>{propertyPending=true;$('rewardBalls').disabled=$('role').value!=='reward';refresh();}));
   $('health').addEventListener('input',()=>{if(state.context.selected<0){propertyPending=true;refresh();return;}const d=state.stageInput($('health').dataset.path,$('health').value);$('health').classList.toggle('invalid',!!d.error);refresh();});
   $('health').addEventListener('blur',()=>{if(state.context.selected>=0)commit($('health'),$('health').dataset.path);});

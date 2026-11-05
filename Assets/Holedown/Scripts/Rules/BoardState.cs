@@ -102,13 +102,12 @@ namespace Holedown
         public static void Validate(IReadOnlyList<BlockDefinition> initial, IReadOnlyList<RowDefinition> rows)
         {
             if (initial == null || rows == null || rows.Count == 0) throw new ArgumentException("level.json: initialBlocks and at least one incomingRows entry are required.");
-            int targets = 0, rewards = 0;
+            int targets = 0;
             var occupied = new HashSet<int>();
             for(int i=0;i<initial.Count;i++)
             {
                 var d=initial[i]; string path=$"level.json.initialBlocks[{i}]";
                 ValidateBlock(d, false, occupied,path);
-                if(d.rewardBalls>0) rewards++;
                 if (d.target) throw new ArgumentException(path+".target: target must be in the last incoming row.");
             }
             for (int i = 0; i < rows.Count; i++)
@@ -120,13 +119,11 @@ namespace Holedown
                 {
                     var d=rows[i].blocks[j]; string blockPath=$"{path}.blocks[{j}]";
                     ValidateBlock(d, true, occupied,blockPath);
-                    if(d.rewardBalls>0) rewards++;
-                    if (!d.target) continue;
+                        if (!d.target) continue;
                     targets++;
                     if (i != rows.Count - 1) throw new ArgumentException(blockPath+".target: target must be in the last incoming row.");
                 }
             }
-            if(rewards>1) throw new ArgumentException("level.json: at most one reward block per stage.");
             if (targets != 1) throw new ArgumentException($"level.json: expected exactly one target in the last incoming row; found {targets}.");
         }
 
@@ -138,7 +135,7 @@ namespace Holedown
             if(d.column+d.width>8) throw new ArgumentException(path+": column + width exceeds 8 columns.");
             if(d.height!=1 && d.height!=2) throw new ArgumentException(path+".height: expected 1 or 2.");
             if(d.height==2 && (incoming || d.width!=1)) throw new ArgumentException(path+".height: height=2 requires width=1 and initial layout; incoming height must be 1.");
-            if(d.rewardBalls!=0 && d.rewardBalls!=3 && d.rewardBalls!=5) throw new ArgumentException(path+".rewardBalls: expected 0, 3 or 5.");
+            if(d.rewardBalls<0) throw new ArgumentException(path+".rewardBalls: expected non-negative Int32 integer.");
             if(d.target && d.rewardBalls!=0) throw new ArgumentException(path+": target and reward are mutually exclusive.");
             if(d.health<=0) throw new ArgumentException(path+".health: expected positive integer.");
             if(d.row<0 || d.row>=8 || (incoming && d.row!=0)) throw new ArgumentException(path+".row: "+(incoming?"incoming blocks must use row 0.":"expected 0-7."));

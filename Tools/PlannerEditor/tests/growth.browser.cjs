@@ -12,7 +12,7 @@ const root=path.resolve(__dirname,'../../..'),out=path.join(root,'Library/Locus/
  await page.goto(pathToFileURL(path.join(process.env.PLANNER_EDITOR_DIR||path.join(root,'Tools/PlannerEditor'),'index.html')).href);
  const preview=file=>page.locator('#'+file+'Preview').textContent().then(JSON.parse);
  assert.match(await page.locator('#validation').innerText(),/校验通过/);assert.equal(await page.locator('#stage option').count(),3);
- assert.match(await page.locator('#entryOptions').innerText(),/12, 15, 17, 20/);
+ assert.match(await page.locator('#entryOptions').innerText(),/最低（无前关奖励）12，满奖（前关全拿）20/);
  await page.locator('#ballsPerRound').fill('7');assert.equal((await preview('settings')).ballsPerRound,12);await page.locator('#ballsPerRound').press('Tab');assert.equal((await preview('settings')).ballsPerRound,7);
  const health=page.locator('#blockRows input[type=number]');await health.nth(0).fill('21');await health.nth(0).press('Enter');assert.equal(await health.nth(1).evaluate(el=>el===document.activeElement),true);await health.nth(1).fill('22');await health.nth(1).press('Tab');assert.equal((await preview('level')).levels[0].initialBlocks[1].health,22);
  await health.nth(0).fill('0');await page.locator('#stage').selectOption('1');assert.equal(await page.locator('#stage').inputValue(),'0');assert.equal((await preview('level')).levels[0].initialBlocks[0].health,21);await page.locator('#cancelInputs').click();assert.equal(await health.nth(0).inputValue(),'21');

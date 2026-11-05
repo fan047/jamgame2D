@@ -29,11 +29,28 @@ namespace Holedown.Tests
             for(int i=0;i<10;i++){c.RecordHit(2,Reward(5));c.FailStage();Assert.IsFalse(c.CompleteStage());Assert.IsFalse(c.RecordHit(3,Reward()));Assert.IsTrue(c.RetryStage());Assert.IsFalse(c.RetryStage());Assert.AreEqual(15,c.EntryBalls);Assert.AreEqual(0,c.PendingBonus);Assert.AreEqual(3,c.ConfirmedBonus);}
             c.RestartRun();Assert.AreEqual(0,c.StageIndex);Assert.AreEqual(12,c.EntryBalls);Assert.AreEqual(0,c.ConfirmedBonus);
         }
+        [Test]
+        public void MultipleCustomRewardsSumOnlyActualDestructionsAndConfirmNextStage()
+        {
+            var blocks=new[]{new BlockDefinition(0,0,1,1,false,3),new BlockDefinition(1,0,1,1,false,5),new BlockDefinition(2,0,1,1,false,8),new BlockDefinition(3,0,1,1,false,11)};
+            var rows=new[]{new RowDefinition{blocks=new System.Collections.Generic.List<BlockDefinition>{new BlockDefinition(7,0,1,1,true)}}};
+            var stage=new StageDefinition("custom","Custom",blocks,rows); Assert.AreEqual(27,stage.PossibleReward);
+            var board=stage.CreateBoard(); var state=new CampaignState(9,12);
+            foreach(int id in new[]{2,4}) {var hit=board.ApplyHit(id);Assert.IsTrue(state.RecordHit(id,hit));Assert.IsFalse(state.RecordHit(id,hit));}
+            Assert.AreEqual(16,state.PendingBonus);Assert.AreEqual(12,state.EntryBalls);
+            state.FailStage();state.RetryStage();Assert.AreEqual(0,state.PendingBonus);
+            board=stage.CreateBoard();for(int id=1;id<=4;id++)state.RecordHit(id,board.ApplyHit(id));
+            state.CompleteStage();state.NextStage();Assert.AreEqual(39,state.EntryBalls);
+            Assert.Throws<ArgumentException>(()=>new StageDefinition("overflow","Overflow",new[]{new BlockDefinition(0,0,1,1,false,int.MaxValue),new BlockDefinition(1,0,1,1,false,1)},rows));
+            var final=new StageDefinition("final","Final",new BlockDefinition[0],rows);
+            Assert.Throws<ArgumentException>(()=>new CampaignDefinition(new[]{stage,final},int.MaxValue-26));
+            Assert.Throws<ArgumentException>(()=>new CampaignDefinition(new[]{stage},12));
+        }
         [Test] public void OverflowRejectedBeforeRewardStateChanges()
         {
             var c=new CampaignState(2,int.MaxValue-1);Assert.Throws<OverflowException>(()=>c.RecordHit(1,Reward()));Assert.AreEqual(0,c.PendingBonus);
         }
-        [TestCase(3,0,false)] [TestCase(1,4,false)] [TestCase(1,3,true)]
+        [TestCase(3,0,false)] [TestCase(1,-1,false)] [TestCase(1,3,true)]
         public void UnsupportedHeightRewardOrTargetCombinationRejected(int height,int reward,bool target)
         {
             Assert.Throws<ArgumentException>(()=>new BoardState(new[]{new BlockDefinition(0,0,1,1,target,reward,height)},new[]{new RowDefinition{blocks=new System.Collections.Generic.List<BlockDefinition>{new BlockDefinition(3,0,1,1,true)}}}));

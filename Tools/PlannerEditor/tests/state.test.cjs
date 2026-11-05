@@ -12,7 +12,7 @@ test('C# and JS shared invalid fixtures agree',()=>{
     assert.ok(M.validate(s,l).some(e=>e.includes(c.error)),c.name);
   }
 });
-test('reachable balls are discrete instead of assuming full growth',()=>{assert.deepEqual(M.entryOptions(settings,growth,0),[12]);assert.deepEqual(M.entryOptions(settings,growth,1),[12,15]);assert.deepEqual(M.entryOptions(settings,growth,2),[12,15,17,20]);});
+test('entry estimates expose minimum and all-prior-rewards maximum only',()=>{assert.deepEqual(M.entryOptions(settings,growth,0),[12]);assert.deepEqual(M.entryOptions(settings,growth,1),[12,15]);assert.deepEqual(M.entryOptions(settings,growth,2),[12,20]);});
 test('valid numerical commit is one transaction and supports undo redo',()=>{const s=fresh(),p=s.blockPath+'[0].health';s.stageInput(p,'17');assert.equal(s.blocks[0].health,5);s.commitInput(p);assert.equal(s.blocks[0].health,17);assert.equal(s.past.length,1);assert.ok(s.undo());assert.equal(s.blocks[0].health,5);assert.ok(s.redo());assert.equal(s.blocks[0].health,17);});
 test('invalid draft stays out of model and blocks navigation/export',()=>{const s=fresh(),p='settings.ballSpeed';s.stageInput(p,'-1');assert.equal(s.settings.ballSpeed,12);assert.ok(s.firstInvalid);assert.equal(s.navigate(1),false);assert.throws(()=>s.markExport('settings'));assert.equal(s.cancelInput(p),12);assert.equal(s.navigate(1),true);});
 test('ordinary select excludes rewards and targets; explicit specials participate',()=>{const s=fresh();s.selectOrdinary();assert.equal(s.context.checked.length,10);assert.equal(s.summary().reward,0);s.context.checked.push(7);assert.equal(s.summary().reward,1);});
