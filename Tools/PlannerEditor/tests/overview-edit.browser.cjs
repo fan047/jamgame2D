@@ -10,6 +10,9 @@ const root=path.resolve(__dirname,'../../..'),out=path.join(root,'Library/Locus/
   const context=await browser.newContext({acceptDownloads:true,viewport:{width:1500,height:1050}}),page=await context.newPage(),errors=[];
   page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
   await page.goto(pathToFileURL(path.join(process.env.PLANNER_EDITOR_DIR||path.join(root,'Tools/PlannerEditor'),'index.html')).href);
+  const config=process.env.PLANNER_CONFIG_DIR||path.join(root,'Config');
+  await page.locator('#importFiles').setInputFiles(['settings.json','level.json'].map(name=>path.join(config,name)));
+  await page.waitForFunction(()=>document.querySelector('#source').textContent.includes('已导入'));
   const level=()=>page.locator('#levelPreview').textContent().then(JSON.parse);
   const group=n=>page.locator(`.layout-group[data-layout="${n}"]`);
   const first=()=>group(-1).locator('.block').first(),target=()=>group(6).locator('.goal');
