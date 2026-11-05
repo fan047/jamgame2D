@@ -30,18 +30,18 @@
             "column": 3,
             "row": 0,
             "width": 2,
-            "health": 4,
-            "target": false,
             "height": 1,
+            "health": 14,
+            "target": false,
             "rewardBalls": 0
           },
           {
             "column": 6,
             "row": 0,
             "width": 2,
-            "health": 5,
-            "target": false,
             "height": 1,
+            "health": 15,
+            "target": false,
             "rewardBalls": 0
           },
           {
@@ -84,9 +84,9 @@
             "column": 1,
             "row": 2,
             "width": 2,
-            "health": 8,
-            "target": false,
             "height": 1,
+            "health": 28,
+            "target": false,
             "rewardBalls": 3
           },
           {
@@ -102,9 +102,9 @@
             "column": 0,
             "row": 3,
             "width": 2,
-            "health": 3,
-            "target": false,
             "height": 1,
+            "health": 13,
+            "target": false,
             "rewardBalls": 0
           },
           {
@@ -115,6 +115,24 @@
             "target": false,
             "height": 1,
             "rewardBalls": 0
+          },
+          {
+            "column": 1,
+            "row": 6,
+            "width": 2,
+            "height": 1,
+            "health": 5,
+            "target": false,
+            "rewardBalls": 0
+          },
+          {
+            "column": 3,
+            "row": 3,
+            "width": 1,
+            "height": 2,
+            "health": 13,
+            "target": false,
+            "rewardBalls": 0
           }
         ],
         "incomingRows": [
@@ -124,18 +142,18 @@
                 "column": 1,
                 "row": 0,
                 "width": 1,
-                "health": 3,
-                "target": false,
                 "height": 1,
+                "health": 6,
+                "target": false,
                 "rewardBalls": 0
               },
               {
                 "column": 3,
                 "row": 0,
                 "width": 2,
-                "health": 4,
-                "target": false,
                 "height": 1,
+                "health": 10,
+                "target": false,
                 "rewardBalls": 0
               },
               {
@@ -155,18 +173,18 @@
                 "column": 0,
                 "row": 0,
                 "width": 2,
-                "health": 4,
-                "target": false,
                 "height": 1,
+                "health": 23,
+                "target": false,
                 "rewardBalls": 0
               },
               {
                 "column": 6,
                 "row": 0,
                 "width": 2,
-                "health": 4,
-                "target": false,
                 "height": 1,
+                "health": 13,
+                "target": false,
                 "rewardBalls": 0
               }
             ]
@@ -196,12 +214,12 @@
           {
             "blocks": [
               {
-                "column": 3,
+                "column": 0,
                 "row": 0,
                 "width": 2,
-                "health": 10,
-                "target": true,
                 "height": 1,
+                "health": 27,
+                "target": true,
                 "rewardBalls": 0
               }
             ]
@@ -276,39 +294,75 @@
             "rewardBalls": 0
           },
           {
-            "column": 1,
-            "row": 2,
+            "column": 3,
+            "row": 5,
             "width": 2,
-            "health": 5,
-            "target": false,
             "height": 1,
+            "health": 28,
+            "target": false,
+            "rewardBalls": 0
+          },
+          {
+            "column": 2,
+            "row": 2,
+            "width": 1,
+            "height": 2,
+            "health": 10,
+            "target": false,
             "rewardBalls": 0
           },
           {
             "column": 5,
             "row": 2,
-            "width": 2,
-            "health": 12,
+            "width": 1,
+            "height": 2,
+            "health": 20,
             "target": false,
-            "height": 1,
-            "rewardBalls": 5
+            "rewardBalls": 0
           },
           {
-            "column": 2,
-            "row": 3,
+            "column": 3,
+            "row": 2,
             "width": 2,
-            "health": 4,
-            "target": false,
             "height": 1,
-            "rewardBalls": 0
+            "health": 20,
+            "target": false,
+            "rewardBalls": 5
           },
           {
             "column": 6,
             "row": 3,
-            "width": 2,
-            "health": 4,
-            "target": false,
+            "width": 1,
             "height": 1,
+            "health": 3,
+            "target": false,
+            "rewardBalls": 0
+          },
+          {
+            "column": 1,
+            "row": 3,
+            "width": 1,
+            "height": 1,
+            "health": 13,
+            "target": false,
+            "rewardBalls": 0
+          },
+          {
+            "column": 0,
+            "row": 6,
+            "width": 1,
+            "height": 1,
+            "health": 3,
+            "target": false,
+            "rewardBalls": 0
+          },
+          {
+            "column": 7,
+            "row": 6,
+            "width": 1,
+            "height": 1,
+            "health": 3,
+            "target": false,
             "rewardBalls": 0
           }
         ],
@@ -319,9 +373,9 @@
                 "column": 1,
                 "row": 0,
                 "width": 1,
-                "health": 4,
-                "target": false,
                 "height": 1,
+                "health": 14,
+                "target": false,
                 "rewardBalls": 0
               },
               {
@@ -337,9 +391,9 @@
                 "column": 6,
                 "row": 0,
                 "width": 1,
-                "health": 4,
-                "target": false,
                 "height": 1,
+                "health": 14,
+                "target": false,
                 "rewardBalls": 0
               }
             ]
@@ -350,18 +404,18 @@
                 "column": 0,
                 "row": 0,
                 "width": 2,
-                "health": 5,
-                "target": false,
                 "height": 1,
+                "health": 10,
+                "target": false,
                 "rewardBalls": 0
               },
               {
                 "column": 6,
                 "row": 0,
                 "width": 2,
-                "health": 5,
-                "target": false,
                 "height": 1,
+                "health": 10,
+                "target": false,
                 "rewardBalls": 0
               }
             ]
@@ -372,18 +426,18 @@
                 "column": 1,
                 "row": 0,
                 "width": 2,
-                "health": 5,
-                "target": false,
                 "height": 1,
+                "health": 25,
+                "target": false,
                 "rewardBalls": 0
               },
               {
                 "column": 5,
                 "row": 0,
                 "width": 2,
-                "health": 5,
-                "target": false,
                 "height": 1,
+                "health": 25,
+                "target": false,
                 "rewardBalls": 0
               }
             ]
@@ -394,9 +448,9 @@
                 "column": 3,
                 "row": 0,
                 "width": 2,
-                "health": 14,
-                "target": true,
                 "height": 1,
+                "health": 24,
+                "target": true,
                 "rewardBalls": 0
               }
             ]
@@ -411,99 +465,117 @@
             "column": 0,
             "row": 0,
             "width": 2,
-            "health": 7,
-            "target": false,
             "height": 1,
-            "rewardBalls": 0
-          },
-          {
-            "column": 2,
-            "row": 0,
-            "width": 2,
-            "health": 6,
+            "health": 27,
             "target": false,
-            "height": 1,
             "rewardBalls": 0
           },
           {
             "column": 6,
             "row": 0,
             "width": 2,
-            "health": 7,
-            "target": false,
             "height": 1,
+            "health": 37,
+            "target": false,
             "rewardBalls": 0
           },
           {
             "column": 0,
             "row": 1,
             "width": 1,
-            "health": 5,
-            "target": false,
             "height": 1,
+            "health": 16,
+            "target": false,
             "rewardBalls": 0
           },
           {
             "column": 2,
             "row": 1,
             "width": 1,
-            "health": 5,
-            "target": false,
             "height": 1,
+            "health": 15,
+            "target": false,
             "rewardBalls": 0
           },
           {
             "column": 5,
             "row": 1,
             "width": 1,
-            "health": 5,
-            "target": false,
             "height": 1,
+            "health": 35,
+            "target": false,
             "rewardBalls": 0
           },
           {
             "column": 7,
             "row": 1,
             "width": 1,
-            "health": 5,
-            "target": false,
             "height": 1,
+            "health": 13,
+            "target": false,
             "rewardBalls": 0
           },
           {
             "column": 1,
             "row": 2,
             "width": 2,
-            "health": 6,
-            "target": false,
             "height": 1,
+            "health": 16,
+            "target": false,
             "rewardBalls": 0
           },
           {
             "column": 5,
             "row": 2,
             "width": 2,
-            "health": 6,
-            "target": false,
             "height": 1,
+            "health": 16,
+            "target": false,
             "rewardBalls": 0
           },
           {
             "column": 1,
             "row": 3,
             "width": 2,
-            "health": 5,
-            "target": false,
             "height": 1,
+            "health": 35,
+            "target": false,
             "rewardBalls": 0
           },
           {
             "column": 5,
             "row": 3,
             "width": 2,
-            "health": 5,
-            "target": false,
             "height": 1,
+            "health": 25,
+            "target": false,
+            "rewardBalls": 0
+          },
+          {
+            "column": 0,
+            "row": 6,
+            "width": 1,
+            "height": 1,
+            "health": 23,
+            "target": false,
+            "rewardBalls": 0
+          },
+          {
+            "column": 4,
+            "row": 1,
+            "width": 1,
+            "height": 1,
+            "health": 23,
+            "target": false,
+            "rewardBalls": 0
+          },
+          {
+            "column": 7,
+            "row": 5,
+            "width": 1,
+            "height": 2,
+            "health": 30,
+            "target": false,
             "rewardBalls": 0
           }
         ],
@@ -514,27 +586,27 @@
                 "column": 1,
                 "row": 0,
                 "width": 1,
-                "health": 5,
-                "target": false,
                 "height": 1,
+                "health": 15,
+                "target": false,
                 "rewardBalls": 0
               },
               {
                 "column": 3,
                 "row": 0,
                 "width": 2,
-                "health": 6,
-                "target": false,
                 "height": 1,
+                "health": 16,
+                "target": false,
                 "rewardBalls": 0
               },
               {
                 "column": 6,
                 "row": 0,
                 "width": 1,
-                "health": 5,
-                "target": false,
                 "height": 1,
+                "health": 25,
+                "target": false,
                 "rewardBalls": 0
               }
             ]
@@ -545,18 +617,27 @@
                 "column": 0,
                 "row": 0,
                 "width": 2,
-                "health": 6,
-                "target": false,
                 "height": 1,
+                "health": 36,
+                "target": false,
                 "rewardBalls": 0
               },
               {
                 "column": 6,
                 "row": 0,
                 "width": 2,
-                "health": 6,
-                "target": false,
                 "height": 1,
+                "health": 26,
+                "target": false,
+                "rewardBalls": 0
+              },
+              {
+                "column": 3,
+                "row": 0,
+                "width": 2,
+                "height": 1,
+                "health": 38,
+                "target": false,
                 "rewardBalls": 0
               }
             ]
@@ -567,18 +648,27 @@
                 "column": 1,
                 "row": 0,
                 "width": 2,
-                "health": 6,
-                "target": false,
                 "height": 1,
+                "health": 36,
+                "target": false,
                 "rewardBalls": 0
               },
               {
                 "column": 5,
                 "row": 0,
                 "width": 2,
-                "health": 6,
-                "target": false,
                 "height": 1,
+                "health": 13,
+                "target": false,
+                "rewardBalls": 0
+              },
+              {
+                "column": 3,
+                "row": 0,
+                "width": 1,
+                "height": 1,
+                "health": 33,
+                "target": false,
                 "rewardBalls": 0
               }
             ]
@@ -589,9 +679,102 @@
                 "column": 3,
                 "row": 0,
                 "width": 2,
-                "health": 18,
-                "target": true,
                 "height": 1,
+                "health": 38,
+                "target": false,
+                "rewardBalls": 0
+              },
+              {
+                "column": 0,
+                "row": 0,
+                "width": 1,
+                "height": 1,
+                "health": 32,
+                "target": false,
+                "rewardBalls": 0
+              },
+              {
+                "column": 6,
+                "row": 0,
+                "width": 2,
+                "height": 1,
+                "health": 32,
+                "target": false,
+                "rewardBalls": 0
+              }
+            ]
+          },
+          {
+            "blocks": [
+              {
+                "column": 0,
+                "row": 0,
+                "width": 1,
+                "height": 1,
+                "health": 23,
+                "target": false,
+                "rewardBalls": 0
+              },
+              {
+                "column": 2,
+                "row": 0,
+                "width": 2,
+                "height": 1,
+                "health": 31,
+                "target": false,
+                "rewardBalls": 0
+              },
+              {
+                "column": 7,
+                "row": 0,
+                "width": 1,
+                "height": 1,
+                "health": 30,
+                "target": false,
+                "rewardBalls": 0
+              }
+            ]
+          },
+          {
+            "blocks": [
+              {
+                "column": 2,
+                "row": 0,
+                "width": 2,
+                "height": 1,
+                "health": 31,
+                "target": false,
+                "rewardBalls": 0
+              },
+              {
+                "column": 6,
+                "row": 0,
+                "width": 1,
+                "height": 1,
+                "health": 40,
+                "target": false,
+                "rewardBalls": 0
+              },
+              {
+                "column": 0,
+                "row": 0,
+                "width": 1,
+                "height": 1,
+                "health": 31,
+                "target": false,
+                "rewardBalls": 0
+              }
+            ]
+          },
+          {
+            "blocks": [
+              {
+                "column": 0,
+                "row": 0,
+                "width": 1,
+                "height": 1,
+                "health": 30,
+                "target": true,
                 "rewardBalls": 0
               }
             ]
