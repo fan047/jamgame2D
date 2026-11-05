@@ -17,6 +17,7 @@ namespace Holedown.Tests
                 Assert.AreEqual(File.ReadAllText("Tools/PlannerEditor/editor-state.js"),File.ReadAllText(Path.Combine(output,"PlannerEditor","editor-state.js")));
                 StringAssert.Contains("\"schemaVersion\": 2",File.ReadAllText(Path.Combine(output,"Config","level.json")));
                 Assert.IsTrue(File.Exists(Path.Combine(output,"策划快速上手.txt")));
+                StringAssert.Contains("--planner-test",File.ReadAllText(Path.Combine(output,"策划测试.cmd")));
                 string example=Path.Combine(output,"Config","Examples","level-vertical.json");
                 Assert.AreEqual(File.ReadAllText("Config/Examples/level-vertical.json"),File.ReadAllText(example));
                 File.WriteAllText(example,"custom example must survive rebuild");

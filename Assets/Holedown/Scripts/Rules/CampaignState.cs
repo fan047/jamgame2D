@@ -17,10 +17,10 @@ namespace Holedown
         public bool IsFinalStage => StageIndex == StageCount - 1;
         public int NextEntryBalls => checked(BaseBalls + ConfirmedBonus);
 
-        public CampaignState(int stageCount, int baseBalls)
+        public CampaignState(int stageCount, int baseBalls, int stageIndex = 0)
         {
-            if(stageCount<=0 || baseBalls<=0) throw new ArgumentException("Positive stage count and base balls required.");
-            StageCount=stageCount; BaseBalls=baseBalls; EntryBalls=baseBalls;
+            if(stageCount<=0 || baseBalls<=0 || stageIndex<0 || stageIndex>=stageCount) throw new ArgumentException("Positive stage count and base balls, and a valid stage index required.");
+            StageCount=stageCount; BaseBalls=baseBalls; EntryBalls=baseBalls; StageIndex=stageIndex;
         }
         public bool RecordHit(int blockId, HitResult hit)
         {

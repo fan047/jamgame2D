@@ -5,8 +5,8 @@ using UnityEngine;
 
 namespace Holedown
 {
-    public enum AppPhase { Loading, Title, Playing, Paused, ConfigError }
-    public enum FlowCommand { Start, Continue, Recall, NextStage, RetryStage, RestartRun, Reload }
+    public enum AppPhase { Loading, Title, Playing, Paused, ConfigError, PlannerSelection }
+    public enum FlowCommand { Start, Continue, Recall, NextStage, RetryStage, RestartRun, Reload, BeginPlannerTest, PlannerSelection }
 
     public sealed class GameFlowController : MonoBehaviour
     {
@@ -17,6 +17,15 @@ namespace Holedown
         [SerializeField] BallActor ballPrefab;
         [SerializeField, Tooltip("Optional JSON folder. Empty: project/Config in Editor; executable/Config in Player.")]
         string externalConfigDirectory;
+        [SerializeField] bool plannerTestMode;
+        PlannerTestContext plannerContext, requestedPlannerContext;
+        int plannerEntryBalls;
+        public bool IsPlannerTest => plannerTestMode;
+        public PlannerTestContext PlannerContext => plannerContext;
+        public string PlannerError { get; private set; }
+        public int EntryBalls => plannerContext != null ? plannerEntryBalls : Campaign?.EntryBalls ?? Settings.ballsPerRound;
+        public IReadOnlyList<StageDefinition> Stages => configuration?.Campaign.Stages;
+        public string StageId => configuration != null && Campaign != null ? configuration.Campaign.Stages[Campaign.StageIndex].Id : "";
         LoadedConfiguration configuration;
         readonly Dictionary<int, BallActor> balls = new Dictionary<int, BallActor>();
         Coroutine launching;
@@ -87,6 +96,8 @@ namespace Holedown
         void Start()
         {
             Session = new GameSession();
+            plannerTestMode |= Array.IndexOf(Environment.GetCommandLineArgs(),"--planner-test")>=0;
+            if(plannerTestMode) gameObject.AddComponent<PlannerTestView>().Configure(this);
             try
             {
                 ConfigurationDirectory = !string.IsNullOrWhiteSpace(externalConfigDirectory)
@@ -94,7 +105,8 @@ namespace Holedown
                     : System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Application.dataPath),"Config");
                 configuration = ExternalConfiguration.Load(ConfigurationDirectory,settings,level);
                 Campaign=new CampaignState(configuration.Campaign.Stages.Count,Settings.ballsPerRound);
-                if(hasStarted) BeginAttempt(); else SetPhase(AppPhase.Title);
+                if(plannerTestMode) SetPhase(AppPhase.PlannerSelection);
+                else if(hasStarted) BeginAttempt(); else SetPhase(AppPhase.Title);
             }
             catch (Exception exception)
             {
@@ -130,6 +142,8 @@ namespace Holedown
                 case FlowCommand.RetryStage: RetryStage(); break;
                 case FlowCommand.RestartRun: RestartRun(); break;
                 case FlowCommand.Reload: ReloadAndRestart(); break;
+                case FlowCommand.BeginPlannerTest: BeginPlannerTest(requestedPlannerContext); break;
+                case FlowCommand.PlannerSelection: ReturnToPlannerSelection(); break;
             }
             else if(fire.HasValue) TryFire(fire.Value);
         }
@@ -143,7 +157,7 @@ namespace Holedown
             if (!CanSimulate || !UserInputAllowed || transitionFrame == Time.frameCount || transitioning || Campaign == null || Session == null || direction.y >= 0 || !float.IsFinite(direction.x) || !float.IsFinite(direction.y) || direction.sqrMagnitude < 0.0001f) return false;
             float angle = Mathf.Clamp(Mathf.Atan2(direction.x,-direction.y)*Mathf.Rad2Deg,-Settings.maxAimAngle,Settings.maxAimAngle)*Mathf.Deg2Rad;
             direction = new Vector2(Mathf.Sin(angle),-Mathf.Cos(angle));
-            if (!Session.TryFire(Campaign.EntryBalls)) return false;
+            if (!Session.TryFire(EntryBalls)) return false;
             aim.CanAim = false; InvalidateInput(); volleyStarted = Time.time;
             launching = StartCoroutine(LaunchVolley(Session.SessionId,Session.VolleyId,direction));
             Changed?.Invoke(); return true;
@@ -195,22 +209,26 @@ namespace Holedown
         }
         public void NextStage()
         {
+            if(plannerTestMode)return;
             if(!CanSimulate || !UserInputAllowed || Session?.Phase!=SessionPhase.Won || Campaign==null || Campaign.IsFinalStage || !EnterTransition())return;
             try{if(Campaign.NextStage())BeginAttempt();}finally{transitioning=false;}
         }
         public void RetryStage()
         {
+            if(plannerTestMode){BeginPlannerTest(plannerContext);return;}
             if(!CanSimulate || !UserInputAllowed || Session?.Phase!=SessionPhase.Lost || Campaign==null || !EnterTransition())return;
             try{if(Campaign.RetryStage())BeginAttempt();}finally{transitioning=false;}
         }
         public void RestartRun()
         {
+            if(plannerTestMode){ReturnToPlannerSelection();return;}
             if(!CanSimulate || !UserInputAllowed || Campaign==null || !EnterTransition())return;
             try{Campaign.RestartRun();BeginAttempt();}finally{transitioning=false;}
         }
         public void Restart() => ReloadAndRestart();
         public void ReloadAndRestart()
         {
+            if(plannerTestMode){ReloadPlannerTest();return;}
             if(!UserInputAllowed || Phase == AppPhase.Loading || !EnterTransition())return;
             try
             {
@@ -219,7 +237,8 @@ namespace Holedown
                 Session = new GameSession(); InitializationError = null;
                 configuration = ExternalConfiguration.Load(ConfigurationDirectory,settings,level);
                 Campaign = new CampaignState(configuration.Campaign.Stages.Count, Settings.ballsPerRound);
-                if(hasStarted) BeginAttempt(); else SetPhase(AppPhase.Title);
+                if(plannerTestMode) SetPhase(AppPhase.PlannerSelection);
+                else if(hasStarted) BeginAttempt(); else SetPhase(AppPhase.Title);
             }
             catch(Exception exception)
             {
@@ -227,6 +246,59 @@ namespace Holedown
                 Debug.LogError("Initialization failed: " + exception.Message, this);
             }
             finally { transitioning = false; Changed?.Invoke(); }
+        }
+        public int PreviewPlannerEntryBalls(string stageId,PlannerBallMode mode,int manualBalls)
+            => new PlannerTestContext(stageId,mode,manualBalls).Resolve(configuration.Campaign,Settings.ballsPerRound).balls;
+        public void QueuePlannerTest(string stageId,PlannerBallMode mode,int manualBalls)
+        {
+            if(!plannerTestMode || !UserInputAllowed)return;
+            try { requestedPlannerContext=new PlannerTestContext(stageId,mode,manualBalls); QueueCommand(FlowCommand.BeginPlannerTest); }
+            catch(Exception e) { PlannerError=e.Message;Changed?.Invoke(); }
+        }
+        void BeginPlannerTest(PlannerTestContext context)
+        {
+            if(!plannerTestMode || !UserInputAllowed || !EnterTransition())return;
+            try
+            {
+                if(context==null || configuration==null)throw new ArgumentException("Select a valid stage and load configuration first.");
+                var resolved=context.Resolve(configuration.Campaign,Settings.ballsPerRound);
+                plannerContext=context;plannerEntryBalls=resolved.balls;PlannerError=null;InitializationError=null;
+                Campaign=new CampaignState(configuration.Campaign.Stages.Count,Settings.ballsPerRound,resolved.index);
+                ReleasePause();hasStarted=true;BeginAttempt();
+            }
+            catch(Exception e) { PlannerError=e.Message;Changed?.Invoke(); }
+            finally { transitioning=false; }
+        }
+        public void ReturnToPlannerSelection()
+        {
+            if(!plannerTestMode || !UserInputAllowed || !EnterTransition())return;
+            try { ClearAttempt();ReleasePause();plannerContext=null;PlannerError=null;Board=null;Session=new GameSession();SetPhase(AppPhase.PlannerSelection); }
+            finally { transitioning=false; }
+        }
+        void ReloadPlannerTest()
+        {
+            if(!UserInputAllowed || !EnterTransition())return;
+            LoadedConfiguration candidate=null;
+            try
+            {
+                foreach(string name in new[]{"settings.json","level.json"})
+                    if(!System.IO.File.Exists(System.IO.Path.Combine(ConfigurationDirectory,name)))throw new ArgumentException($"Config/{name}: required file is missing; current test preserved.");
+                candidate=ExternalConfiguration.Load(ConfigurationDirectory,settings,level);
+                var resolved=plannerContext?.Resolve(candidate.Campaign,candidate.Settings.ballsPerRound);
+                // Commit only after files, IDs and effective ball count are validated.
+                SetPhase(AppPhase.Loading);ClearAttempt();ReleasePause();
+                var old=configuration;configuration=candidate;candidate=null;old?.Dispose();
+                PlannerError=null;InitializationError=null;
+                if(resolved.HasValue)
+                {
+                    plannerEntryBalls=resolved.Value.balls;
+                    Campaign=new CampaignState(configuration.Campaign.Stages.Count,Settings.ballsPerRound,resolved.Value.index);
+                    BeginAttempt();
+                }
+                else { Campaign=new CampaignState(configuration.Campaign.Stages.Count,Settings.ballsPerRound);Board=null;Session=new GameSession();SetPhase(AppPhase.PlannerSelection); }
+            }
+            catch(Exception e) { PlannerError=e.Message;Changed?.Invoke(); }
+            finally { candidate?.Dispose();transitioning=false; }
         }
         public void RequestPause()
         {

@@ -1,1 +1,1 @@
-{"name":"Holedown.PlayTests","references":["Holedown.Rules","Holedown.Runtime","Unity.InputSystem","Unity.TextMeshPro","Unity.ugui"],"optionalUnityReferences":["TestAssemblies"]}
+{"name":"Holedown.PlayTests","references":["Holedown.Rules","Holedown.Runtime","Unity.InputSystem","Unity.TextMeshPro","Unity.ugui","Unity.Newtonsoft.Json"],"overrideReferences":true,"precompiledReferences":["nunit.framework.dll","Newtonsoft.Json.dll"],"optionalUnityReferences":["TestAssemblies"]}
