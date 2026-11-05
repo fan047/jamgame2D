@@ -60,10 +60,24 @@
     $('selectionTitle').textContent=selected<0?'新增方块':`编辑第 ${selected+1} 块`;$('applyBlock').textContent=selected<0?'新增方块':'应用属性修改';$('deleteBlock').disabled=selected<0;propertyPending=false;
     $('health').removeAttribute('data-path');if(selected>=0)$('health').dataset.path=`${state.blockPath}[${selected}].health`;
   }
+  function layoutName(layout=state.context.layout){return layout<0?'初始棋盘':`补行 ${layout+1}${layout===state.stage.incomingRows.length-1?'（最后一条）':''}`;}
+  function layoutGroup(layout=state.context.layout){return $('board').querySelector(`.layout-group[data-layout="${layout}"]`);}
+  function scrollToLayout(){const group=layoutGroup();if(group){$('board').scrollTop=group.offsetTop;$('board').scrollIntoView({block:'nearest'});}}
   function renderBoard(){
-    const board=$('board'),count=state.context.layout<0?8:1;board.replaceChildren();board.style.gridTemplateRows=`repeat(${count},minmax(0,1fr))`;
-    for(let row=count-1;row>=0;row--)for(let col=0;col<8;col++){const cell=document.createElement('button');cell.className='cell';cell.textContent='+';cell.style.gridColumn=col+1;cell.style.gridRow=count-row;cell.setAttribute('aria-label',`空格 列${col} 行${row}`);cell.onclick=()=>guard(()=>select(-1,col,row));board.append(cell);}
-    state.blocks.forEach((b,i)=>{const button=document.createElement('button');button.className=`block${b.target?' goal':''}${b.rewardBalls?' reward':''}${state.context.selected===i?' selected':''}`;button.style.gridColumn=`${b.column+1} / span ${b.width}`;button.style.gridRow=`${count-b.row-b.height+1} / span ${b.height}`;button.textContent=`${b.target?'★ ':''}${b.health}${b.rewardBalls?` +${b.rewardBalls}`:''}`;button.title=`第 ${i+1} 块，列 ${b.column} 行 ${b.row}，形状 ${b.width}×${b.height}，${roleName(b)}`;button.onclick=()=>guard(()=>select(i));board.append(button);});
+    const board=$('board'),top=board.scrollTop,left=board.scrollLeft;board.replaceChildren();
+    const layouts=[state.stage.initialBlocks,...state.stage.incomingRows.map(r=>r.blocks)];
+    layouts.forEach((blocks,position)=>{
+      const layout=position-1,count=layout<0?8:1,active=layout===state.context.layout;
+      const group=document.createElement('div');group.className='layout-group'+(active?' active':'');group.dataset.layout=layout;
+      const title=document.createElement('h3');title.textContent=layoutName(layout)+(active?' · 当前编辑':'');group.append(title);
+      const columns=document.createElement('div');columns.className='column-labels';columns.setAttribute('aria-hidden','true');
+      for(let col=0;col<8;col++){const label=document.createElement('span');label.textContent=col;columns.append(label);}group.append(columns);
+      const grid=document.createElement('div');grid.className='layout-grid';grid.style.gridTemplateRows=`repeat(${count},minmax(0,1fr))`;grid.setAttribute('aria-label',layoutName(layout));
+      for(let row=count-1;row>=0;row--)for(let col=0;col<8;col++){const cell=document.createElement('button');cell.type='button';cell.className='cell';cell.textContent='+';cell.style.gridColumn=col+1;cell.style.gridRow=count-row;cell.setAttribute('aria-label',`${layoutName(layout)} 空格 列${col} 行${row}`);cell.onclick=()=>guard(()=>select(-1,col,row,layout));grid.append(cell);}
+      blocks.forEach((b,i)=>{const button=document.createElement('button');button.type='button';button.dataset.block=i;button.className=`block${b.target?' goal':''}${b.rewardBalls?' reward':''}${active&&state.context.selected===i?' selected':''}`;button.style.gridColumn=`${b.column+1} / span ${b.width}`;button.style.gridRow=`${count-b.row-b.height+1} / span ${b.height}`;button.textContent=`${b.target?'★ ':''}${b.health}${b.rewardBalls?` +${b.rewardBalls}`:''}`;button.title=`${layoutName(layout)} 第 ${i+1} 块，血量 ${b.health}，列 ${b.column} 行 ${b.row}，形状 ${b.width}×${b.height}，${roleName(b)}`;button.onclick=()=>guard(()=>select(i,null,0,layout));grid.append(button);});
+      group.append(grid);board.append(group);
+    });
+    board.scrollTop=top;board.scrollLeft=left;
   }
   function renderTable(){
     $('blockRows').replaceChildren();state.blocks.forEach((b,i)=>{
@@ -78,7 +92,7 @@
     });
   }
   function render(){numeric.forEach(key=>$(key).value=state.settings[key]);$('settingsVersion').value=state.settings.version;$('levelVersion').value=state.level.version;renderSelectors();fillProperty();renderBoard();renderTable();refresh();}
-  function select(index,column=null,row=0){state.context.selected=index;fillProperty(column??0,row);if(index<0&&column!==null)propertyPending=true;renderBoard();refresh();}
+  function select(index,column=null,row=0,layout=state.context.layout){if(layout!==state.context.layout){state.navigate(state.context.stage,layout,index);renderSelectors();renderTable();}else state.context.selected=index;fillProperty(column??0,row);if(index<0&&column!==null)propertyPending=true;renderBoard();refresh();}
   function propertyBlock(){
     const [width,height]=$('shape').value.split('x').map(Number);
     return {column:$('column').value.trim()===''?NaN:Number($('column').value),row:$('row').value.trim()===''?NaN:Number($('row').value),width,height,health:$('health').value.trim()===''?NaN:Number($('health').value),target:$('role').value==='target',rewardBalls:$('role').value==='reward'?Number($('rewardBalls').value):0};
@@ -89,7 +103,7 @@
     $('placementHint').textContent=error?`未应用：${error}`:'虚线为未应用放置预览；点击应用才写入配置。';
     const count=state.context.layout<0?8:1;
     if(!Number.isInteger(b.column)||!Number.isInteger(b.row)||b.column<0||b.row<0||b.column+b.width>8||b.row+b.height>count)return;
-    const preview=document.createElement('div');preview.className='placement-preview'+(error?' bad':'');preview.style.gridColumn=`${b.column+1} / span ${b.width}`;preview.style.gridRow=`${count-b.row-b.height+1} / span ${b.height}`;preview.textContent=`${b.width}×${b.height} 待应用`;$('board').append(preview);
+    const preview=document.createElement('div');preview.className='placement-preview'+(error?' bad':'');preview.style.gridColumn=`${b.column+1} / span ${b.width}`;preview.style.gridRow=`${count-b.row-b.height+1} / span ${b.height}`;preview.textContent=`${b.width}×${b.height} 待应用`;layoutGroup()?.querySelector('.layout-grid')?.append(preview);
   }
   function applyProperty(){
     const block=propertyBlock();
@@ -114,9 +128,9 @@
   $('duplicateStage').onclick=()=>guard(()=>{state.addStage(true);render();});
   $('deleteStage').onclick=()=>guard(()=>{if(confirm(`删除关卡 ${state.stage.name}（${state.stage.id}）？可撤销。`)){state.deleteStage();render();}});
   $('stageUp').onclick=()=>guard(()=>{state.moveStage(-1);render();});$('stageDown').onclick=()=>guard(()=>{state.moveStage(1);render();});
-  $('layout').onchange=()=>{const target=Number($('layout').value);guard(()=>{state.navigate(state.context.stage,target);render();});renderSelectors();};
+  $('layout').onchange=()=>{const target=Number($('layout').value);guard(()=>{state.navigate(state.context.stage,target);render();scrollToLayout();});renderSelectors();};
   $('newBlock').onclick=()=>guard(()=>select(-1));$('deleteBlock').onclick=()=>guard(()=>{state.deleteBlock();render();});
-  $('addRow').onclick=()=>guard(()=>{state.addRow();render();});$('removeRow').onclick=()=>guard(()=>{if(confirm('删除当前补行及其中全部方块？')){state.removeRow();render();}});
+  $('addRow').onclick=()=>guard(()=>{state.addRow();render();scrollToLayout();});$('removeRow').onclick=()=>guard(()=>{if(confirm('删除当前补行及其中全部方块？')){state.removeRow();render();}});
   $('selectOrdinary').onclick=()=>guard(()=>{state.selectOrdinary();renderTable();refresh();});
   $('selectRewards').onclick=()=>guard(()=>{state.selectRole('reward');renderTable();refresh();});$('selectTargets').onclick=()=>guard(()=>{state.selectRole('target');renderTable();refresh();});
   $('clearChecks').onclick=()=>{state.context.checked=[];renderTable();refresh();};
@@ -135,7 +149,7 @@
   ['settings','level'].forEach(file=>$(file+'Stamp').onclick=()=>guard(()=>{state.perform('生成版本',d=>d[file].version=PlannerState.version());syncHealth();refresh();}));
   function locate(path){
     const clean=path.replace('settings.json','settings').replace('level.json','level');const si=/levels\[(\d+)\]/.exec(clean),li=/incomingRows\[(\d+)\]/.exec(clean),bi=/(?:initialBlocks|\.blocks)\[(\d+)\]/.exec(clean);
-    if(si){state.navigate(Number(si[1]),li?Number(li[1]):-1,bi?Number(bi[1]):-1);render();}
+    if(si){state.navigate(Number(si[1]),li?Number(li[1]):-1,bi?Number(bi[1]):-1);render();scrollToLayout();}
     const input=inputFor(clean);if(input){input.focus();input.scrollIntoView({block:'center'});}else $('board').scrollIntoView({block:'center'});
   }
   $('reset').onclick=()=>guard(()=>{if(!confirm('用默认示例替换当前内容？未导出修改会丢失。'))return;state.replace(PlannerDefaults.settings,PlannerDefaults.level);render();$('source').textContent='当前编辑：成长版内置默认示例，不是游戏当前文件。';});

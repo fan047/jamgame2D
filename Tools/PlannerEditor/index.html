@@ -26,13 +26,13 @@
 </div><p class="hint">版本只用英文字母、数字、点、下划线或连字符（1–32 字符）。默认球直径 0.24，大于标准块间隙 0.1；钻缝需要留出实际通道。</p>
 </section>
 <section>
-<h2>2. 棋盘与补行</h2>
-<div class="actions"><label>关卡 <select id="stage"></select></label><label>编辑布局 <select id="layout"></select></label><button id="addRow" type="button">在末尾新增补行</button><button id="removeRow" type="button">删除当前补行</button></div>
+<h2>2. 整关总览与编辑</h2>
+<div class="actions"><label>关卡 <select id="stage"></select></label><label>跳到布局 <select id="layout"></select></label><button id="addRow" type="button">在末尾新增补行</button><button id="removeRow" type="button">删除当前补行</button></div>
 <div class="actions"><label>关名<input id="stageName" maxlength="40"></label><button id="addStage" type="button">新增关</button><button id="duplicateStage" type="button">复制当前关</button><button id="stageUp" type="button">前移</button><button id="stageDown" type="button">后移</button><button id="deleteStage" type="button">删除当前关</button></div>
 <p id="layoutHint" class="hint"></p><p id="statistics"></p><p id="entryOptions"></p>
 <div class="actions"><button id="selectOrdinary">只选普通块</button><button id="selectRewards">只选奖励块</button><button id="selectTargets">只选目标块</button><button id="clearChecks">清空勾选</button><label>字段<select id="batchField"><option value="health">血量</option><option value="rewardBalls">奖励球数</option></select></label><label>批量 <select id="batchMode"><option value="set">设为</option><option value="add">增加（可填负数）</option><option value="multiply">乘倍率（四舍五入）</option></select></label><input id="batchValue" type="number" step="any" value="1" aria-label="批量数值"><button id="batchApply">应用整批</button></div><p id="batchSummary"></p><p id="batchPreview" role="status"></p><p id="launchAnalysis" class="hint"></p>
 <div class="board-layout">
-<div><div class="column-labels" aria-hidden="true"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span></div><div id="board" role="group" aria-label="8 列棋盘"></div><p class="hint">点击空格定位新增块，点击已有块选中编辑。初始棋盘顶部为第 7 行、底部为第 0 行。此处只显示格子，不模拟球运动。</p></div>
+<div><div id="board" role="group" aria-label="整关总览：初始棋盘与全部补行" tabindex="0"></div><p class="hint">整关八列对齐，向下滚动浏览全部补行；下拉可跳到指定组。点击空格新增，点击方块编辑。初始顶部 row 7、底部 row 0，补行均为局部 row 0；不模拟球运动。</p></div>
 <form id="blockForm">
 <h3 id="selectionTitle">新增方块</h3>
 <div class="fields block-fields">
