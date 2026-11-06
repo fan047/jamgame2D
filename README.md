@@ -1,87 +1,51 @@
-# Holedown 2D 项目导航
+# 水晶矿洞
 
-Unity 2D 弹球消块项目。后续开发以[中期版文档](Docs/README.md)为准，具体功能的交付状态见[团队交接](Docs/中期版/团队交接.md)。
+一款受 **holedown** 启发的 Unity 2D Game Jam 弹球游戏。瞄准发射一串球，利用反弹打碎矿洞里的方块。击碎目标块并完成本轮即可过关。击碎奖励块后，本关通关时会确认奖励，从下一关起每轮可以发射更多球。
 
-## 快速入口
+<img src="Assets/Holedown/Art/Theme/title_logo.png" alt="水晶矿洞游戏徽章" width="240">
 
-- **开发环境**：Unity `6000.4.3f1`，URP、New Input System；用 Unity Hub 打开本目录。
-- **游戏入口**：[SampleScene](Assets/Scenes/SampleScene.unity)，打开后进入 Play Mode，点击“开始游戏”进入第 1 关。左键发射、空格召回、Esc／“暂停”暂停、“继续游戏”恢复。
-- **策划工具**：[离线编辑器](Tools/PlannerEditor/index.html)，用 Chrome / Edge 打开，无需服务器；操作见[快速上手](Tools/PlannerEditor/快速上手.txt)。
-- **项目配置**：[球参数](Config/settings.json)、[关卡](Config/level.json)。工具不会自动读取这两份文件，需手动导入；导出后需手动替换，再在游戏中点击“重载并重开”。
-- **当前试玩包**：`Builds/11/Windows`，内含三关、离线工作台和策划选关测试，游戏沿用构建 10。源码另有首批 8 个音效。正式九关、新背景与策划音效调节是中期版待交付项。[产品与内容](Docs/中期版/产品与内容.md)
+当前交付为**中期预览 · Windows 构建 13**，内含三关、中文占位 UI、八条音效与离线策划工作台。程序支持九关串联与三组背景，正式第 4–9 关和两张新背景待接入。 [构建 13 交付记录](Docs/中期版/构建13交付说明.md)
 
-## 目录职责
+## 运行游戏
 
-| 路径 | 用途与整理约定 |
-|---|---|
-| `Assets/Holedown/Scripts/Rules` | 棋盘、会话、战役规则；程序集 `Holedown.Rules` |
-| `Assets/Holedown/Scripts/Runtime` | Unity 运行时流程、输入、球、棋盘表现、HUD、配置加载；程序集 `Holedown.Runtime` |
-| `Assets/Holedown/Scripts/Editor` | Unity 编辑器与 Windows 构建入口；程序集 `Holedown.Editor` |
-| `Assets/Holedown/Scripts/Tests` | Unity EditMode / PlayMode 测试及各自程序集 |
-| `Assets/Holedown/Art` | 游戏图片与材质，包括现有占位裂痕 |
-| `Assets/Holedown/Audio` | 内置音效 WAV |
-| `Assets/Holedown/Data` | 内置关卡、默认设置、物理材质与 VisualTheme 素材引用配置；分组背景缺图回退既有主题 |
-| `Assets/Holedown/Prefabs` | 球与方块预制体 |
-| `Assets/Scenes` | 游戏场景 |
-| `Assets/Settings` | 渲染管线配置与场景模板 |
-| `Assets/TextMesh Pro` | 字体相关依赖资源 |
-| `Config` | Editor 默认使用、构建时复制的外置配置 |
-| `Config/Examples` | 可选示例，不自动替换正式配置 |
-| `Tools/PlannerEditor` | 离线策划工具源码，浏览器测试与 Node 测试位于其 `tests` 子目录 |
-| `Tools` 下的 `Generate*.cjs` | 配置与测试样本生成脚本，写入范围见下文 |
-| `Tests/Fixtures` | C# / JS 测试共享的 JSON 样本，不是游戏默认配置 |
-| `Docs` | 中期版产品、技术和团队交接，以及成长版和 MVP 历史资料 |
-| `VISUAL_DESIGN.md` | 美术样片阶段参考，保留原路径供追溯 |
-| `Packages`、`ProjectSettings` | Unity 包与项目设置，不作为普通资料移动 |
-| `Locus` | 开发工具配置、知识与工作区相关文件，不混入游戏资源整理 |
+从源码运行需要 **Unity 6000.4.3f1** 和 **Git LFS**。克隆后执行 `git lfs pull` 获取图片、音频和字体，再用 Unity Hub 打开仓库根目录。打开 [SampleScene](Assets/Scenes/SampleScene.unity)，进入 Play Mode 并点击「开始游戏」。
 
-`Config`、`Tests/Fixtures`、`Tools/PlannerEditor` 和场景路径有代码或测试依赖，移动前必须同步检查引用。Unity 资源移动应通过 Unity API 保留 `.meta` 与 GUID。
+已有 Windows 试玩包时，完整解压后运行 `HoledownGrowth.exe`。从源码打包时，在 Unity 安装 Windows x64 Build Support，退出 Play Mode，然后选择 **Holedown → Build Windows Growth**。程序、离线工作台和配置会写入本地的 `Builds/<编号>/Windows`，每次构建使用新编号。构建产物单独分发。
 
-## 配置与试玩
+| 操作 | 输入 |
+| --- | --- |
+| 瞄准与发射 | 移动鼠标瞄准，在棋盘内按左键发射一轮 |
+| 主动召回 | Space 或「召回」 |
+| 暂停 | Esc 或「暂停」 |
+| 恢复 | 「继续游戏」 |
 
-- Editor 默认读取项目根目录的 `Config`；Player 默认读取 exe 同目录的 `Config`。显式配置目录可覆盖默认值。
-- 两份 JSON 都缺失时才回退内置配置；只缺一份或内容非法会报错并停止发射。
-- “重新开始全程”使用已加载快照；普通模式读取磁盘修改需用“重载并重开”，从第一关重开。
-- Player 同目录 `策划测试.cmd` 用 `--planner-test` 启动选关测试，支持基础／满前关／手填球数；该模式重载按稳定 ID 回当前关，失败保留旧局。
-- 工程配置和工具默认值已同步构建 05 策划三关基线，来源哈希见[构建 08 交付说明](Docs/成长版/九关程序扩展预览交付说明.md)。
-- [竖块示例](Config/Examples/level-vertical.json)需先备份原配置，再复制为 `Config/level.json`；体验后恢复备份并重载。示例不是正式默认种子。
-- 当前操作细节见[策划快速上手](Tools/PlannerEditor/快速上手.txt)，中期版配置及兼容性见[技术方案与验收](Docs/中期版/技术方案与验收.md)。
+球全部收回后进行结算。目标块还在时，棋盘会上移并从底部补行。方块触及危险线会失败，可以重试当前关。
 
-## 测试入口
+## 策划工作台
 
-### Unity
+用 Chrome 或 Edge 打开[离线工作台](Tools/PlannerEditor/index.html)，无需启动服务器。可以新增、复制、重排关卡，浏览整关布局，批量改血量和奖励，也可以试听、调整音量、静音或替换内置音效。
 
-在 Unity Test Runner 中选择相应模式与程序集：
+| 配置 | 编辑和应用 |
+| --- | --- |
+| `settings.json`、`level.json` | 在工作台同时导入两份文件，编辑后分别导出。放回 `Config`，在策划测试暂停菜单点「重载当前关」。正式模式的「重载并重开」会回到第 1 关。 |
+| 可选的 `audio.json` | 在「音效」页单独导入或导出。放回 `Config`，在策划测试暂停菜单点「重载音效」，可继续当前一局。普通模式启动时也会读取音效配置。 |
 
-- EditMode：`Holedown.EditTests`，源码位于 `Assets/Holedown/Scripts/Tests/EditMode`。
-- PlayMode：`Holedown.PlayTests`，源码位于 `Assets/Holedown/Scripts/Tests/PlayMode`。
+Unity Editor 读取项目根目录的 `Config`，Windows 试玩包读取 exe 同目录的 `Config`。双击试玩包里的「策划测试.cmd」可直达指定关，入关球数可选基础值、满前关奖励或手填。 [策划快速上手](Tools/PlannerEditor/快速上手.txt)
 
-运行前保存编辑中的场景。本文不把历史交付中的测试结果视为当前工作区的验证结果。
+## 开发与验证
 
-### Node
+| 目录 | 内容 |
+| --- | --- |
+| [Assets/Holedown/Scripts](Assets/Holedown/Scripts) | 棋盘与成长规则、Unity 运行时、构建入口和测试 |
+| [Assets/Holedown](Assets/Holedown) | 游戏图片、预制体、音频与数据资产 |
+| [Config](Config) | 球参、关卡配置与可选示例 |
+| [Tools/PlannerEditor](Tools/PlannerEditor) | 离线工作台源码与前端测试 |
+| [Docs](Docs/README.md) | 中期版产品、技术、团队交接与历史资料 |
 
-在项目根目录运行（需安装 Node.js）：
+Unity 回归可在 Test Runner 中运行 `Holedown.EditTests` 和 `Holedown.PlayTests`。工作台的配置与音效核心测试可在仓库根目录使用 Node.js 运行。
 
 ```sh
-node --test Tools/PlannerEditor/tests/model.test.cjs Tools/PlannerEditor/tests/state.test.cjs Tools/PlannerEditor/tests/p1.test.cjs
+node --test Tools/PlannerEditor/tests/model.test.cjs Tools/PlannerEditor/tests/state.test.cjs Tools/PlannerEditor/tests/audio.test.cjs
 ```
 
-真实浏览器测试另见 `Tools/PlannerEditor/tests/browser.test.cjs`、`growth.browser.cjs`、`p1.browser.cjs`；运行前检查脚本所需环境，不包含在上面的纯 Node 测试命令中。
-
-## 构建与生成脚本
-
-- Unity 菜单：`Holedown > Build Windows Growth`，需要 Windows x64 Build Support，并退出 Play Mode。
-- 构建实现：[WindowsBuild.cs](Assets/Holedown/Scripts/Editor/WindowsBuild.cs)。每次自动创建 `Builds/01`、`Builds/02`……，不覆盖旧包，也不补用旧编号空缺。
-- 每个编号目录由脚本生成 `Windows/HoledownGrowth.exe`、配套运行文件、配置、策划工具与 `build-result.txt`。ZIP 和交付说明不是该构建方法自动生成的内容，需要单独准备。
-- 新包复制项目当前配置，不会自动继承旧包调参；分发必须保留完整运行目录，不能只复制 exe。
-
-以下脚本会写文件，不要把它们当只读校验命令：
-
-| 脚本 | 写入范围与注意事项 |
-|---|---|
-| [GenerateGrowthConfig.cjs](Tools/GenerateGrowthConfig.cjs) | 从 Git 历史提交 `b0244f9` 生成 `Tests/Fixtures/legacy-level.json`、`growth-level.json`；加 `--publish` 还会覆盖 `Config/level.json` 和 `Tools/PlannerEditor/defaults.js`，运行前备份调参 |
-| [GenerateP1Example.cjs](Tools/GenerateP1Example.cjs) | 根据当前 `Config/level.json` 覆盖 `Config/Examples/level-vertical.json`，不修改默认关卡 |
-
-## 自动生成与本地文件
-
-`Library`、`Temp`、`Obj`、`Logs`、`Builds`、`UserSettings` 及根目录 `.csproj`、`.slnx` 等由 Unity、IDE 或构建产生，已有忽略规则；不需要为整理源码而移动或删除。历史构建应保留在各自独立目录中。
+浏览器自动化需要 Playwright 和 Chrome，入口见[工作台测试目录](Tools/PlannerEditor/tests)。素材出处见[美术来源](Docs/成长版/美术素材来源清单.md)与[音效授权记录](Docs/成长版/首批音效素材来源.md)。
