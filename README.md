@@ -1,6 +1,6 @@
 # Holedown 2D 项目导航
 
-Unity 2D 弹球消块项目。此页整理工程入口与目录职责；功能交付状态以对应交付说明为准，后续设计方案不代表已实现。
+Unity 2D 弹球消块项目。后续开发以[中期版文档](Docs/README.md)为准，具体功能的交付状态见[团队交接](Docs/中期版/团队交接.md)。
 
 ## 快速入口
 
@@ -8,7 +8,7 @@ Unity 2D 弹球消块项目。此页整理工程入口与目录职责；功能�
 - **游戏入口**：[SampleScene](Assets/Scenes/SampleScene.unity)，打开后进入 Play Mode，点击“开始游戏”进入第 1 关。左键发射、空格召回、Esc／“暂停”暂停、“继续游戏”恢复。
 - **策划工具**：[离线编辑器](Tools/PlannerEditor/index.html)，用 Chrome / Edge 打开，无需服务器；操作见[快速上手](Tools/PlannerEditor/快速上手.txt)。
 - **项目配置**：[球参数](Config/settings.json)、[关卡](Config/level.json)。工具不会自动读取这两份文件，需手动导入；导出后需手动替换，再在游戏中点击“重载并重开”。
-- **当前交付**：[关卡工作台重设计 · 交付 11](Docs/成长版/策划工具工作台重设计交付说明.md)，目录 `Builds/11/Windows`；数值表独占整行，重排预览／属性／批量编辑，完善窄窗口适配。本次只更新网页工具，游戏沿用[全中文构建 10](Docs/成长版/全中文界面交付说明.md)。继承[构建 09](Docs/成长版/策划工具整关总览交付说明.md)的整关浏览与跨组编辑，以及[构建 08](Docs/成长版/九关程序扩展预览交付说明.md)的九关程序与指定关测试能力。正式配置仍为策划确认的三关；正式九关及两张新背景待提供。现有美术接入见[构建 05](Docs/成长版/正式美术样片交付说明.md)，正式 UI 见[开放简报](Docs/成长版/UI美术制作清单.md)。
+- **当前试玩包**：`Builds/11/Windows`，内含三关、离线工作台和策划选关测试，游戏沿用构建 10。源码另有首批 8 个音效。正式九关、新背景与策划音效调节是中期版待交付项。[产品与内容](Docs/中期版/产品与内容.md)
 
 ## 目录职责
 
@@ -19,6 +19,7 @@ Unity 2D 弹球消块项目。此页整理工程入口与目录职责；功能�
 | `Assets/Holedown/Scripts/Editor` | Unity 编辑器与 Windows 构建入口；程序集 `Holedown.Editor` |
 | `Assets/Holedown/Scripts/Tests` | Unity EditMode / PlayMode 测试及各自程序集 |
 | `Assets/Holedown/Art` | 游戏图片与材质，包括现有占位裂痕 |
+| `Assets/Holedown/Audio` | 内置音效 WAV |
 | `Assets/Holedown/Data` | 内置关卡、默认设置、物理材质与 VisualTheme 素材引用配置；分组背景缺图回退既有主题 |
 | `Assets/Holedown/Prefabs` | 球与方块预制体 |
 | `Assets/Scenes` | 游戏场景 |
@@ -29,8 +30,8 @@ Unity 2D 弹球消块项目。此页整理工程入口与目录职责；功能�
 | `Tools/PlannerEditor` | 离线策划工具源码，浏览器测试与 Node 测试位于其 `tests` 子目录 |
 | `Tools` 下的 `Generate*.cjs` | 配置与测试样本生成脚本，写入范围见下文 |
 | `Tests/Fixtures` | C# / JS 测试共享的 JSON 样本，不是游戏默认配置 |
-| `Docs` | 分阶段设计、技术、使用与交付文档，见文档索引 |
-| `VISUAL_DESIGN.md` | 美术素材交接约定，保留原路径供现有文档引用 |
+| `Docs` | 中期版产品、技术和团队交接，以及成长版和 MVP 历史资料 |
+| `VISUAL_DESIGN.md` | 美术样片阶段参考，保留原路径供追溯 |
 | `Packages`、`ProjectSettings` | Unity 包与项目设置，不作为普通资料移动 |
 | `Locus` | 开发工具配置、知识与工作区相关文件，不混入游戏资源整理 |
 
@@ -42,9 +43,9 @@ Unity 2D 弹球消块项目。此页整理工程入口与目录职责；功能�
 - 两份 JSON 都缺失时才回退内置配置；只缺一份或内容非法会报错并停止发射。
 - “重新开始全程”使用已加载快照；普通模式读取磁盘修改需用“重载并重开”，从第一关重开。
 - Player 同目录 `策划测试.cmd` 用 `--planner-test` 启动选关测试，支持基础／满前关／手填球数；该模式重载按稳定 ID 回当前关，失败保留旧局。
-- 文档总览见 [Docs/README.md](Docs/README.md)；工程配置和工具默认值已同步构建 05 策划三关基线，来源哈希见构建 08 交付说明。
+- 工程配置和工具默认值已同步构建 05 策划三关基线，来源哈希见[构建 08 交付说明](Docs/成长版/九关程序扩展预览交付说明.md)。
 - [竖块示例](Config/Examples/level-vertical.json)需先备份原配置，再复制为 `Config/level.json`；体验后恢复备份并重载。示例不是正式默认种子。
-- 配置版本兼容性、操作细节和限制见[策划快速上手](Tools/PlannerEditor/快速上手.txt)与[P1 交付说明](Docs/成长版/P1交付说明.md)。
+- 当前操作细节见[策划快速上手](Tools/PlannerEditor/快速上手.txt)，中期版配置及兼容性见[技术方案与验收](Docs/中期版/技术方案与验收.md)。
 
 ## 测试入口
 
