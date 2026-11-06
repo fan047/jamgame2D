@@ -54,7 +54,7 @@ namespace Holedown.Tests
                     foreach(char character in text.text)if(!char.IsWhiteSpace(character))Assert.IsTrue(font.HasCharacter(character,true,true),"Missing glyph: "+character);
                     count++;
                 }
-                Assert.AreEqual(17,count);
+                Assert.AreEqual(20,count);
                 var block=AssetDatabase.LoadAssetAtPath<BlockView>("Assets/Holedown/Prefabs/Block.prefab");
                 Assert.AreSame(font,block.GetComponentInChildren<TMP_Text>(true).font);
             }

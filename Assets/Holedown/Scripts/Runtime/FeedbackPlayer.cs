@@ -16,6 +16,39 @@ namespace Holedown
         AudioClip fallbackHit;
         float nextHitTime, nextBreakTime;
         public int SoundsPlayed { get; private set; }
+        AudioSnapshot audioConfiguration=new AudioSnapshot();
+        public string AudioVersion => audioConfiguration.Version;
+        public string AudioError { get; private set; }
+        public event System.Action AudioChanged;
+        public AudioCue? LastCue { get; private set; }
+        public float LastCueGain { get; private set; }
+        public AudioClip ConfiguredClip(AudioCue cue) => audioConfiguration.Cues[(int)cue].Replacement ? audioConfiguration.Cues[(int)cue].Replacement : DefaultClip(cue);
+        AudioClip DefaultClip(AudioCue cue) => cue switch
+        {
+            AudioCue.VolleyLaunch=>launchSound,AudioCue.BlockHit=>hitSound?hitSound:fallbackHit,AudioCue.BlockBreak=>breakSound,AudioCue.RewardBreak=>rewardSound,
+            AudioCue.StageClear=>winSound,AudioCue.StageFail=>lossSound,AudioCue.ManualRecall=>recallSound,AudioCue.UiConfirm=>confirmSound,_=>null
+        };
+        IEnumerator Start()
+        {
+            while(flow && flow.ConfigurationDirectory==null)yield return null;
+            if(flow)LoadAudio();
+        }
+        bool LoadAudio()
+        {
+            try
+            {
+                var candidate=AudioConfiguration.Read(flow.ConfigurationDirectory);
+                StopSounds();var old=audioConfiguration;audioConfiguration=candidate;AudioError=null;old.Dispose();
+                AudioChanged?.Invoke();return true;
+            }
+            catch(System.Exception error){AudioError=error.Message;AudioChanged?.Invoke();return false;}
+        }
+        public bool ReloadAudio()
+        {
+            if(!flow.IsPlannerTest || flow.Phase!=AppPhase.Paused || !flow.UserInputAllowed)return false;
+            bool success=LoadAudio();if(success)PlayConfirm();return success;
+        }
+        void StopSounds(){if(audioSource)audioSource.Stop();if(accentSource)accentSource.Stop();if(uiSource)uiSource.Stop();}
 
         void Awake()
         {
@@ -70,52 +103,52 @@ namespace Holedown
             Clear();
         }
 
-        void PlayLaunch() => PlaySound(audioSource, launchSound, 0.65f);
-        void PlayRecall() => PlaySound(accentSource, recallSound, 0.7f);
-        void PlayConfirm() => PlaySound(uiSource, confirmSound, 0.35f);
+        void PlayLaunch() => PlaySound(audioSource, AudioCue.VolleyLaunch, 0.65f);
+        void PlayRecall() => PlaySound(accentSource, AudioCue.ManualRecall, 0.7f);
+        void PlayConfirm() => PlaySound(uiSource, AudioCue.UiConfirm, 0.35f);
 
         void PlayResult(SessionPhase phase)
         {
-            if (phase == SessionPhase.Won) PlaySound(accentSource, winSound, 0.9f);
-            if (phase == SessionPhase.Lost) PlaySound(accentSource, lossSound, 0.8f);
+            if (phase == SessionPhase.Won) PlaySound(accentSource, AudioCue.StageClear, 0.9f);
+            if (phase == SessionPhase.Lost) PlaySound(accentSource, AudioCue.StageFail, 0.8f);
         }
 
-        static bool PlaySound(AudioSource source, AudioClip clip, float gain)
+        bool PlaySound(AudioSource source, AudioCue slot, float gain)
         {
-            if (!source || !clip) return false;
-            source.PlayOneShot(clip, gain);
+            var cue=audioConfiguration.Cues[(int)slot];var clip=ConfiguredClip(slot);
+            if (!source || !clip || cue.Muted || cue.VolumePercent==0) return false;
+            gain*=cue.VolumePercent/100f;source.PlayOneShot(clip, gain);
+            LastCue=slot;LastCueGain=gain;
             return true;
         }
 
         void Clear()
         {
             StopAllCoroutines();
-            if (audioSource) audioSource.Stop();
-            if (accentSource) accentSource.Stop();
-            if (uiSource) uiSource.Stop();
+            StopSounds();
             nextHitTime = nextBreakTime = 0;
             foreach(Transform child in transform)Destroy(child.gameObject);
         }
-        void OnDestroy() { if(fallbackHit) Destroy(fallbackHit); }
+        void OnDestroy() { audioConfiguration.Dispose();if(fallbackHit) Destroy(fallbackHit); }
 
         void PlayBlockSound(HitResult hit)
         {
             if (!hit.Destroyed)
             {
-                if (Time.time < nextHitTime || !PlaySound(audioSource, hitSound ? hitSound : fallbackHit, 0.3f)) return;
+                if (Time.time < nextHitTime || !PlaySound(audioSource, AudioCue.BlockHit, 0.3f)) return;
                 nextHitTime = Time.time + 0.05f;
             }
             else if (hit.RewardBalls > 0)
             {
-                if (!PlaySound(accentSource, rewardSound, 0.95f)) return;
+                if (!PlaySound(accentSource, AudioCue.RewardBreak, 0.95f)) return;
             }
             else if (hit.IsTarget)
             {
-                if (!PlaySound(accentSource, breakSound, 0.72f)) return;
+                if (!PlaySound(accentSource, AudioCue.BlockBreak, 0.72f)) return;
             }
             else
             {
-                if (Time.time < nextBreakTime || !PlaySound(audioSource, breakSound, 0.42f)) return;
+                if (Time.time < nextBreakTime || !PlaySound(audioSource, AudioCue.BlockBreak, 0.42f)) return;
                 nextBreakTime = Time.time + 0.08f;
             }
             SoundsPlayed++;
