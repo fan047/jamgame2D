@@ -70,7 +70,7 @@ namespace Holedown.Editor
             string examples=Path.Combine(config,"Examples");Directory.CreateDirectory(examples);
             string verticalExample=Path.Combine(examples,"level-vertical.json");
             if(!File.Exists(verticalExample))File.Copy("Config/Examples/level-vertical.json",verticalExample);
-            foreach(string name in new[]{"index.html","config-model.js","defaults.js","editor-state.js","editor.js","styles.css"})
+            foreach(string name in new[]{"index.html","config-model.js","defaults.js","editor-state.js","editor.js","styles.css","audio-model.js","audio-defaults.js","audio-editor.js"})
                 File.Copy(Path.Combine("Tools/PlannerEditor",name),Path.Combine(editor,name),true);
             string notices=Path.Combine(outputDirectory,"ThirdPartyNotices");Directory.CreateDirectory(notices);
             File.Copy("Assets/Holedown/Fonts/NotoSansCJK/OFL.txt",Path.Combine(notices,"NotoSansCJK-OFL.txt"),true);

@@ -146,6 +146,27 @@ tbody tr:hover { background: #244257; }
 td input[type=number] { width: 100%; min-width: 120px; max-width: 200px; }
 td button { min-width: 36px; min-height: 32px; padding: 3px 8px; }
 .narrow-table-hint { display: none; margin: 8px 0 0; }
+.audio-tools { padding: 12px; background: var(--inset); border: 1px solid var(--line); border-radius: 6px; }
+.audio-tools label { flex-wrap: wrap; }
+#audioVersion { width: 190px; }
+#audioStatus { text-align: right; }
+.audio-scroll { margin-top: 4px; }
+#audioTable { width: 100%; min-width: 980px; border-collapse: collapse; table-layout: fixed; font-size: 14px; }
+.audio-name-column { width: 92px; }
+.audio-key-column { width: 142px; }
+.audio-hint-column { width: 250px; }
+.audio-volume-column { width: 110px; }
+.audio-mute-column { width: 74px; }
+.audio-clip-column { width: 118px; }
+.audio-actions-column { width: 250px; }
+#audioTable .cue-hint { white-space: normal; color: var(--muted); font-size: 13px; line-height: 1.5; }
+#audioTable code { white-space: nowrap; font-size: 12px; }
+#audioTable td input[type=number] { width: 90px; min-width: 90px; }
+#audioTable .cue-actions { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+#audioTable button, #audioTable .button.small { min-height: 32px; padding: 3px 10px; font-size: 13px; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 999px; background: #24405a; color: #b9d4e6; font-size: 12px; white-space: nowrap; }
+.badge.custom { background: #3d2f58; color: #dcc6ff; }
+#audioPreviewJson { max-height: 320px; overflow: auto; }
 .file-status { display: flex; flex-wrap: wrap; gap: 8px 24px; color: var(--muted); font-size: 13px; }
 #validation { border-radius: 6px; padding: 16px; background: #173e3a; border: 1px solid #558d80; overflow-wrap: anywhere; }
 #validation.invalid { background: #492d37; border-color: #b57688; color: #ffe1e6; }
@@ -189,8 +210,7 @@ dialog::backdrop { background: #060e19bb; }
   .stage-selectors { padding: 10px; }
   .stage-selectors label { width: 100%; flex-wrap: wrap; }
   .stage-selectors select { width: 100%; }
-  .stage-tools label { width: 100%; }
-  #stageName { flex: 1; width: 0; }
+  .stage-tools label { width: 100%; }  #stageName { flex: 1; width: 0; }
   .editor-inspector { padding: 14px; }
   .fields { gap: 12px; }
   .batch-controls { padding-left: 10px; padding-right: 10px; }

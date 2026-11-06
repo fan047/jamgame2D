@@ -44,7 +44,7 @@ for(const [width,height] of [[1920,1080],[1440,900],[1152,720],[960,600],[768,90
    await page.locator('#values').screenshot({path:path.join(out,`${width}-values.png`)});
    const reward=page.locator('#blockRows input[data-path$=".rewardBalls"]').first();
    await reward.click();await reward.fill('0');
-   const scroll=await page.locator('.table-scroll').evaluate(e=>({client:e.clientWidth,scroll:e.scrollWidth,left:e.scrollLeft}));
+   const scroll=await page.locator('#values .table-scroll').evaluate(e=>({client:e.clientWidth,scroll:e.scrollWidth,left:e.scrollLeft}));
    if(width<=768){assert.ok(scroll.scroll>scroll.client);assert.ok(scroll.left>0,'Right-side input must remain reachable by local scrolling');}
    await reward.press('Tab');
    await page.locator('#undo').click();

@@ -5,7 +5,7 @@
 <a class="skip-link" href="#workspace">跳到关卡编辑</a>
 <header class="app-header">
 <div class="brand"><span class="crystal-mark" aria-hidden="true"></span><div><h1>水晶矿洞<span>关卡工作台</span></h1><p>离线编辑，本地导出，不上传文件</p></div></div>
-<nav aria-label="工作区导航"><a href="#workspace">关卡编辑</a><a href="#values">数值表</a><a href="#settings">球参数</a><a href="#delivery">校验与导出</a></nav>
+<nav aria-label="工作区导航"><a href="#workspace">关卡编辑</a><a href="#values">数值表</a><a href="#audio">音效</a><a href="#settings">球参数</a><a href="#delivery">校验与导出</a></nav>
 </header>
 <main>
 <section class="notice" aria-label="配置来源">
@@ -45,6 +45,14 @@
 <p class="hint narrow-table-hint">表格可左右滚动，数值列保留完整输入宽度。</p>
 </div>
 </section>
+<section id="audio">
+<div class="section-heading"><div><h2>音效</h2><p class="hint">全关共用一份配置，单独导出 audio.json。换素材保留该条音量和静音；普通块与目标块共用碎裂设置。</p></div><span class="hint" id="audioStatus" role="status"></span></div>
+<div class="actions audio-tools"><label>音效版本<input id="audioVersion" value="audio-1" maxlength="32" autocomplete="off"></label><button id="audioStamp" type="button">生成音效版本</button><label class="button">导入 audio.json<input id="audioImport" type="file" accept=".json,application/json" hidden></label><button id="exportAudio" class="primary" type="button">下载 audio.json</button><button id="audioResetAll" type="button">全部恢复默认</button></div>
+<p class="hint">试听与导出用同一份数据：任何可解码的 WAV 都会转换为 48 kHz、16-bit 单声道 PCM，最长 3 秒；无效或超长会指出原因并保留原素材。</p>
+<div class="table-scroll audio-scroll" role="region" aria-label="音效配置表，可横向滚动" tabindex="0"><table id="audioTable"><colgroup><col class="audio-name-column"><col class="audio-key-column"><col class="audio-hint-column"><col class="audio-volume-column"><col class="audio-mute-column"><col class="audio-clip-column"><col class="audio-actions-column"></colgroup><thead><tr><th scope="col">槽位</th><th scope="col">键名</th><th scope="col">播放时机</th><th scope="col">音量 %</th><th scope="col">静音</th><th scope="col">当前素材</th><th scope="col">操作</th></tr></thead><tbody id="audioRows"></tbody></table></div>
+<details class="analysis-details"><summary>查看导出的 audio.json</summary><pre id="audioPreviewJson"></pre></details>
+<p class="hint">把 audio.json 放到游戏 exe 同目录的 Config 后，在策划测试暂停菜单点「重载音效」即可在当前局比较；普通游戏启动时读取同一个文件，坏文件会提示并回退内置音效。</p>
+</section>
 <section id="settings">
 <div class="section-heading"><div><h2>球参数与配置版本</h2><p class="hint">全局参数影响所有关卡，修改后重新导出。</p></div><a href="#workspace">回到关卡</a></div>
 <p class="file-status">settings.json：<strong id="settingsStatus"></strong><span>level.json：<strong id="levelStatus"></strong></span></p>
@@ -71,5 +79,5 @@
 <div id="message" role="alert" aria-live="assertive"></div>
 </main>
 <dialog id="draftDialog"><h3>有尚未应用的属性</h3><p>位置、形状或类型修改尚未应用。请选择如何处理，再继续操作。</p><div class="actions"><button id="draftApply">应用并继续</button><button id="draftDiscard">丢弃并继续</button><button id="draftCancel">取消操作</button></div></dialog>
-<script src="config-model.js"></script><script src="defaults.js"></script><script src="editor-state.js"></script><script src="editor.js"></script>
+<script src="config-model.js"></script><script src="defaults.js"></script><script src="editor-state.js"></script><script src="audio-model.js"></script><script src="audio-defaults.js"></script><script src="editor.js"></script><script src="audio-editor.js"></script>
 </body></html>
