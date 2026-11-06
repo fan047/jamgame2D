@@ -35,6 +35,7 @@ namespace Holedown.Tests
             var audio=AudioConfiguration.Parse("{\"schemaVersion\":1,\"version\":\"v\",\"cues\":{\"block_hit\":{\"wavBase64\":\""+Convert.ToBase64String(bytes)+"\"}}}");
             var clip=audio.Cues[1].Replacement;Assert.AreEqual(48000,clip.frequency);Assert.AreEqual(1,clip.channels);audio.Dispose();Assert.IsFalse(clip);
         }
+        [Test] public void JsonSyntaxErrorsAreReportedInChinese(){var error=Assert.Throws<ArgumentException>(()=>AudioConfiguration.Parse("{\"schemaVersion\":1,\"version\":\"broken\""));StringAssert.StartsWith("audio.json：JSON 格式错误",error.Message);StringAssert.DoesNotContain("Unexpected",error.Message);StringAssert.DoesNotContain("JObject",error.Message);}
         [Test] public void WaveRejectsTruncationStereoWrongRateEmptyAndOverThreeSeconds()
         {
             var bytes=File.ReadAllBytes("Assets/Holedown/Audio/block_hit.wav");

@@ -80,7 +80,12 @@ namespace Holedown
             catch(Exception error)
             {
                 candidate.Dispose();
-                if(error is JsonException)throw new ArgumentException("audio.json：JSON 格式错误，"+error.Message,error);
+                if(error is JsonReaderException reader)
+                {
+                    string where=reader.LineNumber>0?$"第 {reader.LineNumber+1} 行，第 {reader.LinePosition+1} 列" : "请检查逗号、引号与重复字段";
+                    throw new ArgumentException("audio.json：JSON 格式错误（"+where+"）。",error);
+                }
+                if(error is JsonException)throw new ArgumentException("audio.json：JSON 格式错误，请检查逗号、引号与重复字段。",error);
                 throw;
             }
         }
