@@ -34,6 +34,10 @@ namespace Holedown
         public BoardState Board { get; private set; }
         public string InitializationError { get; private set; }
         public event Action<BlockView, HitResult> BlockHit;
+        public event Action VolleyLaunched;
+        public event Action ManualRecallAccepted;
+        public event Action<SessionPhase> RoundSettled;
+        public event Action CommandConfirmed;
         public event Action Changed;
         public event Action AttemptReset;
         public CampaignState Campaign { get; private set; }
@@ -150,7 +154,7 @@ namespace Holedown
         public void StartGame()
         {
             if(Phase != AppPhase.Title || configuration == null || !UserInputAllowed || !EnterTransition()) return;
-            try { hasStarted = true; BeginAttempt(); } finally { transitioning = false; }
+            try { hasStarted = true; BeginAttempt(); CommandConfirmed?.Invoke(); } finally { transitioning = false; }
         }
         public bool TryFire(Vector2 direction)
         {
@@ -165,6 +169,7 @@ namespace Holedown
         IEnumerator LaunchVolley(Guid session, int volley, Vector2 direction)
         {
             var interval = new WaitForSeconds(Settings.launchInterval);
+            bool firstBall = true;
             while (Session.SessionId == session && Session.VolleyId == volley && Session.Phase == SessionPhase.Volley && Session.Pending > 0)
             {
                 while(!CanSimulate) yield return null;
@@ -172,6 +177,11 @@ namespace Holedown
                 var ball = Instantiate(ballPrefab, AimInput.Origin, Quaternion.identity);
                 balls.Add(id,ball); ball.Hit += OnHit; ball.Returned += OnReturned;
                 ball.Launch(Settings,session,volley,id,direction);
+                if (firstBall)
+                {
+                    firstBall = false;
+                    VolleyLaunched?.Invoke();
+                }
                 Changed?.Invoke();
                 yield return interval;
             }
@@ -193,13 +203,16 @@ namespace Holedown
             balls.Remove(ball.BallId); ball.Hit -= OnHit; ball.Returned -= OnReturned;
             Changed?.Invoke();
         }
-        public void RequestRecall()
+        public void RequestRecall() => Recall(manual: true);
+
+        void Recall(bool manual)
         {
             if (!CanSimulate || !UserInputAllowed || transitionFrame == Time.frameCount || Session == null || !Session.Recall()) return;
             InvalidateInput();
             if (launching != null) { StopCoroutine(launching); launching = null; }
             var returning = new List<BallActor>(balls.Values);
             foreach (var ball in returning) ball.Return();
+            if (manual) ManualRecallAccepted?.Invoke();
             Changed?.Invoke();
         }
         bool EnterTransition()
@@ -211,19 +224,19 @@ namespace Holedown
         {
             if(plannerTestMode)return;
             if(!CanSimulate || !UserInputAllowed || Session?.Phase!=SessionPhase.Won || Campaign==null || Campaign.IsFinalStage || !EnterTransition())return;
-            try{if(Campaign.NextStage())BeginAttempt();}finally{transitioning=false;}
+            try { if (Campaign.NextStage()) { BeginAttempt(); CommandConfirmed?.Invoke(); } } finally { transitioning = false; }
         }
         public void RetryStage()
         {
             if(plannerTestMode){BeginPlannerTest(plannerContext);return;}
             if(!CanSimulate || !UserInputAllowed || Session?.Phase!=SessionPhase.Lost || Campaign==null || !EnterTransition())return;
-            try{if(Campaign.RetryStage())BeginAttempt();}finally{transitioning=false;}
+            try { if (Campaign.RetryStage()) { BeginAttempt(); CommandConfirmed?.Invoke(); } } finally { transitioning = false; }
         }
         public void RestartRun()
         {
             if(plannerTestMode){ReturnToPlannerSelection();return;}
             if(!CanSimulate || !UserInputAllowed || Campaign==null || !EnterTransition())return;
-            try{Campaign.RestartRun();BeginAttempt();}finally{transitioning=false;}
+            try { Campaign.RestartRun(); BeginAttempt(); CommandConfirmed?.Invoke(); } finally { transitioning = false; }
         }
         public void Restart() => ReloadAndRestart();
         public void ReloadAndRestart()
@@ -239,6 +252,7 @@ namespace Holedown
                 Campaign = new CampaignState(configuration.Campaign.Stages.Count, Settings.ballsPerRound);
                 if(plannerTestMode) SetPhase(AppPhase.PlannerSelection);
                 else if(hasStarted) BeginAttempt(); else SetPhase(AppPhase.Title);
+                CommandConfirmed?.Invoke();
             }
             catch(Exception exception)
             {
@@ -265,6 +279,7 @@ namespace Holedown
                 plannerContext=context;plannerEntryBalls=resolved.balls;PlannerError=null;InitializationError=null;
                 Campaign=new CampaignState(configuration.Campaign.Stages.Count,Settings.ballsPerRound,resolved.index);
                 ReleasePause();hasStarted=true;BeginAttempt();
+                CommandConfirmed?.Invoke();
             }
             catch(Exception e) { PlannerError=e.Message;Changed?.Invoke(); }
             finally { transitioning=false; }
@@ -272,7 +287,7 @@ namespace Holedown
         public void ReturnToPlannerSelection()
         {
             if(!plannerTestMode || !UserInputAllowed || !EnterTransition())return;
-            try { ClearAttempt();ReleasePause();plannerContext=null;PlannerError=null;Board=null;Session=new GameSession();SetPhase(AppPhase.PlannerSelection); }
+            try { ClearAttempt();ReleasePause();plannerContext=null;PlannerError=null;Board=null;Session=new GameSession();SetPhase(AppPhase.PlannerSelection); CommandConfirmed?.Invoke(); }
             finally { transitioning=false; }
         }
         void ReloadPlannerTest()
@@ -296,20 +311,24 @@ namespace Holedown
                     BeginAttempt();
                 }
                 else { Campaign=new CampaignState(configuration.Campaign.Stages.Count,Settings.ballsPerRound);Board=null;Session=new GameSession();SetPhase(AppPhase.PlannerSelection); }
+                CommandConfirmed?.Invoke();
             }
             catch(Exception e) { PlannerError=e.Message;Changed?.Invoke(); }
             finally { candidate?.Dispose();transitioning=false; }
         }
-        public void RequestPause()
+        public void RequestPause() => Pause(manual: true);
+
+        void Pause(bool manual)
         {
             if(!CanSimulate || (Session?.Phase != SessionPhase.Aiming && Session?.Phase != SessionPhase.Volley && Session?.Phase != SessionPhase.Recalling)) return;
             savedTimeScale = Time.timeScale; ownsPause = true; Time.timeScale = 0;
             SetPhase(AppPhase.Paused); PauseChanged?.Invoke(true);
+            if (manual) CommandConfirmed?.Invoke();
         }
         public void ContinueGame()
         {
             if(Phase != AppPhase.Paused || !UserInputAllowed || !EnterTransition()) return;
-            try { ReleasePause(); SetPhase(AppPhase.Playing); } finally { transitioning = false; }
+            try { ReleasePause(); SetPhase(AppPhase.Playing); CommandConfirmed?.Invoke(); } finally { transitioning = false; }
         }
         void ReleasePause()
         {
@@ -318,7 +337,7 @@ namespace Holedown
         }
         void OnApplicationFocus(bool focused)
         {
-            if(!focused) RequestPause();
+            if(!focused) Pause(manual: false);
             HasFocus = focused; InvalidateInput();
             if(input) input.FocusChanged(focused);
             aim.CanAim = CanSimulate && Session?.Phase == SessionPhase.Aiming;
@@ -328,7 +347,7 @@ namespace Holedown
         {
             DispatchInput();
             if(!CanSimulate || Session == null) return;
-            if(Session.Phase == SessionPhase.Volley && Time.time-volleyStarted >= Settings.recallTimeout) RequestRecall();
+            if(Session.Phase == SessionPhase.Volley && Time.time-volleyStarted >= Settings.recallTimeout) Recall(manual: false);
             switch (Session.Phase)
             {
                 case SessionPhase.Volley:
@@ -341,6 +360,7 @@ namespace Holedown
                     InvalidateInput();
                     aim.CanAim = Session.Phase == SessionPhase.Aiming;
                     Changed?.Invoke();
+                    RoundSettled?.Invoke(Session.Phase);
                     break;
             }
         }

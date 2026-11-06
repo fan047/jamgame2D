@@ -4774,6 +4774,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Holedown.Runtime::Holedown.FeedbackPlayer
   flow: {fileID: 1028796998}
   audioSource: {fileID: 1898611273}
+  launchSound: {fileID: 8300000, guid: 7cd161aadba245daa83e1653a6790f63, type: 3}
+  hitSound: {fileID: 8300000, guid: 9e7cd2c1ff3f412887539caa46731945, type: 3}
+  breakSound: {fileID: 8300000, guid: 69585c78e1d54214af30b94b8c18b248, type: 3}
+  rewardSound: {fileID: 8300000, guid: c61ee4a8a04f407d80d2825852193bf5, type: 3}
+  winSound: {fileID: 8300000, guid: 390f3bd4a5c24b09bd703c479e86b9cd, type: 3}
+  lossSound: {fileID: 8300000, guid: d020f1035de344048ac160375cfb07a3, type: 3}
+  recallSound: {fileID: 8300000, guid: 822254a92ea44a7293150beda636eb59, type: 3}
+  confirmSound: {fileID: 8300000, guid: 597e8638df4a4ff4b77f4a831dd7a6d6, type: 3}
   fragmentSprite: {fileID: 7482667652216324306, guid: 9b51139e69622394b99b0322acd0c44d, type: 3}
   fragmentMaterial: {fileID: 2100000, guid: db7639095b2c7be418b8254b65104209, type: 2}
   theme: {fileID: 11400000, guid: 104ba133b5cf0614d8ecc0c8721b0aad, type: 2}

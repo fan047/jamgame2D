@@ -7,38 +7,123 @@ namespace Holedown
     {
         [SerializeField] GameFlowController flow;
         [SerializeField] AudioSource audioSource;
+        [SerializeField] AudioClip launchSound, hitSound, breakSound, rewardSound;
+        [SerializeField] AudioClip winSound, lossSound, recallSound, confirmSound;
         [SerializeField] Sprite fragmentSprite;
         [SerializeField] Material fragmentMaterial;
         [SerializeField] VisualTheme theme;
-        AudioClip hitClip;
-        float nextSoundTime;
+        AudioSource accentSource, uiSource;
+        AudioClip fallbackHit;
+        float nextHitTime, nextBreakTime;
         public int SoundsPlayed { get; private set; }
+
         void Awake()
         {
+            if (!audioSource) return;
+            accentSource = CreateSource(64);
+            uiSource = CreateSource(128);
+            if (hitSound) return;
             const int rate=22050;
             var samples=new float[1323];
             for(int i=0;i<samples.Length;i++) {float t=(float)i/rate; samples[i]=Mathf.Sin(t*880*Mathf.PI*2)*0.18f*(1f-(float)i/samples.Length);}
-            hitClip=AudioClip.Create("Placeholder hit",samples.Length,1,rate,false); hitClip.SetData(samples,0);
+            fallbackHit=AudioClip.Create("Placeholder hit",samples.Length,1,rate,false);
+            fallbackHit.SetData(samples,0);
         }
-        bool pausedAudio;
+
+        AudioSource CreateSource(int priority)
+        {
+            var source = gameObject.AddComponent<AudioSource>();
+            source.playOnAwake = false;
+            source.outputAudioMixerGroup = audioSource.outputAudioMixerGroup;
+            source.volume = audioSource.volume;
+            source.priority = priority;
+            return source;
+        }
+
         void PauseAudio(bool paused)
         {
             if(!audioSource) return;
-            if(paused) { pausedAudio = audioSource.isPlaying; if(pausedAudio) audioSource.Pause(); }
-            else { if(pausedAudio) audioSource.UnPause(); pausedAudio = false; }
+            if (paused) { audioSource.Pause(); accentSource.Pause(); }
+            else { audioSource.UnPause(); accentSource.UnPause(); }
         }
-        void OnEnable() { flow.BlockHit += PlayHit; flow.AttemptReset += Clear; flow.PauseChanged += PauseAudio; }
-        void OnDisable() { flow.BlockHit -= PlayHit; flow.AttemptReset -= Clear; flow.PauseChanged -= PauseAudio; Clear(); }
+
+        void OnEnable()
+        {
+            flow.BlockHit += PlayHit;
+            flow.VolleyLaunched += PlayLaunch;
+            flow.ManualRecallAccepted += PlayRecall;
+            flow.RoundSettled += PlayResult;
+            flow.CommandConfirmed += PlayConfirm;
+            flow.AttemptReset += Clear;
+            flow.PauseChanged += PauseAudio;
+        }
+
+        void OnDisable()
+        {
+            flow.BlockHit -= PlayHit;
+            flow.VolleyLaunched -= PlayLaunch;
+            flow.ManualRecallAccepted -= PlayRecall;
+            flow.RoundSettled -= PlayResult;
+            flow.CommandConfirmed -= PlayConfirm;
+            flow.AttemptReset -= Clear;
+            flow.PauseChanged -= PauseAudio;
+            Clear();
+        }
+
+        void PlayLaunch() => PlaySound(audioSource, launchSound, 0.65f);
+        void PlayRecall() => PlaySound(accentSource, recallSound, 0.7f);
+        void PlayConfirm() => PlaySound(uiSource, confirmSound, 0.35f);
+
+        void PlayResult(SessionPhase phase)
+        {
+            if (phase == SessionPhase.Won) PlaySound(accentSource, winSound, 0.9f);
+            if (phase == SessionPhase.Lost) PlaySound(accentSource, lossSound, 0.8f);
+        }
+
+        static bool PlaySound(AudioSource source, AudioClip clip, float gain)
+        {
+            if (!source || !clip) return false;
+            source.PlayOneShot(clip, gain);
+            return true;
+        }
+
         void Clear()
         {
-            pausedAudio = false;
-            StopAllCoroutines(); if(audioSource)audioSource.Stop();nextSoundTime=0;
+            StopAllCoroutines();
+            if (audioSource) audioSource.Stop();
+            if (accentSource) accentSource.Stop();
+            if (uiSource) uiSource.Stop();
+            nextHitTime = nextBreakTime = 0;
             foreach(Transform child in transform)Destroy(child.gameObject);
         }
-        void OnDestroy() { if(hitClip) Destroy(hitClip); }
+        void OnDestroy() { if(fallbackHit) Destroy(fallbackHit); }
+
+        void PlayBlockSound(HitResult hit)
+        {
+            if (!hit.Destroyed)
+            {
+                if (Time.time < nextHitTime || !PlaySound(audioSource, hitSound ? hitSound : fallbackHit, 0.3f)) return;
+                nextHitTime = Time.time + 0.05f;
+            }
+            else if (hit.RewardBalls > 0)
+            {
+                if (!PlaySound(accentSource, rewardSound, 0.95f)) return;
+            }
+            else if (hit.IsTarget)
+            {
+                if (!PlaySound(accentSource, breakSound, 0.72f)) return;
+            }
+            else
+            {
+                if (Time.time < nextBreakTime || !PlaySound(audioSource, breakSound, 0.42f)) return;
+                nextBreakTime = Time.time + 0.08f;
+            }
+            SoundsPlayed++;
+        }
+
         void PlayHit(BlockView view, HitResult hit)
         {
-            if(Time.time>=nextSoundTime) { audioSource.PlayOneShot(hitClip); nextSoundTime=Time.time+0.05f; SoundsPlayed++; }
+            PlayBlockSound(hit);
             if(!view) return;
             if(hit.Destroyed)
             {
