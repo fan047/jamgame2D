@@ -38,21 +38,21 @@ namespace Holedown.Tests
             {
                 text.ForceMeshUpdate();
                 Assert.IsFalse(Regex.IsMatch(text.text,@"\b(Start|Stage|Balls|Round|Paused|Continue|Recall|Reload|Defeat|PLANNER|Preparing)\b"),text.text);
-                foreach(char character in text.text)if(!char.IsWhiteSpace(character))Assert.IsTrue(text.font.HasCharacter(character),"Missing glyph: "+character+" in "+text.text);
+                foreach(char character in text.GetParsedText())if(!char.IsWhiteSpace(character))Assert.IsTrue(text.font.HasCharacter(character),"Missing glyph: "+character+" in "+text.text);
                 Assert.IsFalse(text.isTextOverflowing,"Overflow: "+text.text);
             }
         }
         IEnumerator Load()
         {
             yield return SceneManager.LoadSceneAsync("Assets/Scenes/SampleScene.unity");yield return null;
-            var flow=UnityEngine.Object.FindFirstObjectByType<GameFlowController>();flow.SendMessage("OnApplicationFocus",true);yield return null;yield return null;
+            var flow=UnityEngine.Object.FindFirstObjectByType<GameFlowController>();flow.SendMessage("OnApplicationFocus",true);yield return null;yield return null;yield return null;
         }
         [UnityTest] public IEnumerator TitleHudPauseAndContinueAreChinese()
         {
             yield return Load();var flow=UnityEngine.Object.FindFirstObjectByType<GameFlowController>();
             Assert.AreEqual(AppPhase.Title,flow.Phase);Assert.IsNotNull(Button("开始游戏"));CheckVisible();
             Button("开始游戏").onClick.Invoke();yield return null;yield return null;
-            Assert.AreEqual(AppPhase.Playing,flow.Phase);StringAssert.Contains("瞄准中",Visible().Single(t=>t.name=="Status").text);CheckVisible();
+            Assert.AreEqual(AppPhase.Playing,flow.Phase);StringAssert.Contains("待确认奖励",Visible().Single(t=>t.name=="Status").text);Assert.IsFalse(Visible().Single(t=>t.name=="Status").text.Contains("配置："));CheckVisible();
             Button("暂停").onClick.Invoke();yield return null;Assert.AreEqual(AppPhase.Paused,flow.Phase);Assert.IsNotNull(Button("继续游戏"));CheckVisible();
             Button("继续游戏").onClick.Invoke();yield return null;yield return null;Assert.AreEqual(AppPhase.Playing,flow.Phase);
         }

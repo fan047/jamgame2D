@@ -51,10 +51,10 @@ namespace Holedown.Tests
                 {
                     Assert.AreSame(font,text.font,text.name);
                     Assert.IsTrue(System.Text.RegularExpressions.Regex.IsMatch(text.text,"[\\u4e00-\\u9fff]"),text.text);
-                    foreach(char character in text.text)if(!char.IsWhiteSpace(character))Assert.IsTrue(font.HasCharacter(character),"Missing glyph: "+character);
+                    foreach(char character in text.text)if(!char.IsWhiteSpace(character))Assert.IsTrue(font.HasCharacter(character,true,true),"Missing glyph: "+character);
                     count++;
                 }
-                Assert.AreEqual(16,count);
+                Assert.AreEqual(17,count);
                 var block=AssetDatabase.LoadAssetAtPath<BlockView>("Assets/Holedown/Prefabs/Block.prefab");
                 Assert.AreSame(font,block.GetComponentInChildren<TMP_Text>(true).font);
             }

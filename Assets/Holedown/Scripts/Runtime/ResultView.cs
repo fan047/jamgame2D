@@ -32,8 +32,13 @@ namespace Holedown
             title.text = error ? "配置错误" : flow.IsPlannerTest ? phase==SessionPhase.Won?"测试通关":"测试失败" : phase == SessionPhase.Won ? next ? "本关通关" : "全程通关" : "挑战失败";
             reason.enableAutoSizing = true; reason.fontSizeMin = 18; reason.fontSizeMax = error ? 24 : 32;
             reason.fontSize = error ? 24 : 32;
-            reason.rectTransform.sizeDelta = new Vector2(800,error ? 170 : 80);
-            reason.rectTransform.anchoredPosition = new Vector2(0,error ? 10 : 20);
+            reason.rectTransform.sizeDelta = new Vector2(670,190);
+            reason.rectTransform.anchoredPosition = new Vector2(0,50);
+            var primary=new Color(0.88f,0.66f,0.27f);var secondary=new Color(0.20f,0.30f,0.40f);
+            restart.GetComponent<Image>().color=error || (!next && !flow.IsPlannerTest && phase!=SessionPhase.Lost)?primary:secondary;
+            advance.GetComponent<Image>().color=primary;
+            var restartText=restart.GetComponentInChildren<TMP_Text>();if(restartText)restartText.color=restart.GetComponent<Image>().color==primary?new Color(0.10f,0.16f,0.23f):Color.white;
+            advanceLabel.color=new Color(0.10f,0.16f,0.23f);
             reason.text = error ? ChineseText.Error(flow.InitializationError) : flow.IsPlannerTest ? $"关卡标识：{flow.StageId} | 入关 {flow.EntryBalls} 球\n本次测试不推进正式流程。" : phase == SessionPhase.Lost ? "方块到达危险线" : next ? $"本关奖励 +{campaign.PendingBonus}\n下一关每轮 {campaign.NextEntryBalls} 球" : "已完成全部关卡";
         }
     }
