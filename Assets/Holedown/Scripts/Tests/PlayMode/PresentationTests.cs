@@ -29,8 +29,8 @@ namespace Holedown.Tests
             yield return null; yield return null;
             Assert.AreEqual(1,flow.Session.Round); Assert.AreEqual(SessionPhase.Aiming,flow.Session.Phase);
             Assert.IsFalse(button.interactable);
-            StringAssert.Contains("待确认奖励",GameObject.Find("UI/Status").GetComponent<TMP_Text>().text);
-            StringAssert.DoesNotContain("在场",GameObject.Find("UI/Status").GetComponent<TMP_Text>().text);
+            Assert.IsFalse(GameObject.Find("UI").transform.Find("Status").gameObject.activeInHierarchy);
+            StringAssert.Contains(flow.EntryBalls.ToString(),GameObject.Find("UI/HudHeader/BallCount").GetComponent<TMP_Text>().text);
         }
         [UnityTest] public IEnumerator VolleyDestroysBlockAndPlaysRateLimitedFeedback()
         {

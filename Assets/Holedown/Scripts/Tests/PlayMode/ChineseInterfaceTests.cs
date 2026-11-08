@@ -52,7 +52,7 @@ namespace Holedown.Tests
             yield return Load();var flow=UnityEngine.Object.FindFirstObjectByType<GameFlowController>();
             Assert.AreEqual(AppPhase.Title,flow.Phase);Assert.IsNotNull(Button("开始游戏"));CheckVisible();
             Button("开始游戏").onClick.Invoke();yield return null;yield return null;
-            Assert.AreEqual(AppPhase.Playing,flow.Phase);StringAssert.Contains("待确认奖励",Visible().Single(t=>t.name=="Status").text);Assert.IsFalse(Visible().Single(t=>t.name=="Status").text.Contains("配置："));CheckVisible();
+            Assert.AreEqual(AppPhase.Playing,flow.Phase);StringAssert.Contains(flow.EntryBalls.ToString(),Visible().Single(t=>t.name=="BallCount").text);Assert.IsFalse(Visible().Any(t=>t.name=="Status"));CheckVisible();
             Button("暂停").onClick.Invoke();yield return null;Assert.AreEqual(AppPhase.Paused,flow.Phase);Assert.IsNotNull(Button("继续游戏"));CheckVisible();
             Button("继续游戏").onClick.Invoke();yield return null;yield return null;Assert.AreEqual(AppPhase.Playing,flow.Phase);
         }

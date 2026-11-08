@@ -94,9 +94,11 @@ namespace Holedown.Tests
             var hit=typeof(GameFlowController).GetMethod("OnHit",System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic);
             while(flow.Board.Blocks.ContainsKey(reward.Id))hit.Invoke(flow,new object[]{ball,reward.Id});
             Assert.Greater(flow.Campaign.PendingBonus,0);
-            var status=GameObject.Find("UI/Status").GetComponent<TMP_Text>();
+            var status=GameObject.Find("UI/HudHeader/PendingReward/RewardValue").GetComponent<TMP_Text>();
             yield return null;
-            Assert.Greater(status.rectTransform.localScale.x,1.005f,"the pending reward number bounces");
+            Assert.Greater(status.rectTransform.localScale.x,1.005f,"only the pending reward number bounces");
+            Assert.AreEqual(Vector3.one,GameObject.Find("UI/HudHeader/BallCount").transform.localScale);
+            Assert.AreEqual(Vector3.one,GameObject.Find("UI/HudHeader/StageIndex").transform.localScale);
             flow.RequestRecall();yield return null;yield return null;
         }
     }

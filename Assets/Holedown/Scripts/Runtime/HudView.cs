@@ -8,6 +8,8 @@ namespace Holedown
     {
         [SerializeField] GameFlowController flow;
         [SerializeField] TMP_Text status;
+        [SerializeField] TMP_Text stageIndex, ballCount, round, rewardValue;
+        [SerializeField] GameObject hudRoot, rewardStrip, recallHint;
         [SerializeField] Button recall;
         [SerializeField] Button reload;
         [SerializeField] float pendingBounceSeconds = 0.18f;
@@ -17,7 +19,7 @@ namespace Holedown
         void Recall() => flow.QueueCommand(FlowCommand.Recall);
         void Reload() => flow.QueueCommand(FlowCommand.Reload);
         void OnEnable() { flow.Changed += Refresh; recall.onClick.AddListener(Recall); reload.onClick.AddListener(Reload); Refresh(); }
-        void OnDisable() { flow.Changed -= Refresh; recall.onClick.RemoveListener(Recall); reload.onClick.RemoveListener(Reload); }
+        void OnDisable() { flow.Changed -= Refresh; recall.onClick.RemoveListener(Recall); reload.onClick.RemoveListener(Reload); if(bounce!=null)StopCoroutine(bounce);bounce=null;if(rewardValue)rewardValue.rectTransform.localScale=Vector3.one; }
         void BouncePending()
         {
             if (pendingBounceSeconds <= 0f || !isActiveAndEnabled) return;
@@ -26,7 +28,7 @@ namespace Holedown
         }
         System.Collections.IEnumerator PendingPulse()
         {
-            var rect = status.rectTransform; var rest = Vector3.one; float elapsed = 0;
+            var rect = rewardValue.rectTransform; var rest = Vector3.one; float elapsed = 0;
             while (elapsed < pendingBounceSeconds)
             {
                 elapsed += Time.deltaTime;
@@ -39,22 +41,22 @@ namespace Holedown
         }
         void Refresh()
         {
-            // Configuration reload belongs to the pause menu, never the live board.
             reload.gameObject.SetActive(false);
-            var instructions=transform.Find("Instructions");if(instructions)instructions.gameObject.SetActive(false);
             bool playing = flow.Phase == AppPhase.Playing && flow.Session?.Phase != SessionPhase.Won && flow.Session?.Phase != SessionPhase.Lost;
-            recall.gameObject.SetActive(playing);
-            status.gameObject.SetActive(playing);
+            hudRoot.SetActive(playing);recall.gameObject.SetActive(playing);recallHint.SetActive(playing);
+            status.gameObject.SetActive(playing && flow.IsPlannerTest);
             if(!playing) return;
             var session=flow.Session;
-            if(session==null) { recall.interactable=false; status.text="正在准备…"; return; }
-            recall.interactable=session.Phase==SessionPhase.Volley;
+            recall.interactable=session?.Phase==SessionPhase.Volley;
+            if(session==null)return;
             var campaign=flow.Campaign;
-            // Consecutive rewards merge into one value; the number bounces once per change.
             int pending=campaign?.PendingBonus ?? 0;
-            if (pending != shownPending) { shownPending = pending; if (playing) BouncePending(); }
-            string summary=$"第 {(campaign?.StageIndex ?? 0)+1}/{campaign?.StageCount ?? 1} 关   每轮 {flow.EntryBalls} 球   第 {session.Round + (session.Phase==SessionPhase.Aiming?1:0)} 轮\n待确认奖励 +{pending}（下关生效）";
-            status.text=flow.IsPlannerTest ? summary+$"\n<size=65%>在场 {session.ActiveCount} 球（待发 {session.Pending}） | 补行 {flow.Board?.IncomingCursor ?? 0}/{flow.Board?.IncomingCount ?? 0} | {(flow.IsAdvancing ? "推进中" : ChineseText.Session(session.Phase))}\n配置：{ChineseText.Configuration(flow.ConfigurationLabel)}</size>" : summary;
+            stageIndex.text=$"{(campaign?.StageIndex ?? 0)+1:00} / {campaign?.StageCount ?? 1:00}";
+            ballCount.text=$"{flow.EntryBalls}<size=34%> 球</size>";
+            round.text=$"第 {session.Round + (session.Phase==SessionPhase.Aiming?1:0)} 轮";
+            rewardStrip.SetActive(pending>0);rewardValue.text=$"+{pending}";
+            if(pending!=shownPending){shownPending=pending;if(pending>0)BouncePending();else{if(bounce!=null)StopCoroutine(bounce);bounce=null;rewardValue.rectTransform.localScale=Vector3.one;}}
+            status.text=$"在场 {session.ActiveCount} 球（待发 {session.Pending}） | 补行 {flow.Board?.IncomingCursor ?? 0}/{flow.Board?.IncomingCount ?? 0} | {(flow.IsAdvancing ? "推进中" : ChineseText.Session(session.Phase))}\n配置：{ChineseText.Configuration(flow.ConfigurationLabel)}";
         }
     }
 }

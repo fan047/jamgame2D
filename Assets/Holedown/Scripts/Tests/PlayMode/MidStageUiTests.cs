@@ -43,11 +43,11 @@ namespace Holedown.Tests
         {
             yield return Load();var f=Object.FindFirstObjectByType<GameFlowController>();var ui=GameObject.Find("UI").transform;Fits();
             Assert.IsTrue(ui.Find("StartPanel/Controls").gameObject.activeInHierarchy);f.StartGame();yield return null;yield return null;
-            var status=ui.Find("Status").GetComponent<TMP_Text>();StringAssert.Contains("待确认奖励",status.text);StringAssert.DoesNotContain("在场",status.text);StringAssert.DoesNotContain("配置：",status.text);Assert.IsFalse(ui.Find("ReloadConfig").gameObject.activeInHierarchy);
+            var status=ui.Find("Status").GetComponent<TMP_Text>();Assert.IsFalse(status.gameObject.activeInHierarchy);StringAssert.Contains(f.EntryBalls.ToString(),ui.Find("HudHeader/BallCount").GetComponent<TMP_Text>().text);Assert.IsFalse(ui.Find("HudHeader/PendingReward").gameObject.activeInHierarchy);Assert.IsFalse(ui.Find("ReloadConfig").gameObject.activeInHierarchy);
             Assert.AreEqual(0,ui.Find("Recall").GetComponent<RectTransform>().anchoredPosition.x);Assert.IsFalse(ui.Find("Recall").GetComponent<Button>().interactable);Fits();
             Assert.IsTrue(f.TryFire(Vector2.down));Assert.IsTrue(ui.Find("Recall").GetComponent<Button>().interactable);f.RequestPause();yield return null;
             Assert.IsTrue(ui.Find("PausePanel").gameObject.activeInHierarchy);Assert.IsFalse(status.gameObject.activeInHierarchy);Assert.IsFalse(ui.Find("Recall").gameObject.activeInHierarchy);Assert.IsFalse(ui.Find("Pause").gameObject.activeInHierarchy);Assert.IsTrue(ui.Find("PausePanel").GetComponent<Image>().raycastTarget);Fits();
-            f.ContinueGame();yield return null;Assert.IsTrue(status.gameObject.activeInHierarchy);f.RequestRecall();yield return null;yield return null;
+            f.ContinueGame();yield return null;Assert.IsTrue(ui.Find("HudHeader").gameObject.activeInHierarchy);Assert.IsFalse(status.gameObject.activeInHierarchy);f.RequestRecall();yield return null;yield return null;
         }
         [UnityTest] public IEnumerator PlannerHudRetainsDiagnosticsAndLongVersions()
         {
