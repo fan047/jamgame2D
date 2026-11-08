@@ -11,5 +11,5 @@ test('four custom rewards and values above ten validate and preserve on JSON rou
  assert.ok(M.validate(D.settings,l).some(e=>e.includes('本关奖励合计')));
  const c=M.clone(D.level);c.levels[0].initialBlocks[0].rewardBalls=2147483640;
  assert.ok(M.validate(D.settings,c).some(e=>e.includes('基础球数')));
- c.levels[2].initialBlocks[0].rewardBalls=11;assert.ok(M.validate(D.settings,c).some(e=>e.includes('最终关')));
+ c.levels[c.levels.length-1].initialBlocks[0].rewardBalls=11;assert.ok(M.validate(D.settings,c).some(e=>e.includes('最终关')));
 });

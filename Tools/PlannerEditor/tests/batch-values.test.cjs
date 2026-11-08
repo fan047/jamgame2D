@@ -12,6 +12,6 @@ test('reward batches preview and round without mutation, apply once, undo atomic
 test('batch target conflict, final reward, overflow, zero health and invalid multiplier fail without partial writes',()=>{
  const s=fresh();s.context.checked=[0,1];const before=JSON.stringify(s.data);
  for(const args of [['set',0,'health'],['add',-99,'rewardBalls'],['multiply',-1,'health'],['multiply',Infinity,'health'],['set',2147483647,'rewardBalls']]){assert.throws(()=>s.batch(...args));assert.equal(JSON.stringify(s.data),before);}
- s.navigate(2);s.context.checked=[0];assert.throws(()=>s.batch('set',1,'rewardBalls'),/最终关/);
+ s.navigate(s.level.levels.length-1);s.context.checked=[0];assert.throws(()=>s.batch('set',1,'rewardBalls'),/最终关/);
  s.navigate(0,s.level.levels[0].incomingRows.length-1);s.context.checked=s.blocks.map((_,i)=>i);assert.throws(()=>s.batch('set',1,'rewardBalls'),/目标块/);
 });
