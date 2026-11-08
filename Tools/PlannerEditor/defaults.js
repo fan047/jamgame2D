@@ -11,7 +11,7 @@
   },
   "level": {
     "schemaVersion": 2,
-    "version": "mid-10",
+    "version": "mid-11",
     "levels": [
       {
         "id": "stage-1",
@@ -558,7 +558,7 @@
             "height": 1,
             "health": 25,
             "target": false,
-            "rewardBalls": 0
+            "rewardBalls": 3
           },
           {
             "column": 0,
@@ -583,7 +583,7 @@
             "row": 5,
             "width": 1,
             "height": 2,
-            "health": 30,
+            "health": 25,
             "target": false,
             "rewardBalls": 0
           }
@@ -689,7 +689,7 @@
                 "row": 0,
                 "width": 2,
                 "height": 1,
-                "health": 38,
+                "health": 28,
                 "target": false,
                 "rewardBalls": 0
               },
@@ -760,9 +760,9 @@
                 "row": 0,
                 "width": 1,
                 "height": 1,
-                "health": 50,
+                "health": 40,
                 "target": false,
-                "rewardBalls": 8
+                "rewardBalls": 5
               },
               {
                 "column": 0,
@@ -1013,7 +1013,7 @@
             "height": 2,
             "health": 41,
             "target": false,
-            "rewardBalls": 0
+            "rewardBalls": 3
           },
           {
             "column": 0,
@@ -1286,9 +1286,9 @@
                 "row": 0,
                 "width": 2,
                 "height": 1,
-                "health": 170,
+                "health": 200,
                 "target": false,
-                "rewardBalls": 8
+                "rewardBalls": 3
               },
               {
                 "column": 0,
@@ -1578,9 +1578,9 @@
                 "row": 0,
                 "width": 1,
                 "height": 1,
-                "health": 200,
+                "health": 175,
                 "target": false,
-                "rewardBalls": 8
+                "rewardBalls": 6
               }
             ]
           },
@@ -1859,7 +1859,7 @@
                 "height": 1,
                 "health": 169,
                 "target": false,
-                "rewardBalls": 9
+                "rewardBalls": 6
               }
             ]
           },
@@ -1925,7 +1925,7 @@
                 "height": 1,
                 "health": 140,
                 "target": false,
-                "rewardBalls": 7
+                "rewardBalls": 5
               }
             ]
           },
@@ -1945,9 +1945,9 @@
                 "row": 0,
                 "width": 1,
                 "height": 1,
-                "health": 155,
+                "health": 130,
                 "target": false,
-                "rewardBalls": 8
+                "rewardBalls": 6
               },
               {
                 "column": 1,
@@ -2118,9 +2118,9 @@
                 "row": 0,
                 "width": 1,
                 "height": 1,
-                "health": 199,
+                "health": 170,
                 "target": false,
-                "rewardBalls": 10
+                "rewardBalls": 8
               },
               {
                 "column": 0,
@@ -2222,7 +2222,7 @@
                 "height": 1,
                 "health": 177,
                 "target": false,
-                "rewardBalls": 7
+                "rewardBalls": 6
               }
             ]
           },
@@ -2235,7 +2235,7 @@
                 "height": 1,
                 "health": 125,
                 "target": false,
-                "rewardBalls": 8
+                "rewardBalls": 6
               },
               {
                 "column": 0,
