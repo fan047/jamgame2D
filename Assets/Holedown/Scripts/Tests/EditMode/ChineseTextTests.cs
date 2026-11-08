@@ -50,11 +50,17 @@ namespace Holedown.Tests
                 foreach(var root in scene.GetRootGameObjects())foreach(var text in root.GetComponentsInChildren<TMP_Text>(true))
                 {
                     Assert.AreSame(font,text.font,text.name);
-                    Assert.IsTrue(System.Text.RegularExpressions.Regex.IsMatch(text.text,"[\\u4e00-\\u9fff]"),text.text);
-                    foreach(char character in text.text)if(!char.IsWhiteSpace(character))Assert.IsTrue(font.HasCharacter(character,true,true),"Missing glyph: "+character);
+                    bool runtimeOnly=text.name=="Status" || text.name=="RewardSummary" || text.name=="NextBalls" || text.name=="CompletedCount" || text.name=="Subtitle";
+                    bool numeric=text.name=="StageIndex" || text.name=="RewardValue";
+                    if(runtimeOnly)Assert.IsTrue(string.IsNullOrEmpty(text.text),text.name);
+                    else if(numeric)Assert.IsTrue(System.Text.RegularExpressions.Regex.IsMatch(text.text,@"^[0-9+ /]+$"),text.name);
+                    else Assert.IsTrue(System.Text.RegularExpressions.Regex.IsMatch(text.text,"[\\u4e00-\\u9fff]"),text.text);
+                    Assert.IsFalse(text.raycastTarget,text.name);
+                    string visible=System.Text.RegularExpressions.Regex.Replace(text.text,"<[^>]+>","");
+                    foreach(char character in visible)if(!char.IsWhiteSpace(character))Assert.IsTrue(font.HasCharacter(character,true,true),"Missing glyph: "+character);
                     count++;
                 }
-                Assert.AreEqual(20,count);
+                Assert.AreEqual(34,count);
                 var block=AssetDatabase.LoadAssetAtPath<BlockView>("Assets/Holedown/Prefabs/Block.prefab");
                 Assert.AreSame(font,block.GetComponentInChildren<TMP_Text>(true).font);
             }
