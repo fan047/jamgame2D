@@ -44,7 +44,14 @@ namespace Holedown.Tests
             Assert.IsFalse(GameObject.Find("Game/Launcher").GetComponent<SpriteRenderer>().enabled);Assert.IsFalse(GameObject.Find("Game/DangerLine").GetComponent<LineRenderer>().enabled);
             Assert.IsFalse(UI.Find("StartPanel/Subtitle").gameObject.activeInHierarchy);Capture("title");
             Button("开始游戏").onClick.Invoke();yield return null;yield return null;Assert.AreEqual(SessionPhase.Aiming,flow.Session.Phase);Assert.AreEqual(0,flow.Session.ActiveCount);
-            Assert.IsTrue(GameObject.Find("Game/Launcher").GetComponent<SpriteRenderer>().enabled);Assert.IsFalse(UI.Find("HudHeader/PendingReward").gameObject.activeInHierarchy);Assert.IsFalse(Button("召回").interactable);Capture("hud-zero");
+            Assert.IsTrue(GameObject.Find("Game/Launcher").GetComponent<SpriteRenderer>().enabled);Assert.IsFalse(UI.Find("HudHeader/PendingReward").gameObject.activeInHierarchy);            Assert.IsFalse(Button("召回").interactable);Capture("hud-zero");
+            // Borderless recall: the hit graphic is invisible, the backing is a single
+            // fading quad, and both labels stay inside the softer central pad.
+            var scrim=UI.Find("RecallScrim").GetComponent<SoftScrim>();
+            Assert.IsNotNull(scrim);Assert.IsFalse(scrim.raycastTarget);Assert.Greater(scrim.BottomAlpha,scrim.TopAlpha);
+            Assert.AreEqual(0f,Button("召回").targetGraphic.color.a,"recall draws no box");
+            Assert.IsTrue(Bounds(Text("RecallHint").transform).width <= Bounds(scrim.transform).width);
+            Assert.IsTrue(Bounds(scrim.transform).Contains(Bounds(Button("召回").transform).min));
             Assert.IsTrue(flow.TryFire(Vector2.down));Assert.IsTrue(Button("召回").interactable);StringAssert.Contains(flow.EntryBalls.ToString(),Text("HudHeader/BallCount").text);Capture("volley");
             Button("召回").onClick.Invoke();yield return null;yield return null;Assert.IsFalse(Button("召回").interactable);
             foreach(int bonus in new[]{3,5}){Assert.IsTrue(flow.Campaign.RecordHit(900+bonus,new HitResult(true,0,true,false,bonus)));Refresh();yield return null;Assert.AreEqual(Vector3.one,Text("HudHeader/BallCount").transform.localScale);Assert.AreEqual(Vector3.one,Text("HudHeader/StageIndex").transform.localScale);StringAssert.Contains("+"+flow.Campaign.PendingBonus,Text("HudHeader/PendingReward/RewardValue").text);}

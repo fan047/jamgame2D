@@ -10,6 +10,7 @@ namespace Holedown
         [SerializeField] TMP_Text status;
         [SerializeField] TMP_Text stageIndex, ballCount, round, rewardValue;
         [SerializeField] GameObject hudRoot, rewardStrip, recallHint;
+        [SerializeField] SoftScrim recallScrim;
         [SerializeField] Button recall;
         [SerializeField] Button reload;
         [SerializeField] float pendingBounceSeconds = 0.18f;
@@ -48,6 +49,9 @@ namespace Holedown
             if(!playing) return;
             var session=flow.Session;
             MineUIStyle.Availability(recall,session?.Phase==SessionPhase.Volley);
+            // The borderless backing dims with availability so a disabled recall is still
+            // visible without drawing a box over the cave floor.
+            if(recallScrim)recallScrim.color=new Color(recallScrim.color.r,recallScrim.color.g,recallScrim.color.b,recall.interactable?1f:.72f);
             if(session==null)return;
             var campaign=flow.Campaign;
             int pending=campaign?.PendingBonus ?? 0;
