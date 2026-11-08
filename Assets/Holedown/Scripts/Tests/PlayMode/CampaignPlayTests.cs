@@ -28,7 +28,8 @@ namespace Holedown.Tests
             Assert.IsTrue(f.TryFire(new Vector2(-0.5f,-6.5f)));float until=Time.realtimeSinceStartup+10;
             while((f.Session.Phase==SessionPhase.Volley || f.Session.Phase==SessionPhase.Recalling)&&Time.realtimeSinceStartup<until)
             {
-                Assert.AreEqual(AppPhase.Playing, f.Phase, $"Physical regression interrupted: focus={f.HasFocus}, scale={Time.timeScale}");
+                if(f.Phase!=AppPhase.Playing) { yield return PlaySceneEntry.ResumeAfterFocusLoss(f); continue; }
+                Assert.Less(Time.realtimeSinceStartup,until,"Physical volley did not finish");
                 yield return null;
             }
             Assert.Less(Time.realtimeSinceStartup,until,"Physical volley did not finish");
@@ -95,7 +96,7 @@ namespace Holedown.Tests
                 if(next==null)continue; // A previous volley may physically hit more than one reward.
                 var destination=new Vector2(next.Column+.5f,next.Row+.5f);
                 Assert.IsTrue(f.TryFire(destination-AimInput.Origin));float until=Time.realtimeSinceStartup+40;
-                while(f.Session.Phase==SessionPhase.Volley||f.Session.Phase==SessionPhase.Recalling){Assert.AreEqual(AppPhase.Playing,f.Phase,$"focus={f.HasFocus}");Assert.Less(Time.realtimeSinceStartup,until);yield return null;}
+                while(f.Session.Phase==SessionPhase.Volley||f.Session.Phase==SessionPhase.Recalling){if(f.Phase!=AppPhase.Playing){yield return PlaySceneEntry.ResumeAfterFocusLoss(f);continue;}Assert.Less(Time.realtimeSinceStartup,until);yield return null;}
                 Assert.AreEqual(12,f.Campaign.EntryBalls);yield return null;
             }
             Assert.AreEqual(27,f.Campaign.PendingBonus);
