@@ -5,8 +5,7 @@ using UnityEngine.UI;
 
 namespace Holedown
 {
-    // Deliberately plain test controls, created only by the explicit --planner-test entry.
-    // Formal UI art/navigation remains unchanged.
+    // Explicit planner entry retains its tool layout and shares the game UI kit.
     public sealed class PlannerTestView : MonoBehaviour
     {
         GameFlowController flow;
@@ -28,26 +27,26 @@ namespace Holedown
             Button(panel.transform,"下一关",210,200,()=>Select(1));
             modeLabel=Label(panel.transform,"",105,30);
             Button(panel.transform,"切换球数方式",0,25,()=>{mode=(PlannerBallMode)(((int)mode+1)%3);Refresh();});
-            manualRoot=Element("ManualBalls",panel.transform,new Vector2(0,-65),new Vector2(350,64),typeof(Image),typeof(InputField));
-            manualRoot.GetComponent<Image>().color=new Color(.9f,.94f,1);
+            manualRoot=Element("ManualBalls",panel.transform,new Vector2(0,-65),new Vector2(350,64),typeof(CutCornerImage),typeof(InputField));
+            manualRoot.GetComponent<Image>().color=MineUIStyle.Secondary;
             var textGo=Element("Text",manualRoot.transform,Vector2.zero,new Vector2(320,60),typeof(Text));
-            var text=textGo.GetComponent<Text>();text.font=Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");text.fontSize=28;text.alignment=TextAnchor.MiddleCenter;text.color=Color.black;text.raycastTarget=false;
+            var text=textGo.GetComponent<Text>();text.font=Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");text.fontSize=28;text.alignment=TextAnchor.MiddleCenter;text.color=MineUIStyle.Ivory;text.raycastTarget=false;
             manual=manualRoot.GetComponent<InputField>();manual.textComponent=text;manual.contentType=InputField.ContentType.IntegerNumber;manual.text="12";manual.onValueChanged.AddListener(_=>Refresh());
             estimate=Label(panel.transform,"",-150,28);
             Button(panel.transform,"开始测试本关",0,-235,()=>{int.TryParse(manual.text,out int balls);flow.QueuePlannerTest(selectedId,mode,balls);});
             Button(panel.transform,"重新读取配置",0,-325,()=>flow.QueueCommand(FlowCommand.Reload));
-            error=Label(panel.transform,"",-455,24);error.rectTransform.sizeDelta=new Vector2(820,180);error.color=new Color(1,.7f,.5f);
+            error=Label(panel.transform,"",-455,24);error.rectTransform.sizeDelta=new Vector2(820,180);error.color=MineUIStyle.Muted;
             overlay=Root("PlannerTestOverlay",canvas.transform,false);
             overlayLabel=Label(overlay.transform,"",650,24);
             Button(overlay.transform,"返回选关",0,745,()=>flow.QueueCommand(FlowCommand.PlannerSelection));
-            overlayError=Label(overlay.transform,"",-400,24);overlayError.rectTransform.sizeDelta=new Vector2(820,160);overlayError.color=new Color(1,.7f,.5f);
+            overlayError=Label(overlay.transform,"",-400,24);overlayError.rectTransform.sizeDelta=new Vector2(820,160);overlayError.color=MineUIStyle.Muted;
             flow.Changed+=Refresh;Refresh();
         }
         GameObject Root(string name,Transform parent,bool background)
         {
             var go=new GameObject(name,typeof(RectTransform));go.transform.SetParent(parent,false);
             var r=(RectTransform)go.transform;r.anchorMin=Vector2.zero;r.anchorMax=Vector2.one;r.sizeDelta=Vector2.zero;r.anchoredPosition=Vector2.zero;
-            if(background)go.AddComponent<Image>().color=new Color(.04f,.07f,.12f,.98f);
+            if(background)go.AddComponent<Image>().color=MineUIStyle.Ink;
             return go;
         }
         static GameObject Element(string name,Transform parent,Vector2 position,Vector2 size,params Type[] components)
@@ -59,12 +58,13 @@ namespace Holedown
         TMP_Text Label(Transform parent,string text,float y,float size)
         {
             var go=Element("Label",parent,new Vector2(0,y),new Vector2(820,90),typeof(TextMeshProUGUI));
-            var label=go.GetComponent<TMP_Text>();label.font=font;label.fontSize=size;label.enableAutoSizing=true;label.fontSizeMin=18;label.fontSizeMax=size;label.text=text;label.richText=false;label.alignment=TextAlignmentOptions.Center;label.raycastTarget=false;return label;
+            var label=go.GetComponent<TMP_Text>();label.font=font;MineUIStyle.Text(label,size);label.enableAutoSizing=true;label.fontSizeMin=18;label.fontSizeMax=size;label.text=text;label.richText=false;label.alignment=TextAlignmentOptions.Center;return label;
         }
         void Button(Transform parent,string text,float x,float y,UnityEngine.Events.UnityAction action)
         {
-            var go=Element(text,parent,new Vector2(x,y),new Vector2(370,70),typeof(Image),typeof(Button));go.GetComponent<Image>().color=new Color(.1f,.4f,.5f);
+            var go=Element(text,parent,new Vector2(x,y),new Vector2(370,70),typeof(CutCornerImage),typeof(Button),typeof(ButtonPressMotion));
             var label=Label(go.transform,text,0,28);label.rectTransform.sizeDelta=new Vector2(350,64);
+            MineUIStyle.Button(go.GetComponent<Button>(),text=="开始测试本关");
             go.GetComponent<Button>().onClick.AddListener(action);
         }
         void Select(int delta)
@@ -77,7 +77,7 @@ namespace Holedown
         {
             if(!flow || !panel)return;
             bool selecting=flow.Phase==AppPhase.PlannerSelection;
-            panel.SetActive(selecting);overlay.SetActive(!selecting && flow.Phase!=AppPhase.ConfigError && flow.Phase!=AppPhase.Loading);
+            panel.SetActive(selecting);overlay.SetActive(flow.Phase==AppPhase.Playing && flow.Session!=null && flow.Session.Phase!=SessionPhase.Won && flow.Session.Phase!=SessionPhase.Lost);
             overlayLabel.text=$"策划测试 | 关卡标识：{flow.StageId} | 本次 {flow.EntryBalls} 球";
             overlayError.text=ChineseText.Error(flow.PlannerError);
             if(!selecting)return;

@@ -20,6 +20,25 @@ namespace Holedown
             text.fontSize=size;text.enableAutoSizing=false;text.color=muted?Muted:Ivory;
             text.raycastTarget=false;
         }
+        public static void PauseLayout(RectTransform card,RectTransform help,bool planner)
+        {
+            card.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical,(planner?580:380)*Units);
+            help.anchoredPosition=new Vector2(0,-(planner?380:310)*Units);
+        }
+        public static void Availability(Button button,bool enabled)
+        {
+            button.interactable=enabled;
+            var text=button.GetComponentInChildren<TMP_Text>(true);if(text)text.color=enabled?Ivory:DisabledText;
+        }
+        public static void FitScrollBody(ScrollRect scroll)
+        {
+            if(!scroll || !scroll.content)return;
+            var text=scroll.content.GetComponent<TMP_Text>();if(!text)return;
+            // Preferred geometry, not smaller fonts, accommodates arbitrarily
+            // long error/version strings while actions stay outside the viewport.
+            float height=text.GetPreferredValues(text.text,scroll.content.rect.width,float.PositiveInfinity).y;
+            scroll.content.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical,height+2);
+        }
         public static void Button(Button button, bool primary=false)
         {
             if(!button)return;

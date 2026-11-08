@@ -15,6 +15,9 @@ namespace Holedown
         [SerializeField] TMPro.TMP_Text audioStatus;
         [SerializeField] TMPro.TMP_Text audioNotice;
         [SerializeField] PanelTransition panelTransition;
+        [SerializeField] TMPro.TMP_Text help, context;
+        [SerializeField] RectTransform card;
+        [SerializeField] ScrollRect helpScroll, audioScroll;
         bool wasVisible;
         void OnEnable()
         {
@@ -37,6 +40,8 @@ namespace Holedown
         void ReloadAudio() { if(feedback)feedback.ReloadAudio(); }
         void Refresh()
         {
+            MineUIStyle.Button(resume,true);
+            MineUIStyle.PauseLayout(card,(RectTransform)helpScroll.transform,flow.IsPlannerTest);
             if(reloadAudio)reloadAudio.gameObject.SetActive(flow.IsPlannerTest && flow.Phase==AppPhase.Paused);
             if(feedback)
             {
@@ -45,9 +50,11 @@ namespace Holedown
                 if(audioNotice){audioNotice.text="音效配置错误（当前使用："+feedback.AudioVersion+"）\n"+error;audioNotice.gameObject.SetActive(!string.IsNullOrEmpty(error) && flow.Phase!=AppPhase.Paused && flow.Phase!=AppPhase.Loading);}
             }
             var reloadLabel=reload.GetComponentInChildren<TMPro.TMP_Text>();if(reloadLabel)reloadLabel.text=flow.IsPlannerTest?"重载当前关":"重载并重开";
-            var subtitle=panel.transform.Find("Help")?.GetComponent<TMPro.TMP_Text>();
-            if(subtitle)subtitle.text=flow.IsPlannerTest?"重新读取两份配置并重建当前关。\n文件有误时保留本次测试。":"继续本轮，或重新读取配置，\n从第 1 关重新开始。";
+            context.text=$"{(flow.IsPlannerTest?"策划测试　":"")}第 {(flow.Campaign?.StageIndex ?? 0)+1} / {flow.Campaign?.StageCount ?? 1} 关";
+            help.text=flow.IsPlannerTest?"重新读取配置并重建当前关；文件有误时保留本次测试。"+(string.IsNullOrEmpty(flow.PlannerError)?"":"\n"+ChineseText.Error(flow.PlannerError)):"重载配置将从第 1 关重新开始。";
+            audioScroll.gameObject.SetActive(flow.IsPlannerTest);
             panel.SetActive(flow.Phase == AppPhase.Paused);
+            if(panel.activeSelf){Canvas.ForceUpdateCanvases();MineUIStyle.FitScrollBody(helpScroll);MineUIStyle.FitScrollBody(audioScroll);}
             if (panelTransition)
             {
                 var visible = panel.activeSelf;

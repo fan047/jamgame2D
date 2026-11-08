@@ -47,7 +47,7 @@ namespace Holedown
             status.gameObject.SetActive(playing && flow.IsPlannerTest);
             if(!playing) return;
             var session=flow.Session;
-            recall.interactable=session?.Phase==SessionPhase.Volley;
+            MineUIStyle.Availability(recall,session?.Phase==SessionPhase.Volley);
             if(session==null)return;
             var campaign=flow.Campaign;
             int pending=campaign?.PendingBonus ?? 0;

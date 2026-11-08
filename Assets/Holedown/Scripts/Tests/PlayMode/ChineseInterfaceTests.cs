@@ -39,7 +39,7 @@ namespace Holedown.Tests
                 text.ForceMeshUpdate();
                 Assert.IsFalse(Regex.IsMatch(text.text,@"\b(Start|Stage|Balls|Round|Paused|Continue|Recall|Reload|Defeat|PLANNER|Preparing)\b"),text.text);
                 foreach(char character in text.GetParsedText())if(!char.IsWhiteSpace(character))Assert.IsTrue(text.font.HasCharacter(character),"Missing glyph: "+character+" in "+text.text);
-                Assert.IsFalse(text.isTextOverflowing,"Overflow: "+text.text);
+                Assert.IsFalse(text.isTextOverflowing,$"Overflow: {text.text} rect={text.rectTransform.rect.size} preferred={text.preferredHeight} font={text.fontSize}");
             }
         }
         IEnumerator Load()
