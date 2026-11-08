@@ -15,13 +15,14 @@ namespace Holedown.Tests
         string directory;
         [SetUp] public void Setup()
         {
+            BoardView.SkipAdvanceForTests=true;
             directory=Path.GetFullPath("Library/Locus/tmp/campaign-play/"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(directory);File.Copy("Config/settings.json",Path.Combine(directory,"settings.json"));
             string Block(int c,int r,int hp,bool target,int reward)=>$"{{\"column\":{c},\"row\":{r},\"width\":1,\"height\":1,\"health\":{hp},\"target\":{target.ToString().ToLowerInvariant()},\"rewardBalls\":{reward}}}";
             var stages=new string[3];for(int i=0;i<3;i++)stages[i]=$"{{\"id\":\"s{i}\",\"name\":\"Stage {i}\",\"initialBlocks\":[{Block(3,2,1,false,i==0?3:i==1?5:0)},{Block(0,6,1,false,0)}],\"incomingRows\":[{{\"blocks\":[{Block(3,0,1,true,0)}]}}]}}";
             File.WriteAllText(Path.Combine(directory,"level.json"),"{\"schemaVersion\":2,\"version\":\"play-growth\",\"levels\":["+string.Join(",",stages)+"]}");SceneManager.sceneLoaded+=Configure;
         }
         void Configure(Scene scene,LoadSceneMode mode){var f=UnityEngine.Object.FindFirstObjectByType<GameFlowController>();if(f){var so=new SerializedObject(f);so.FindProperty("externalConfigDirectory").stringValue=directory;so.ApplyModifiedPropertiesWithoutUndo();}}
-        [TearDown] public void Cleanup(){SceneManager.sceneLoaded-=Configure;Directory.Delete(directory,true);}
+        [TearDown] public void Cleanup(){SceneManager.sceneLoaded-=Configure;Directory.Delete(directory,true);BoardView.SkipAdvanceForTests=false;}
         static IEnumerator Shoot(GameFlowController f)
         {
             Assert.IsTrue(f.TryFire(new Vector2(-0.5f,-6.5f)));float until=Time.realtimeSinceStartup+10;

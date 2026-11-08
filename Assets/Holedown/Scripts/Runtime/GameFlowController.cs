@@ -49,7 +49,9 @@ namespace Holedown
         public string ConfigurationDirectory { get; private set; }
         public AppPhase Phase { get; private set; } = AppPhase.Loading;
         public bool HasFocus { get; private set; } = true;
-        public bool CanSimulate => isActiveAndEnabled && Phase == AppPhase.Playing && HasFocus;
+        public bool CanSimulate => isActiveAndEnabled && Phase == AppPhase.Playing && HasFocus && !advancing;
+        public bool IsAdvancing => advancing;
+        bool advancing;
         public int InputGeneration { get; private set; }
         public event Action<bool> PauseChanged;
         bool hasStarted, ownsPause;
@@ -59,12 +61,14 @@ namespace Holedown
         Vector2? pendingFire;
         int pendingGeneration;
         public bool UserInputAllowed => isActiveAndEnabled && HasFocus && (input == null || input.AcceptsCommands);
-        void OnDestroy() { ReleasePause(); configuration?.Dispose(); }
+        void OnDestroy() { ReleasePause(); configuration?.Dispose(); if(boardView)boardView.AdvanceCompleted-=OnAdvanceCompleted; }
 
-        void OnEnable() { aim.FireRequested += OnFireRequested; input = GetComponent<PlayerInputController>(); }
+        void OnEnable() { aim.FireRequested += OnFireRequested; input = GetComponent<PlayerInputController>(); if(boardView)boardView.AdvanceCompleted+=OnAdvanceCompleted; }
         void OnDisable()
         {
             aim.FireRequested -= OnFireRequested;
+            if(boardView)boardView.AdvanceCompleted-=OnAdvanceCompleted;
+            advancing=false;
             ReleasePause();
             ClearAttempt();
         }
@@ -81,8 +85,15 @@ namespace Holedown
             if(!aim.CanAim) aim.HidePreview();
             Changed?.Invoke();
         }
+        void OnAdvanceCompleted()
+        {
+            advancing = false;
+            aim.CanAim = CanSimulate && Session?.Phase == SessionPhase.Aiming;
+            Changed?.Invoke();
+        }
         void ClearAttempt()
         {
+            advancing=false;
             aim.CanAim=false;
             StopAllCoroutines(); launching=null;
             foreach(var ball in balls.Values) if(ball){ball.Hit-=OnHit;ball.Returned-=OnReturned;ball.gameObject.SetActive(false);Destroy(ball.gameObject);}
@@ -235,7 +246,8 @@ namespace Holedown
         public void RestartRun()
         {
             if(plannerTestMode){ReturnToPlannerSelection();return;}
-            if(!CanSimulate || !UserInputAllowed || Campaign==null || !EnterTransition())return;
+            // Allowed during an advance animation: restarting cancels it instead of being ignored.
+            if(Phase!=AppPhase.Playing || !UserInputAllowed || Campaign==null || !EnterTransition())return;
             try { Campaign.RestartRun(); BeginAttempt(); CommandConfirmed?.Invoke(); } finally { transitioning = false; }
         }
         public void Restart() => ReloadAndRestart();
@@ -320,7 +332,9 @@ namespace Holedown
 
         void Pause(bool manual)
         {
-            if(!CanSimulate || (Session?.Phase != SessionPhase.Aiming && Session?.Phase != SessionPhase.Volley && Session?.Phase != SessionPhase.Recalling)) return;
+            // Advancing blocks simulation but must still allow pause and focus-loss pause.
+            if(Phase != AppPhase.Playing || !HasFocus || Session == null) return;
+            if(Session.Phase != SessionPhase.Aiming && Session.Phase != SessionPhase.Volley && Session.Phase != SessionPhase.Recalling) return;
             savedTimeScale = Time.timeScale; ownsPause = true; Time.timeScale = 0;
             SetPhase(AppPhase.Paused); PauseChanged?.Invoke(true);
             if (manual) CommandConfirmed?.Invoke();
@@ -353,12 +367,15 @@ namespace Holedown
                 case SessionPhase.Volley:
                 case SessionPhase.Recalling:
                     if (!Session.TryBeginSettlement()) break;
+                    // Capture where blocks were so the advance can rise from those positions.
+                    boardView.CapturePositions();
                     Session.Settle(Board);
-                    if(Session.Phase==SessionPhase.Won)Campaign.CompleteStage();
-                    else if(Session.Phase==SessionPhase.Lost)Campaign.FailStage();
-                    boardView.Sync(Board);
+                    if(Session.Phase==SessionPhase.Won){Campaign.CompleteStage();boardView.Sync(Board);}
+                    else if(Session.Phase==SessionPhase.Lost){Campaign.FailStage();boardView.Sync(Board);}
+                    else if(boardView.AdvanceSeconds>0f){advancing=true;boardView.PlayAdvance(Board);}
+                    else boardView.Sync(Board);
                     InvalidateInput();
-                    aim.CanAim = Session.Phase == SessionPhase.Aiming;
+                    aim.CanAim = !advancing && Session.Phase == SessionPhase.Aiming;
                     Changed?.Invoke();
                     RoundSettled?.Invoke(Session.Phase);
                     break;

@@ -20,6 +20,7 @@ namespace Holedown.Tests
         [SetUp]
         public void Setup()
         {
+            BoardView.SkipAdvanceForTests = true;
             directory = Path.GetFullPath("Library/AudioFeedbackTests/" + Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(directory);
             File.Copy("Config/settings.json", Path.Combine(directory, "settings.json"));
@@ -48,6 +49,7 @@ namespace Holedown.Tests
         [TearDown]
         public void Cleanup()
         {
+            BoardView.SkipAdvanceForTests = false;
             SceneManager.sceneLoaded -= ConfigureScene;
             Directory.Delete(directory, true);
         }

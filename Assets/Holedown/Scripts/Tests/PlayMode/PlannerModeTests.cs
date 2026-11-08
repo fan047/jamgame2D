@@ -16,6 +16,7 @@ namespace Holedown.Tests
         string directory,original;
         [SetUp] public void Setup()
         {
+            BoardView.SkipAdvanceForTests=true;
             directory=Path.GetFullPath("Library/Locus/tmp/planner-mode/"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(directory);
             File.Copy("Config/settings.json",Path.Combine(directory,"settings.json"));
             var levels=new JArray();
@@ -32,7 +33,7 @@ namespace Holedown.Tests
             var f=UnityEngine.Object.FindFirstObjectByType<GameFlowController>();
             if(!f)return;var so=new SerializedObject(f);so.FindProperty("externalConfigDirectory").stringValue=directory;so.FindProperty("plannerTestMode").boolValue=true;so.ApplyModifiedPropertiesWithoutUndo();
         }
-        [TearDown] public void Cleanup(){SceneManager.sceneLoaded-=Configure;Directory.Delete(directory,true);}
+        [TearDown] public void Cleanup(){SceneManager.sceneLoaded-=Configure;Directory.Delete(directory,true);BoardView.SkipAdvanceForTests=false;}
         static IEnumerator Ready(GameFlowController f)
         {
             f.SendMessage("OnApplicationFocus",true);yield return null;yield return null;

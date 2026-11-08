@@ -18,6 +18,7 @@ namespace Holedown.Tests
             File.Copy("Config/settings.json",Path.Combine(directory,"settings.json"));
             File.Copy("Tests/Fixtures/growth-level.json",Path.Combine(directory,"level.json"));
             SceneManager.sceneLoaded+=Configure;
+            BoardView.SkipAdvanceForTests=true;
         }
         void Configure(Scene scene,LoadSceneMode mode)
         {
@@ -27,7 +28,7 @@ namespace Holedown.Tests
             serialized.FindProperty("externalConfigDirectory").stringValue=directory;
             serialized.ApplyModifiedPropertiesWithoutUndo();
         }
-        public void Dispose(){SceneManager.sceneLoaded-=Configure;Directory.Delete(directory,true);}
+        public void Dispose(){SceneManager.sceneLoaded-=Configure;Directory.Delete(directory,true);BoardView.SkipAdvanceForTests=false;}
     }
 }
 #endif

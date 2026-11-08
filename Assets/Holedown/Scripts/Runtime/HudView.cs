@@ -28,7 +28,7 @@ namespace Holedown
             recall.interactable=session.Phase==SessionPhase.Volley;
             var campaign=flow.Campaign;
             string summary=$"第 {(campaign?.StageIndex ?? 0)+1}/{campaign?.StageCount ?? 1} 关   每轮 {flow.EntryBalls} 球   第 {session.Round + (session.Phase==SessionPhase.Aiming?1:0)} 轮\n待确认奖励 +{campaign?.PendingBonus ?? 0}（下关生效）";
-            status.text=flow.IsPlannerTest ? summary+$"\n<size=65%>在场 {session.ActiveCount} 球（待发 {session.Pending}） | 补行 {flow.Board?.IncomingCursor ?? 0}/{flow.Board?.IncomingCount ?? 0} | {ChineseText.Session(session.Phase)}\n配置：{ChineseText.Configuration(flow.ConfigurationLabel)}</size>" : summary;
+            status.text=flow.IsPlannerTest ? summary+$"\n<size=65%>在场 {session.ActiveCount} 球（待发 {session.Pending}） | 补行 {flow.Board?.IncomingCursor ?? 0}/{flow.Board?.IncomingCount ?? 0} | {(flow.IsAdvancing ? "推进中" : ChineseText.Session(session.Phase))}\n配置：{ChineseText.Configuration(flow.ConfigurationLabel)}</size>" : summary;
         }
     }
 }

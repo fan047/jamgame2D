@@ -111,5 +111,11 @@ namespace Holedown
         }
         void OnDisable()=>StopImpact();
         public void Remove() { shape.enabled = false; gameObject.SetActive(false); Destroy(gameObject); }
+        // Used by the advance animation: the incoming row stays hidden until it reaches the bottom.
+        public void SetPresentationVisible(bool visible)
+        {
+            if(label)label.enabled=visible;
+            if(roleBadge)roleBadge.enabled=visible&&roleBadge.sprite;
+        }
     }
 }
