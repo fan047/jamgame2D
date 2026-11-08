@@ -598,6 +598,7 @@ GameObject:
   - component: {fileID: 250882558}
   - component: {fileID: 250882557}
   - component: {fileID: 250882556}
+  - component: {fileID: 250882560}
   m_Layer: 0
   m_Name: Reload
   m_TagString: Untagged
@@ -707,6 +708,19 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: -100}
   m_SizeDelta: {x: 500, y: 80}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &250882560
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 250882555}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0dd343e411e67624fad191db7d5de96a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Holedown.Runtime::Holedown.ButtonPressMotion
+  pressedScale: 0.96
 --- !u!1 &283273028
 GameObject:
   m_ObjectHideFlags: 0
@@ -752,6 +766,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Holedown.Runtime::Holedown.BoardView
   blockPrefab: {fileID: 8072074381442836413, guid: 3fa64f2e4c833e1438440ba48029c8b4, type: 3}
+  advanceSeconds: 0.2
 --- !u!1 &318290491
 GameObject:
   m_ObjectHideFlags: 0
@@ -1038,6 +1053,7 @@ GameObject:
   - component: {fileID: 409735865}
   - component: {fileID: 409735864}
   - component: {fileID: 409735866}
+  - component: {fileID: 409735867}
   m_Layer: 0
   m_Name: Continue
   m_TagString: Untagged
@@ -1147,6 +1163,19 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &409735867
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 409735862}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0dd343e411e67624fad191db7d5de96a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Holedown.Runtime::Holedown.ButtonPressMotion
+  pressedScale: 0.96
 --- !u!114 &432530741
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1173,6 +1202,7 @@ GameObject:
   - component: {fileID: 442691416}
   - component: {fileID: 442691415}
   - component: {fileID: 442691417}
+  - component: {fileID: 442691418}
   m_Layer: 0
   m_Name: Advance
   m_TagString: Untagged
@@ -1282,6 +1312,19 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &442691418
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 442691413}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0dd343e411e67624fad191db7d5de96a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Holedown.Runtime::Holedown.ButtonPressMotion
+  pressedScale: 0.96
 --- !u!1 &502826416
 GameObject:
   m_ObjectHideFlags: 0
@@ -1294,6 +1337,7 @@ GameObject:
   - component: {fileID: 502826419}
   - component: {fileID: 502826418}
   - component: {fileID: 502826420}
+  - component: {fileID: 502826421}
   m_Layer: 0
   m_Name: ReloadAudio
   m_TagString: Untagged
@@ -1403,6 +1447,19 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &502826421
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 502826416}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0dd343e411e67624fad191db7d5de96a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Holedown.Runtime::Holedown.ButtonPressMotion
+  pressedScale: 0.96
 --- !u!1 &515583136
 GameObject:
   m_ObjectHideFlags: 0
@@ -1415,6 +1472,7 @@ GameObject:
   - component: {fileID: 515583139}
   - component: {fileID: 515583138}
   - component: {fileID: 515583140}
+  - component: {fileID: 515583141}
   m_Layer: 0
   m_Name: Start
   m_TagString: Untagged
@@ -1524,6 +1582,19 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &515583141
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 515583136}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0dd343e411e67624fad191db7d5de96a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Holedown.Runtime::Holedown.ButtonPressMotion
+  pressedScale: 0.96
 --- !u!1 &517438659
 GameObject:
   m_ObjectHideFlags: 0
@@ -2474,6 +2545,7 @@ GameObject:
   - component: {fileID: 912249837}
   - component: {fileID: 912249836}
   - component: {fileID: 912249835}
+  - component: {fileID: 912249839}
   m_Layer: 0
   m_Name: Restart
   m_TagString: Untagged
@@ -2583,6 +2655,19 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: -235}
   m_SizeDelta: {x: 500, y: 80}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &912249839
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 912249834}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0dd343e411e67624fad191db7d5de96a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Holedown.Runtime::Holedown.ButtonPressMotion
+  pressedScale: 0.96
 --- !u!1 &924909607
 GameObject:
   m_ObjectHideFlags: 0
@@ -3123,6 +3208,8 @@ MonoBehaviour:
   launcher: {fileID: 1840627757}
   startScreen: {fileID: 1404852083}
   stageCanvas: {fileID: 1404852080}
+  launchPulseSeconds: 0.12
+  launchPulseScale: 1.12
 --- !u!1 &1104748491
 GameObject:
   m_ObjectHideFlags: 0
@@ -4215,6 +4302,7 @@ MonoBehaviour:
   restart: {fileID: 912249835}
   advance: {fileID: 442691417}
   advanceLabel: {fileID: 994425763}
+  panelTransition: {fileID: 1457466484}
 --- !u!114 &1404852078
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4300,6 +4388,8 @@ MonoBehaviour:
   status: {fileID: 1834603277}
   recall: {fileID: 1510917042}
   reload: {fileID: 1805111819}
+  pendingBounceSeconds: 0.18
+  pendingBounceScale: 1.08
 --- !u!114 &1404852082
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4321,6 +4411,7 @@ MonoBehaviour:
   reloadAudio: {fileID: 502826420}
   audioStatus: {fileID: 403671505}
   audioNotice: {fileID: 1172113572}
+  panelTransition: {fileID: 2001239223}
 --- !u!114 &1404852083
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4348,6 +4439,7 @@ GameObject:
   - component: {fileID: 1457466481}
   - component: {fileID: 1457466483}
   - component: {fileID: 1457466482}
+  - component: {fileID: 1457466484}
   m_Layer: 0
   m_Name: ResultPanel
   m_TagString: Untagged
@@ -4417,6 +4509,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1457466480}
   m_CullTransparentMesh: 1
+--- !u!114 &1457466484
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1457466480}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 559fca8983eff9c499aa6b29ce712d7a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Holedown.Runtime::Holedown.PanelTransition
+  fadeSeconds: 0.14
+  fromScale: 0.96
 --- !u!114 &1468039047
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4457,6 +4563,7 @@ GameObject:
   - component: {fileID: 1510917044}
   - component: {fileID: 1510917043}
   - component: {fileID: 1510917042}
+  - component: {fileID: 1510917046}
   m_Layer: 0
   m_Name: Recall
   m_TagString: Untagged
@@ -4566,6 +4673,19 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: -575}
   m_SizeDelta: {x: 340, y: 85}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1510917046
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1510917041}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0dd343e411e67624fad191db7d5de96a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Holedown.Runtime::Holedown.ButtonPressMotion
+  pressedScale: 0.96
 --- !u!1 &1521302522
 GameObject:
   m_ObjectHideFlags: 0
@@ -5005,6 +5125,7 @@ GameObject:
   - component: {fileID: 1805111821}
   - component: {fileID: 1805111820}
   - component: {fileID: 1805111819}
+  - component: {fileID: 1805111823}
   m_Layer: 0
   m_Name: ReloadConfig
   m_TagString: Untagged
@@ -5114,6 +5235,19 @@ RectTransform:
   m_AnchoredPosition: {x: 175, y: -575}
   m_SizeDelta: {x: 300, y: 70}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1805111823
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1805111818}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0dd343e411e67624fad191db7d5de96a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Holedown.Runtime::Holedown.ButtonPressMotion
+  pressedScale: 0.96
 --- !u!1 &1834603276
 GameObject:
   m_ObjectHideFlags: 0
@@ -5475,6 +5609,8 @@ MonoBehaviour:
   fragmentSprite: {fileID: 7482667652216324306, guid: 9b51139e69622394b99b0322acd0c44d, type: 3}
   fragmentMaterial: {fileID: 2100000, guid: db7639095b2c7be418b8254b65104209, type: 2}
   theme: {fileID: 11400000, guid: 104ba133b5cf0614d8ecc0c8721b0aad, type: 2}
+  maxFragmentBursts: 6
+  fragmentSeconds: 0.3
 --- !u!82 &1898611273
 AudioSource:
   m_ObjectHideFlags: 0
@@ -5890,6 +6026,7 @@ GameObject:
   - component: {fileID: 2001239220}
   - component: {fileID: 2001239222}
   - component: {fileID: 2001239221}
+  - component: {fileID: 2001239223}
   m_Layer: 0
   m_Name: PausePanel
   m_TagString: Untagged
@@ -5961,6 +6098,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2001239219}
   m_CullTransparentMesh: 1
+--- !u!114 &2001239223
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2001239219}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 559fca8983eff9c499aa6b29ce712d7a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Holedown.Runtime::Holedown.PanelTransition
+  fadeSeconds: 0.14
+  fromScale: 0.96
 --- !u!1 &2013604637
 GameObject:
   m_ObjectHideFlags: 0
@@ -6110,6 +6261,7 @@ GameObject:
   - component: {fileID: 2052840768}
   - component: {fileID: 2052840767}
   - component: {fileID: 2052840766}
+  - component: {fileID: 2052840770}
   m_Layer: 0
   m_Name: Pause
   m_TagString: Untagged
@@ -6219,6 +6371,19 @@ RectTransform:
   m_AnchoredPosition: {x: 365, y: 595}
   m_SizeDelta: {x: 150, y: 65}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &2052840770
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2052840765}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0dd343e411e67624fad191db7d5de96a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Holedown.Runtime::Holedown.ButtonPressMotion
+  pressedScale: 0.96
 --- !u!114 &2071267176
 MonoBehaviour:
   m_ObjectHideFlags: 0

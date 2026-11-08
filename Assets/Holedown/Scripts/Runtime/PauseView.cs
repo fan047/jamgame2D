@@ -14,6 +14,8 @@ namespace Holedown
         [SerializeField] Button reloadAudio;
         [SerializeField] TMPro.TMP_Text audioStatus;
         [SerializeField] TMPro.TMP_Text audioNotice;
+        [SerializeField] PanelTransition panelTransition;
+        bool wasVisible;
         void OnEnable()
         {
             flow.Changed += Refresh; pause.onClick.AddListener(Pause);
@@ -46,6 +48,11 @@ namespace Holedown
             var subtitle=panel.transform.Find("Help")?.GetComponent<TMPro.TMP_Text>();
             if(subtitle)subtitle.text=flow.IsPlannerTest?"重新读取两份配置并重建当前关。\n文件有误时保留本次测试。":"继续本轮，或重新读取配置，\n从第 1 关重新开始。";
             panel.SetActive(flow.Phase == AppPhase.Paused);
+            if (panelTransition)
+            {
+                var visible = panel.activeSelf;
+                if (visible != wasVisible) { panelTransition.Play(visible); wasVisible = visible; }
+            }
             var phase = flow.Session?.Phase;
             pause.gameObject.SetActive(flow.Phase == AppPhase.Playing && (phase == SessionPhase.Aiming || phase == SessionPhase.Volley || phase == SessionPhase.Recalling));
         }

@@ -13,6 +13,8 @@ namespace Holedown
         [SerializeField] Button restart;
         [SerializeField] Button advance;
         [SerializeField] TMP_Text advanceLabel;
+        [SerializeField] PanelTransition panelTransition;
+        bool wasVisible;
         void OnEnable() { flow.Changed += Refresh; restart.onClick.AddListener(RestartRun); advance.onClick.AddListener(Advance); Refresh(); }
         void OnDisable() { flow.Changed -= Refresh; restart.onClick.RemoveListener(RestartRun); advance.onClick.RemoveListener(Advance); }
         void RestartRun() => flow.QueueCommand(!string.IsNullOrEmpty(flow.InitializationError) ? FlowCommand.Reload : FlowCommand.RestartRun);
@@ -23,6 +25,11 @@ namespace Holedown
             var phase = flow.Session?.Phase ?? SessionPhase.Initializing;
             bool ended = flow.Phase == AppPhase.Playing && (phase == SessionPhase.Won || phase == SessionPhase.Lost);
             panel.SetActive(ended || error);
+            if (panelTransition)
+            {
+                var visible = panel.activeSelf;
+                if (visible != wasVisible) { panelTransition.Play(visible); wasVisible = visible; }
+            }
             var campaign=flow.Campaign;
             bool next=phase==SessionPhase.Won && campaign!=null && !campaign.IsFinalStage && !flow.IsPlannerTest;
             advance.gameObject.SetActive(!error && (next || phase==SessionPhase.Lost || (flow.IsPlannerTest && ended)));
