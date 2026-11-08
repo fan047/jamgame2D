@@ -55,10 +55,17 @@ namespace Holedown
             Enable(volleyMap, playing && phase == SessionPhase.Volley);
             Enable(systemMap, playing && (phase == SessionPhase.Aiming || phase == SessionPhase.Volley || phase == SessionPhase.Recalling));
         }
-        static void Enable(InputActionMap map, bool enabled)
+        void Enable(InputActionMap map, bool enabled)
         {
             if (map.enabled == enabled) return;
-            if (enabled) map.Enable(); else map.Disable();
+            if (enabled)
+            {
+                // A press already held while the map was off (for example the click that
+                // pressed "开始游戏") must not read as a fresh fire, recall or pause.
+                ResetGestures();
+                map.Enable();
+            }
+            else map.Disable();
         }
         void Update()
         {
