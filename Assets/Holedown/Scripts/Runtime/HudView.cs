@@ -56,7 +56,7 @@ namespace Holedown
             round.text=$"第 {session.Round + (session.Phase==SessionPhase.Aiming?1:0)} 轮";
             rewardStrip.SetActive(pending>0);rewardValue.text=$"+{pending}";
             if(pending!=shownPending){shownPending=pending;if(pending>0)BouncePending();else{if(bounce!=null)StopCoroutine(bounce);bounce=null;rewardValue.rectTransform.localScale=Vector3.one;}}
-            status.text=$"在场 {session.ActiveCount} 球（待发 {session.Pending}） | 补行 {flow.Board?.IncomingCursor ?? 0}/{flow.Board?.IncomingCount ?? 0} | {(flow.IsAdvancing ? "推进中" : ChineseText.Session(session.Phase))}\n配置：{ChineseText.Configuration(flow.ConfigurationLabel)}";
+            status.text=$"关卡：{flow.StageId} | 在场 {session.ActiveCount} 球（待发 {session.Pending}） | 补行 {flow.Board?.IncomingCursor ?? 0}/{flow.Board?.IncomingCount ?? 0} | {(flow.IsAdvancing ? "推进中" : ChineseText.Session(session.Phase))}\n配置：{ChineseText.Configuration(flow.ConfigurationLabel)}";
         }
     }
 }

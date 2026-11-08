@@ -100,7 +100,7 @@ namespace Holedown.Tests
             for(int shot=0;shot<2;shot++)
             {
                 Assert.IsTrue(f.TryFire(new Vector2(-.5f,shot==0?-6.5f:-8.5f)));float deadline=Time.realtimeSinceStartup+15;
-                while(f.Session.Phase==SessionPhase.Volley||f.Session.Phase==SessionPhase.Recalling){Assert.AreEqual(AppPhase.Playing,f.Phase);Assert.Less(Time.realtimeSinceStartup,deadline);yield return null;}
+                while(f.Session.Phase==SessionPhase.Volley||f.Session.Phase==SessionPhase.Recalling){Assert.AreEqual(AppPhase.Playing,f.Phase,$"Physical planner volley interrupted: focus={f.HasFocus}, scale={Time.timeScale}");Assert.Less(Time.realtimeSinceStartup,deadline);yield return null;}
                 yield return null;
             }
             Assert.AreEqual(SessionPhase.Won,f.Session.Phase);Assert.AreEqual(7,f.Campaign.PendingBonus);Assert.IsFalse(f.Campaign.IsFinalStage);

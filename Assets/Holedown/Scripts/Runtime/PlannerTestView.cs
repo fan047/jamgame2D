@@ -37,8 +37,12 @@ namespace Holedown
             Button(panel.transform,"重新读取配置",0,-325,()=>flow.QueueCommand(FlowCommand.Reload));
             error=Label(panel.transform,"",-455,24);error.rectTransform.sizeDelta=new Vector2(820,180);error.color=MineUIStyle.Muted;
             overlay=Root("PlannerTestOverlay",canvas.transform,false);
-            overlayLabel=Label(overlay.transform,"",650,24);
-            Button(overlay.transform,"返回选关",0,745,()=>flow.QueueCommand(FlowCommand.PlannerSelection));
+            overlayLabel=Label(overlay.transform,"",600,16);overlayLabel.gameObject.SetActive(false); // Consolidated into HudView's diagnostic field.
+            // The selection tool layout is unchanged. Only the in-run shortcut
+            // moves below the board so it cannot cover the new main ball count.
+            var selectionButton=Button(overlay.transform,"返回选关",-300,-630,()=>flow.QueueCommand(FlowCommand.PlannerSelection));
+            selectionButton.GetComponent<RectTransform>().sizeDelta=new Vector2(220,70);
+            selectionButton.GetComponentInChildren<TMP_Text>().rectTransform.sizeDelta=new Vector2(200,64);
             overlayError=Label(overlay.transform,"",-400,24);overlayError.rectTransform.sizeDelta=new Vector2(820,160);overlayError.color=MineUIStyle.Muted;
             flow.Changed+=Refresh;Refresh();
         }
@@ -60,12 +64,12 @@ namespace Holedown
             var go=Element("Label",parent,new Vector2(0,y),new Vector2(820,90),typeof(TextMeshProUGUI));
             var label=go.GetComponent<TMP_Text>();label.font=font;MineUIStyle.Text(label,size);label.enableAutoSizing=true;label.fontSizeMin=18;label.fontSizeMax=size;label.text=text;label.richText=false;label.alignment=TextAlignmentOptions.Center;return label;
         }
-        void Button(Transform parent,string text,float x,float y,UnityEngine.Events.UnityAction action)
+        Button Button(Transform parent,string text,float x,float y,UnityEngine.Events.UnityAction action)
         {
             var go=Element(text,parent,new Vector2(x,y),new Vector2(370,70),typeof(CutCornerImage),typeof(Button),typeof(ButtonPressMotion));
             var label=Label(go.transform,text,0,28);label.rectTransform.sizeDelta=new Vector2(350,64);
             MineUIStyle.Button(go.GetComponent<Button>(),text=="开始测试本关");
-            go.GetComponent<Button>().onClick.AddListener(action);
+            go.GetComponent<Button>().onClick.AddListener(action);return go.GetComponent<Button>();
         }
         void Select(int delta)
         {
