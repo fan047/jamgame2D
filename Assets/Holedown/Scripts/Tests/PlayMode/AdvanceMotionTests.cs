@@ -33,7 +33,7 @@ namespace Holedown.Tests
             // The incoming row starts below the bottom line, so its label stays hidden until arrival.
             foreach(var block in entering)Assert.Less(block.transform.position.y,0f,"incoming blocks start below the bottom line");
             float deadline=Time.realtimeSinceStartup+2f;
-            while(controller.IsAdvancing&&Time.realtimeSinceStartup<deadline)yield return null;
+            while(controller.IsAdvancing&&Time.realtimeSinceStartup<deadline){if(controller.Phase!=AppPhase.Playing){yield return PlaySceneEntry.ResumeAfterFocusLoss(controller);continue;}yield return null;}
             Assert.IsFalse(controller.IsAdvancing,"advance must finish");Assert.IsTrue(controller.CanSimulate);
             Assert.IsTrue(controller.TryFire(Vector2.down),"aiming resumes after the advance completes");
         }
@@ -50,7 +50,7 @@ namespace Holedown.Tests
             controller.ContinueGame();yield return null;
             Assert.AreEqual(AppPhase.Playing,controller.Phase);Assert.AreEqual(1f,Time.timeScale);
             float deadline=Time.realtimeSinceStartup+2f;
-            while(controller.IsAdvancing&&Time.realtimeSinceStartup<deadline)yield return null;
+            while(controller.IsAdvancing&&Time.realtimeSinceStartup<deadline){if(controller.Phase!=AppPhase.Playing){yield return PlaySceneEntry.ResumeAfterFocusLoss(controller);continue;}yield return null;}
             Assert.IsFalse(controller.IsAdvancing);Assert.IsTrue(controller.CanSimulate);
         }
         [UnityTest] public IEnumerator RetryAndStageChangeCancelTheAdvance()
