@@ -50,6 +50,7 @@ namespace Holedown.Tests
             yield return new WaitForSeconds(.2f);Capture("hud-reward");
             flow.SendMessage("OnApplicationFocus",false);yield return null;Assert.AreEqual(AppPhase.Paused,flow.Phase);flow.SendMessage("OnApplicationFocus",true);yield return null;yield return null;Assert.AreEqual(AppPhase.Paused,flow.Phase);yield return new WaitForSecondsRealtime(.2f);Capture("pause");
             var aim=Object.FindFirstObjectByType<AimInput>();Assert.IsTrue(aim.IsPointerOverUI(Camera.main.WorldToScreenPoint(new Vector3(4,4,0))));Assert.IsFalse(UI.Find("HudHeader").gameObject.activeInHierarchy);
+            Assert.AreEqual(MineUIStyle.Ink,Button("继续游戏").GetComponentInChildren<TMP_Text>().color);
             Button("继续游戏").onClick.Invoke();yield return null;yield return null;Assert.AreEqual(AppPhase.Playing,flow.Phase);Assert.AreEqual(0,flow.Session.ActiveCount);
             flow.RequestPause();yield return null;Button("重载并重开").onClick.Invoke();yield return null;yield return null;Assert.AreEqual(0,flow.Campaign.StageIndex);Assert.AreEqual(0,flow.Campaign.PendingBonus);Assert.IsFalse(UI.Find("HudHeader/PendingReward").gameObject.activeInHierarchy);
         }
@@ -76,6 +77,11 @@ namespace Holedown.Tests
             Button("重试本关").onClick.Invoke();yield return null;yield return null;Assert.AreEqual(SessionPhase.Aiming,flow.Session.Phase);
             for(int i=0;i<flow.Campaign.StageCount;i++){Win();yield return new WaitForSecondsRealtime(.2f);if(!flow.Campaign.IsFinalStage){if(i==0)Capture("stage-clear");Button("进入下一关").onClick.Invoke();yield return null;yield return null;}else{Capture("run-complete");Assert.IsFalse(UI.Find("ResultPanel/Card/Advance").gameObject.activeInHierarchy);}}
             Button("重新开始全程").onClick.Invoke();yield return null;yield return null;Assert.AreEqual(0,flow.Campaign.StageIndex);
+        }
+        [UnityTest] public IEnumerator MaximumPlannerBallCountStillFitsWithoutShrinkingTheHud()
+        {
+            planner=true;yield return Load();Button("切换球数方式").onClick.Invoke();Button("切换球数方式").onClick.Invoke();Object.FindFirstObjectByType<InputField>().text=int.MaxValue.ToString();Button("开始测试本关").onClick.Invoke();yield return null;yield return null;
+            var count=Text("HudHeader/BallCount");count.ForceMeshUpdate();Assert.AreEqual(int.MaxValue,flow.EntryBalls);Assert.IsFalse(count.isTextOverflowing);Assert.AreEqual(Vector3.one,count.transform.localScale);Assert.AreEqual(Vector3.one,Text("HudHeader/StageIndex").transform.localScale);
         }
         [UnityTest] public IEnumerator PlannerControlsAndAudioFailureUseSharedStyle()
         {
