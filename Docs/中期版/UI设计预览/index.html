@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>水晶矿洞 · UI 设计预览</title>
+<style>
+@font-face{font-family:MineUI;src:url("../../../Assets/Holedown/Fonts/NotoSansCJK/NotoSansCJKsc-Regular.otf")}
+:root{color-scheme:dark;--bg:#151e31;--panel:#19263a;--secondary:#2c3c53;--white:#f5f0d8;--muted:#a5b0c2;--reward:#e1a24b;--cut:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px)}
+*{box-sizing:border-box}body{margin:0;background:#0e1522;color:var(--white);font-family:MineUI,"Noto Sans CJK SC",sans-serif}button,input{font:inherit}button{cursor:pointer}button:disabled{cursor:default}button:focus-visible{outline:2px solid var(--white);outline-offset:4px}
+.review{height:100dvh;display:grid;grid-template-columns:248px 1fr}
+aside{padding:28px 20px;display:flex;flex-direction:column;gap:24px;border-right:1px solid #27344a;overflow:auto}
+.review-title{font-size:20px;margin:0 0 8px}.review-note{font-size:12px;color:var(--muted);line-height:1.8;margin:0}.tabs{display:grid;gap:5px}
+.tab{border:0;background:transparent;text-align:left;color:var(--muted);padding:11px 12px;font-size:14px}
+.tab[aria-current=true]{background:var(--secondary);color:var(--white);clip-path:var(--cut)}
+.options{display:grid;gap:15px;font-size:12px;color:var(--muted)}.options label{display:flex;align-items:center;gap:9px}.options input{accent-color:var(--white)}.review-footer{margin-top:auto;font-size:11px;line-height:1.8;color:var(--muted)}
+.viewport{position:relative;display:grid;place-items:center;min-width:0;min-height:0;overflow:hidden}
+.stage-wrap{position:relative;flex:none}.stage{width:540px;height:960px;position:absolute;left:0;top:0;transform-origin:top left;overflow:hidden;background:#101a2c url("岩壁背景参考.png") center/100% 100%;font-size:16px}
+.board{position:absolute;inset:0;pointer-events:none}.board svg{width:100%;height:100%}.hidden{display:none!important}
+.header{position:absolute;left:40px;right:40px;top:38px;display:grid;grid-template-columns:100px 1fr 70px;align-items:start}
+.label{font-size:14px;color:var(--muted)}.stage-index{font-size:23px;margin-top:5px;letter-spacing:1px}.round{font-size:14px;color:var(--muted);margin-top:12px}
+.ball-count{text-align:center;padding-right:30px}.ball-value{font-size:52px;line-height:1.2;margin-top:1px;font-variant-numeric:tabular-nums}.unit{font-size:17px;margin-left:5px}
+.ui-button{position:relative;border:0;clip-path:var(--cut);min-height:52px;padding:12px 24px;display:flex;justify-content:center;align-items:center;gap:10px;font-size:18px;line-height:1.4;background:var(--secondary);color:var(--white);transition:filter .1s,transform .1s}
+.ui-button:hover:not(:disabled){filter:brightness(1.15)}.ui-button:active:not(:disabled){transform:scale(.98)}
+.ui-button.primary{background:var(--white);color:var(--bg)}.ui-button:disabled{background:#263348;color:#6e7d93}.ui-button.quiet{background:transparent;color:var(--muted);font-size:15px;min-height:44px;padding:8px 12px}
+.pause-button{width:52px;min-height:48px;justify-self:end;padding:10px}.pause-button svg{width:20px;height:20px;fill:currentColor}
+.reward-strip{position:absolute;top:161px;left:50%;transform:translateX(-50%);padding:7px 15px;color:var(--reward);font-size:16px;background:#252c36;clip-path:var(--cut);display:flex;gap:10px;align-items:center;white-space:nowrap}
+.reward-mark{font-size:20px;line-height:1}
+.planner-diagnostic{position:absolute;left:40px;right:40px;top:199px;font-size:10px;line-height:1.7;color:var(--muted);text-align:center;overflow-wrap:anywhere}
+.recall-group{position:absolute;left:50%;bottom:95px;transform:translateX(-50%);text-align:center}.recall-group button{width:168px;min-height:48px;font-size:17px}.key-hint{color:var(--muted);font-size:12px;margin-top:9px}
+.title-screen{position:absolute;inset:0}.title-content{position:absolute;top:287px;left:60px;right:60px;text-align:center;display:flex;align-items:center;flex-direction:column}
+.title-logo{width:108px;height:54px;object-fit:contain;margin-bottom:18px}.game-title{font-size:42px;letter-spacing:5px;font-weight:500;margin:0 0 40px;white-space:nowrap}.start-button{width:224px;min-height:56px;font-size:20px}
+.controls-hint{font-size:14px;color:var(--muted);line-height:2.1;margin-top:28px}.controls-hint span{display:block}
+.modal-layer{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(5,11,22,.72);padding:30px}
+.modal{width:408px;max-height:740px;background:rgba(25,38,58,.97);clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px);padding:32px;position:relative}
+.modal::before{content:"";position:absolute;top:0;left:12px;right:0;height:2px;background:#53647b}
+.context{font-size:14px;color:var(--muted);margin:0 0 13px}.modal h2{font-size:29px;line-height:1.5;font-weight:500;margin:0 0 25px;letter-spacing:1px}
+.body-copy{font-size:16px;line-height:1.8;margin:0 0 24px;color:#c4ccda;white-space:pre-line}
+.action-stack{display:grid;gap:12px}.detail-note{font-size:12px;color:var(--muted);line-height:1.8;margin:16px 0 0;overflow-wrap:anywhere}
+.reward-summary{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid #334157;padding-bottom:19px;margin-bottom:20px}.reward-summary .gain{font-size:38px;color:var(--reward)}.next-balls{display:flex;align-items:baseline;justify-content:space-between;margin:0 0 29px;color:var(--muted);font-size:15px}.next-balls strong{font-weight:500;color:var(--white);font-size:28px}
+.complete-count{font-size:42px;margin-bottom:8px}.complete-copy{color:var(--muted);font-size:15px;margin-bottom:30px}
+.error-copy{max-height:236px;overflow:auto;overflow-wrap:anywhere;white-space:pre-line;line-height:1.8;font-size:15px;color:#c4ccda;margin-bottom:25px;scrollbar-color:#65758c #182237;padding-right:7px}
+.notice{position:absolute;top:270px;left:70px;right:70px;text-align:center;font-size:14px;color:var(--white);background:#1e3047;padding:10px;clip-path:var(--cut)}
+.audio-version{font-size:11px;color:var(--muted);margin-top:20px;line-height:1.8}
+.preview-stamp{position:absolute;right:18px;bottom:15px;font-size:10px;color:#8291aa}
+body.clean .review{display:block}body.clean aside{display:none}body.clean .viewport{height:100dvh}body.clean .preview-stamp{display:none}
+@media(max-width:760px){.review{grid-template-columns:1fr;grid-template-rows:auto 1fr}aside{padding:10px 14px;gap:8px;border-right:0;border-bottom:1px solid #27344a;overflow:hidden}.review-title,.review-note,.review-footer{display:none}.tabs{display:flex;overflow-x:auto;gap:4px}.tab{white-space:nowrap;padding:8px 10px;font-size:12px}.options{display:flex;gap:13px;font-size:11px}.options label{gap:4px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="review">
+<aside aria-label="设计预览控制">
+<div><h1 class="review-title">水晶矿洞</h1><p class="review-note">首版 UI 设计预览<br>用于评审视觉和层级，尚未接入 Unity。</p></div>
+<nav class="tabs" aria-label="界面状态">
+<button class="tab" data-page="title">开始页</button><button class="tab" data-page="hud">局内 HUD</button><button class="tab" data-page="pause">暂停</button><button class="tab" data-page="win">本关通关</button><button class="tab" data-page="lose">挑战失败</button><button class="tab" data-page="final">全程通关</button><button class="tab" data-page="error">配置错误</button>
+</nav>
+<div class="options">
+<label><input id="plannerToggle" type="checkbox">策划模式</label>
+<label><input id="rewardToggle" type="checkbox" checked>有奖励</label>
+<label><input id="volleyToggle" type="checkbox" checked>发射中</label>
+<label><input id="longToggle" type="checkbox">长错误与版本</label>
+</div>
+<p class="review-footer">9:16 舞台，窗口变化时整体适配。<br>橙金用于奖励，主操作使用象牙白。<br>所有数值、方块布局与按钮响应均为设计演示。</p>
+</aside>
+<main class="viewport" aria-label="游戏画面预览">
+<div class="stage-wrap"><div class="stage" id="stage">
+<div class="board hidden" id="board"></div>
+<div class="hidden" id="hud">
+<header class="header">
+<div><div class="label">关卡</div><div class="stage-index">03 / 09</div><div class="round">第 4 轮</div></div>
+<div class="ball-count"><div class="label">每轮球数</div><div class="ball-value">12<span class="unit">球</span></div></div>
+<button class="ui-button pause-button" id="pauseButton" aria-label="暂停"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="4" y="3" width="4" height="14"/><rect x="12" y="3" width="4" height="14"/></svg></button>
+</header>
+<div id="rewardStrip" class="reward-strip"><span class="reward-mark" aria-hidden="true">↑</span><span>下关 +3 球</span></div>
+<div id="diagnostic" class="planner-diagnostic hidden"></div>
+<div class="recall-group"><button class="ui-button" id="recallButton">召回</button><div class="key-hint">空格召回</div></div>
+</div>
+<section class="title-screen" id="titleScreen" aria-label="开始页">
+<div class="title-content"><img class="title-logo" src="Logo参考.png" alt=""><h2 class="game-title">水晶矿洞</h2><button class="ui-button primary start-button" id="startButton">开始游戏</button><div class="controls-hint"><span>鼠标左键发射</span><span>空格召回　Esc 暂停</span></div></div>
+</section>
+<div class="modal-layer hidden" id="modalLayer"><section class="modal" id="modal" aria-live="polite"></section></div>
+<div class="notice hidden" id="notice" role="status"></div>
+<div class="preview-stamp">设计预览</div>
+</div></div>
+</main>
+</div>
+<script>
+(function(){
+'use strict';
+var query=new URLSearchParams(location.search);
+var state={page:query.get('page')||'title',planner:false,reward:true,volley:true,long:false};
+if(query.get('clean')==='1')document.body.classList.add('clean');
+function $(id){return document.getElementById(id)}
+function show(el,visible){el.classList.toggle('hidden',!visible)}
+function block(x,y,w,h,value,kind,bonus){
+var c=kind==='reward'?['#e1a24b','#f4c678','#a9653c']:kind==='target'?['#49c6bc','#8ce5d6','#27696f']:['#8293af','#a7b5ce','#465976'];
+var cut=Math.min(w,h)*.16;
+return '<g transform="translate('+x+' '+y+')"><path d="M '+cut+' 0 H '+(w-4)+' L '+w+' 5 V '+(h-cut)+' L '+(w-cut)+' '+h+' H 4 L 0 '+(h-5)+' V '+cut+' Z" fill="'+c[0]+'"/><path d="M 0 '+cut+' L '+cut+' 0 H '+(w-4)+' L '+(w-9)+' 7 H '+(cut+4)+' L 6 '+(cut+7)+' Z" fill="'+c[1]+'"/><path d="M '+(w-9)+' 7 L '+w+' 5 V '+(h-cut)+' L '+(w-cut)+' '+h+' H 4 L 8 '+(h-8)+' H '+(w-cut-5)+' L '+(w-9)+' '+(h-cut-5)+' Z" fill="'+c[2]+'"/><text x="'+w/2+'" y="'+(h/2+(bonus?0:7))+'" font-size="21" fill="#111f32" text-anchor="middle" font-family="MineUI,sans-serif">'+value+'</text>'+(bonus?'<text x="'+w/2+'" y="'+(h/2+19)+'" font-size="12" fill="#38271b" text-anchor="middle" font-family="MineUI,sans-serif">+3</text>':'')+'</g>';
+}
+function board(){
+var s='<svg viewBox="0 0 540 960" aria-hidden="true"><path d="M40 296H500" stroke="#b7767e" stroke-width="1.5"/><circle cx="270" cy="239" r="7" fill="none" stroke="#f5f0d8" stroke-width="2"/>';
+[[44,357,50,50,23],[446,357,50,107,25,'target'],[100,530,108,50,35],[100,588,108,50,16],[330,530,108,50,25,'reward',true],[330,588,108,50,16],[44,647,50,50,16],[158,647,50,50,15],[273,647,50,50,23],[330,647,50,50,35],[446,647,50,50,13],[44,703,108,50,27],[388,703,108,50,37]].forEach(function(b){s+=block.apply(null,b)});
+if(state.volley)s+='<path d="M306 365l-10-13m-28 106l8-14" stroke="#f5f0d8" stroke-opacity=".35" stroke-width="4" stroke-linecap="round"/><circle cx="310" cy="371" r="6.5" fill="#f5f0d8"/><circle cx="264" cy="464" r="6.5" fill="#f5f0d8"/>';
+else s+='<path d="M270 248L310 520" stroke="#e0e5e9" stroke-opacity=".5" stroke-width="1" stroke-dasharray="3 5"/>';
+return s+'</svg>';
+}
+function action(text,name,primary){return '<button class="ui-button'+(primary?' primary':'')+'" data-action="'+name+'">'+text+'</button>'}
+function modal(){
+var context='<p class="context">'+(state.planner?'策划测试　':'')+'第 3 / 9 关</p>';
+if(state.page==='pause')return context+'<h2>已暂停</h2><div class="action-stack">'+action('继续游戏','hud',true)+action(state.planner?'重载当前关':'重载并重开','reload',false)+(state.planner?action('重载音效','audio',false):'')+'</div><p class="detail-note">'+(state.planner?'重新读取配置并重建当前关；文件有误时保留本次测试。':'重载配置将从第 1 关重新开始。')+'</p>'+(state.planner?'<p class="audio-version">音效版本：mid-audio-1</p>':'');
+if(state.page==='win')return context+'<h2>'+(state.planner?'测试通关':'本关通关')+'</h2>'+(state.planner?'<p class="body-copy">入关 12 球<br>本次测试不推进正式流程。</p>':'<div class="reward-summary"><span class="label">本关奖励</span><span class="gain">'+(state.reward?'+3':'+0')+' 球</span></div><div class="next-balls"><span>下一关每轮球数</span><strong>'+(state.reward?'15':'12')+' 球</strong></div>')+'<div class="action-stack">'+action(state.planner?'重测本关':'进入下一关','hud',true)+action(state.planner?'返回选关':'重新开始全程',state.planner?'selection':'title',false)+'</div>';
+if(state.page==='lose')return context+'<h2>'+(state.planner?'测试失败':'挑战失败')+'</h2><p class="body-copy">方块到达危险线</p><div class="action-stack">'+action(state.planner?'重测本关':'重试本关','hud',true)+action(state.planner?'返回选关':'重新开始全程',state.planner?'selection':'title',false)+'</div>';
+if(state.page==='final')return '<p class="context">水晶矿洞</p><h2>全程通关</h2><div class="complete-count">9 / 9</div><div class="complete-copy">已完成全部关卡</div><div class="action-stack">'+action('重新开始全程','title',true)+'</div>';
+if(state.page==='error'){
+var detail=state.long?('关卡配置校验未通过。\n\n'+Array(10).fill('第 4 关初始布局：两个方块占用了相同格子，请在策划工具中修改后重新导出 level.json。\n关卡标识：stage-4，位置：第 2 列、第 3 行。').join('\n\n')+'\n\n修正后点击“重新读取配置”。'):'关卡配置中存在重叠方块。\n请检查 level.json，修改后重新读取。';
+return '<h2>配置错误</h2><div class="error-copy" tabindex="0">'+detail+'</div><div class="action-stack">'+action('重新读取配置','recover',true)+'</div>';
+}
+return '';
+}
+function render(){
+var live=state.page==='hud',hasBoard=['hud','pause','win','lose','final'].includes(state.page);
+show($('titleScreen'),state.page==='title');show($('hud'),live);show($('board'),hasBoard);$('board').innerHTML=hasBoard?board():'';
+show($('rewardStrip'),live&&state.reward);show($('diagnostic'),live&&state.planner);
+$('diagnostic').textContent=state.long?'策划测试｜在场 8 球（待发 4）｜补行 3/7｜配置：planner-2026-11-08-stage-3-long-configuration-version-label-0123456789':'策划测试｜在场 8 球（待发 4）｜补行 3/7｜配置 mid-1 / mid-11';
+$('recallButton').disabled=!state.volley;
+var isModal=['pause','win','lose','final','error'].includes(state.page);
+show($('modalLayer'),isModal);$('modal').innerHTML=isModal?modal():'';
+document.querySelectorAll('.tab').forEach(function(b){b.setAttribute('aria-current',String(b.dataset.page===state.page))});
+document.querySelectorAll('[data-action]').forEach(function(b){b.addEventListener('click',function(){act(b.dataset.action)})});
+show($('notice'),false);window.previewState=Object.assign({},state);scale();
+}
+function select(page){state.page=page;render()}
+function notify(text){$('notice').textContent=text;show($('notice'),true)}
+function act(name){
+if(name==='audio'){notify('预览：音效已重新读取');return}
+if(name==='selection'){notify('预览：此处返回现有策划选关面板，布局沿用原工具');return}
+if(name==='recover'){state.page='title';render();return}
+if(name==='reload'){state.page='hud';state.volley=false;render();notify(state.planner?'预览：重建当前关':'预览：从第 1 关重新开始');return}
+select(name);
+}
+function scale(){var v=document.querySelector('.viewport'),s=Math.min(v.clientWidth/540,v.clientHeight/960);var wrap=document.querySelector('.stage-wrap');wrap.style.width=540*s+'px';wrap.style.height=960*s+'px';$('stage').style.transform='scale('+s+')'}
+document.querySelectorAll('.tab').forEach(function(b){b.addEventListener('click',function(){select(b.dataset.page)})});
+[['plannerToggle','planner'],['rewardToggle','reward'],['volleyToggle','volley'],['longToggle','long']].forEach(function(p){$(p[0]).addEventListener('change',function(){state[p[1]]=this.checked;render()})});
+$('startButton').addEventListener('click',function(){select('hud')});$('pauseButton').addEventListener('click',function(){select('pause')});
+$('recallButton').addEventListener('click',function(){if(state.volley){state.volley=false;$('volleyToggle').checked=false;render();notify('预览：小球已召回')}});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&state.page==='hud'){e.preventDefault();select('pause')}if(e.code==='Space'&&state.page==='hud'&&!['INPUT','BUTTON'].includes(document.activeElement.tagName)){e.preventDefault();$('recallButton').click()}});
+new ResizeObserver(scale).observe(document.querySelector('.viewport'));window.previewSelect=select;render();document.fonts.ready.then(scale);
+})();
+</script>
+</body>
+</html>
