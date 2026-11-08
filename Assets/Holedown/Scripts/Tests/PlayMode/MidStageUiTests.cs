@@ -15,7 +15,12 @@ namespace Holedown.Tests
     {
         string directory;bool planner;
         GameFlowController controller;
-        [SetUp] public void Setup(){controller=null;planner=false;directory=Path.GetFullPath("Library/Locus/tmp/mid-ui/"+System.Guid.NewGuid().ToString("N"));Directory.CreateDirectory(directory);File.WriteAllText(Path.Combine(directory,"settings.json"),File.ReadAllText("Config/settings.json").Replace("demo-1",new string('S',32)));File.WriteAllText(Path.Combine(directory,"level.json"),File.ReadAllText("Config/level.json").Replace("growth-1",new string('L',32)));SceneManager.sceneLoaded+=Configure;}
+        [SetUp] public void Setup(){controller=null;planner=false;directory=Path.GetFullPath("Library/Locus/tmp/mid-ui/"+System.Guid.NewGuid().ToString("N"));Directory.CreateDirectory(directory);File.WriteAllText(Path.Combine(directory,"settings.json"),Lengthen("Config/settings.json","S"));File.WriteAllText(Path.Combine(directory,"level.json"),Lengthen("Config/level.json","L"));SceneManager.sceneLoaded+=Configure;}
+        static string Lengthen(string file,string prefix)
+        {
+            string text=File.ReadAllText(file),current=System.Text.RegularExpressions.Regex.Match(text,"\"version\"\\s*:\\s*\"([^\"]+)\"").Groups[1].Value;
+            return text.Replace("\"version\": \""+current+"\"","\"version\": \""+new string(prefix[0],32)+"\"");
+        }
         void Configure(Scene scene,LoadSceneMode mode){controller=scene.GetRootGameObjects().SelectMany(root=>root.GetComponentsInChildren<GameFlowController>(true)).Single();var so=new SerializedObject(controller);so.FindProperty("externalConfigDirectory").stringValue=directory;so.FindProperty("plannerTestMode").boolValue=planner;so.ApplyModifiedPropertiesWithoutUndo();}
         [TearDown] public void Cleanup()
         {

@@ -88,11 +88,13 @@ namespace Holedown.Tests
             UnityEngine.Object.FindFirstObjectByType<ResultView>().SendMessage("Refresh");
             Assert.IsTrue(Visible().Any(t=>t.text=="挑战失败"));Assert.IsNotNull(Button("重试本关"));CheckVisible();
             flow.RestartRun();yield return null;yield return null;
-            for(int i=0;i<3;i++)
+            int stages=flow.Campaign.StageCount;Assert.Greater(stages,1);
+            for(int i=0;i<stages;i++)
             {
                 WinForPresentation(flow);CheckVisible();
-                Assert.IsTrue(Visible().Any(t=>t.text==(i<2?"本关通关":"全程通关")));
-                if(i<2){Assert.IsNotNull(Button("进入下一关"));flow.NextStage();yield return null;yield return null;}
+                bool last=i==stages-1;
+                Assert.IsTrue(Visible().Any(t=>t.text==(last?"全程通关":"本关通关")),$"stage {i+1}/{stages}");
+                if(!last){Assert.IsNotNull(Button("进入下一关"));flow.NextStage();yield return null;yield return null;}
                 else Assert.IsNotNull(Button("重新开始全程"));
             }
         }

@@ -23,6 +23,12 @@ namespace Holedown.Tests
         { UnityEngine.Object.DestroyImmediate(defaults); UnityEngine.Object.DestroyImmediate(level); Directory.Delete(directory,true); }
         void Replace(string file,string oldValue,string newValue)
         { string p=Path.Combine(directory,file); File.WriteAllText(p,File.ReadAllText(p).Replace(oldValue,newValue)); }
+        void SetValue(string file,string key,string literal)
+        { string p=Path.Combine(directory,file); File.WriteAllText(p,System.Text.RegularExpressions.Regex.Replace(File.ReadAllText(p),"(\""+key+"\"\\s*:\\s*)[^,\\n}]*",m=>m.Groups[1].Value+literal,System.Text.RegularExpressions.RegexOptions.None,System.TimeSpan.FromSeconds(2))); }
+        void RemoveKey(string file,string key)
+        { string p=Path.Combine(directory,file); File.WriteAllText(p,System.Text.RegularExpressions.Regex.Replace(File.ReadAllText(p),",?\\s*\""+key+"\"\\s*:\\s*[^,\\n}]*","",System.Text.RegularExpressions.RegexOptions.None,System.TimeSpan.FromSeconds(2))); }
+        static string Version(string file)
+            => System.Text.RegularExpressions.Regex.Match(File.ReadAllText(file),"\\\"version\\\"\\s*:\\s*\\\"([^\\\"]+)\\\"").Groups[1].Value;
         [Test] public void ExternalPairOverridesWithoutMutatingAssetsOrFiles()
         {
             Replace("settings.json","\"ballsPerRound\": 12","\"ballsPerRound\": 7");
@@ -30,7 +36,8 @@ namespace Holedown.Tests
             using(var loaded=ExternalConfiguration.Load(directory,defaults,level))
             {
                 Assert.AreEqual(7,loaded.Settings.ballsPerRound); Assert.AreEqual(12,defaults.ballsPerRound);
-                Assert.AreEqual(11,loaded.Board.Blocks.Count); Assert.AreEqual("S:demo-1 / L:demo-1",loaded.Label);
+                Assert.AreEqual(11,loaded.Board.Blocks.Count);
+                Assert.AreEqual("S:"+Version(Path.Combine(directory,"settings.json"))+" / L:"+Version(Path.Combine(directory,"level.json")),loaded.Label);
                 loaded.Board.ApplyHit(1); loaded.Board.Advance();
             }
             Assert.AreEqual(original,File.ReadAllText(Path.Combine(directory,"level.json")));
@@ -42,20 +49,32 @@ namespace Holedown.Tests
             File.Delete(Path.Combine(directory,"settings.json"));
             using(var loaded=ExternalConfiguration.Load(directory,defaults,level)) Assert.AreEqual("Built-in",loaded.Label);
         }
-        [TestCase("\"ballsPerRound\": 12","\"ballsPerRound\": 0","ballsPerRound")]
-        [TestCase("\"ballsPerRound\": 12","\"ballsPerRound\": 1.5","ballsPerRound")]
-        [TestCase("\"ballSpeed\": 12","\"ballSpeed\": \"12\"","ballSpeed")]
-        [TestCase("\"ballSpeed\": 12","\"ballSpeed\": NaN","ballSpeed")]
-        [TestCase("\"ballSpeed\": 12,","","ballSpeed")]
-        [TestCase("\"ballSpeed\": 12","\"ballSpead\": 12","ballSpead")]
-        [TestCase("\"ballRadius\": 0.12","\"ballRadius\": 0.5","ballRadius")]
-        [TestCase("\"maxAimAngle\": 75","\"maxAimAngle\": 90","maxAimAngle")]
-        [TestCase("\"schemaVersion\": 1","\"schemaVersion\": 2","schemaVersion")]
-        [TestCase("\"version\": \"demo-1\"","\"version\": \"bad version\"","version")]
-        public void InvalidSettingsNameTheField(string before,string after,string expected)
+        [TestCase("ballsPerRound","0","ballsPerRound")]
+        [TestCase("ballsPerRound","-1","ballsPerRound")]
+        [TestCase("ballSpeed","\"12\"","ballSpeed")]
+        [TestCase("ballSpeed","NaN","ballSpeed")]
+        [TestCase("ballRadius","0.5","ballRadius")]
+        [TestCase("maxAimAngle","90","maxAimAngle")]
+        [TestCase("schemaVersion","2","schemaVersion")]
+        [TestCase("version","\"bad version\"","version")]
+        public void InvalidSettingsNameTheField(string key,string literal,string expected)
         {
-            Replace("settings.json",before,after);
+            SetValue("settings.json",key,literal);
             StringAssert.Contains(expected,Assert.Throws<ArgumentException>(()=>ExternalConfiguration.Load(directory,defaults,level)).Message);
+        }
+        // Fractional and missing values are covered separately because they need structural edits.
+        [Test] public void FractionalOrMissingSettingsAreRejected()
+        {
+            SetValue("settings.json","ballsPerRound","1.5");
+            StringAssert.Contains("ballsPerRound",Assert.Throws<ArgumentException>(()=>ExternalConfiguration.Load(directory,defaults,level)).Message);
+            SetValue("settings.json","ballsPerRound","12");
+            RemoveKey("settings.json","ballSpeed");
+            StringAssert.Contains("ballSpeed",Assert.Throws<ArgumentException>(()=>ExternalConfiguration.Load(directory,defaults,level)).Message);
+        }
+        [Test] public void UnknownSettingsKeyIsRejected()
+        {
+            Replace("settings.json","\"version\"","\"ballSpead\": 12,\n  \"version\"");
+            StringAssert.Contains("ballSpead",Assert.Throws<ArgumentException>(()=>ExternalConfiguration.Load(directory,defaults,level)).Message);
         }
         [Test] public void InvalidLevelReportsExactBlockAndCell()
         {

@@ -40,12 +40,14 @@ namespace Holedown.Tests
         {
             yield return SceneManager.LoadSceneAsync("Assets/Scenes/SampleScene.unity");yield return null;yield return PlaySceneEntry.StartIfReady();
             var flow=UnityEngine.Object.FindFirstObjectByType<GameFlowController>();var oldId=flow.Session.SessionId;
-            Assert.AreEqual("S:demo-1 / L:demo-1",flow.ConfigurationLabel);flow.TryFire(Vector2.down);
-            Change("\"ballsPerRound\": 12","\"ballsPerRound\": 7");Change("\"ballRadius\": 0.12","\"ballRadius\": 0.2");Change("demo-1","test-2");
+            string settingsVersion=System.Text.RegularExpressions.Regex.Match(File.ReadAllText(Path.Combine(directory,"settings.json")),"\"version\"\\s*:\\s*\"([^\"]+)\"").Groups[1].Value;
+            string levelVersion=System.Text.RegularExpressions.Regex.Match(File.ReadAllText(Path.Combine(directory,"level.json")),"\"version\"\\s*:\\s*\"([^\"]+)\"").Groups[1].Value;
+            Assert.AreEqual($"S:{settingsVersion} / L:{levelVersion}",flow.ConfigurationLabel);flow.TryFire(Vector2.down);
+            Change("\"ballsPerRound\": 12","\"ballsPerRound\": 7");Change("\"ballRadius\": 0.12","\"ballRadius\": 0.2");Change(settingsVersion,"test-2");
             Assert.AreEqual(12,flow.Settings.ballsPerRound);Assert.AreEqual(0.12f,flow.Settings.ballRadius,0.001f);
             flow.QueueCommand(FlowCommand.Reload);yield return null;yield return null;
             flow=UnityEngine.Object.FindFirstObjectByType<GameFlowController>();
-            Assert.AreNotEqual(oldId,flow.Session.SessionId);Assert.AreEqual(7,flow.Settings.ballsPerRound);Assert.AreEqual("S:test-2 / L:demo-1",flow.ConfigurationLabel);
+            Assert.AreNotEqual(oldId,flow.Session.SessionId);Assert.AreEqual(7,flow.Settings.ballsPerRound);Assert.AreEqual($"S:test-2 / L:{levelVersion}",flow.ConfigurationLabel);
             Assert.AreEqual(0,UnityEngine.Object.FindObjectsByType<BallActor>(FindObjectsSortMode.None).Length);
             var aim=UnityEngine.Object.FindFirstObjectByType<AimInput>();Assert.AreEqual(1.15f,aim.PreviewEnd(Vector2.down).y,0.03f);
             flow.TryFire(Vector2.down);Assert.AreEqual(6,flow.Session.Pending);

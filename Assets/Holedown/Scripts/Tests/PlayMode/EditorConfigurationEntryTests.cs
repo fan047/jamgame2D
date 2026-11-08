@@ -20,9 +20,9 @@ namespace Holedown.Tests
                 var flow=Object.FindFirstObjectByType<GameFlowController>();
                 Assert.IsNull(flow.InitializationError);
                 Assert.AreEqual(Path.GetFullPath("Config"),Path.GetFullPath(flow.ConfigurationDirectory));
-                Assert.AreEqual(3,flow.Campaign.StageCount);
-                StringAssert.Contains("L:growth-1",flow.ConfigurationLabel);
                 var expected=Newtonsoft.Json.Linq.JObject.Parse(File.ReadAllText("Config/level.json"));
+                Assert.AreEqual(((Newtonsoft.Json.Linq.JArray)expected["levels"]).Count,flow.Campaign.StageCount);
+                StringAssert.Contains("L:"+(string)expected["version"],flow.ConfigurationLabel);
                 var stage=expected["levels"][0];
                 Assert.AreEqual((string)stage["id"],flow.StageId);
                 var blocks=(Newtonsoft.Json.Linq.JArray)stage["initialBlocks"];
