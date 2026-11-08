@@ -11,7 +11,7 @@
   },
   "level": {
     "schemaVersion": 2,
-    "version": "mid-9",
+    "version": "mid-10",
     "levels": [
       {
         "id": "stage-1",
@@ -1618,7 +1618,7 @@
         ]
       },
       {
-        "id": "stage-8",
+        "id": "stage-7",
         "name": "第 7 关",
         "initialBlocks": [
           {
@@ -1963,7 +1963,7 @@
         ]
       },
       {
-        "id": "stage-9",
+        "id": "stage-8",
         "name": "第 8 关",
         "initialBlocks": [
           {
@@ -2282,7 +2282,7 @@
         ]
       },
       {
-        "id": "stage-7",
+        "id": "stage-9",
         "name": "第 9 关",
         "initialBlocks": [
           {

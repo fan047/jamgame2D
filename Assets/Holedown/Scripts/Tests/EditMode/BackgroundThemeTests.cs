@@ -34,5 +34,16 @@ namespace Holedown.Tests
                 Object.DestroyImmediate(theme);
             }
         }
+        [Test]
+        public void ShippedThemeKeepsOneBackgroundUntilGroupArtArrives()
+        {
+            // Art for stages 4-6 and 7-9 is not delivered yet: the shipped theme must not switch at 3→4 or 6→7.
+            var theme = UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTheme>("Assets/Holedown/Data/VisualTheme.asset");
+            Assert.That(theme, Is.Not.Null);
+            Assert.That(theme.background, Is.Not.Null);
+            Assert.That(theme.backgroundStages4To6, Is.Null);
+            Assert.That(theme.backgroundStages7To9, Is.Null);
+            for (int stage = 0; stage < 9; stage++) Assert.That(theme.Background(stage), Is.SameAs(theme.background), "stage " + (stage + 1));
+        }
     }
 }
