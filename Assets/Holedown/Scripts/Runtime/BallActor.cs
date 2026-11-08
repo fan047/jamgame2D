@@ -7,6 +7,8 @@ namespace Holedown
     public sealed class BallActor : MonoBehaviour
     {
         [SerializeField] VisualTheme theme;
+        [SerializeField, Tooltip("Fading trail behind the ball; length is two ball diameters.")]
+        [Min(0f)] float trailDiameters = 2f;
         Rigidbody2D body;
         CircleCollider2D circle;
         Transform visual;
@@ -19,10 +21,12 @@ namespace Holedown
         public event Action<BallActor> Returned;
         public Vector2 Velocity => body.linearVelocity;
 
+        TrailRenderer trail;
+        SpriteRenderer ballVisual;
         void Awake()
         {
             body = GetComponent<Rigidbody2D>(); circle = GetComponent<CircleCollider2D>();
-            visual = GetComponentInChildren<SpriteRenderer>().transform;
+            ballVisual = GetComponentInChildren<SpriteRenderer>(); visual = ballVisual.transform;
         }
         public void Launch(GameSettings settings, Guid session, int volley, int ball, Vector2 direction)
         {
@@ -39,6 +43,30 @@ namespace Holedown
             body.position = transform.position;
             returned = false;
             body.linearVelocity = direction.normalized * speed;
+            ConfigureTrail(settings);
+        }
+        void ConfigureTrail(GameSettings settings)
+        {
+            if (trailDiameters <= 0f || speed <= 0f) return;
+            if (!trail)
+            {
+                var shader = Shader.Find("Sprites/Default");
+                if (!shader) return;
+                trail = gameObject.AddComponent<TrailRenderer>();
+                trail.material = new Material(shader);
+                trail.autodestruct = false; trail.emitting = false;
+            }
+            float diameter = settings.ballRadius * 2f;
+            // Trail time is derived from speed so the visible length stays about trailDiameters diameters.
+            trail.time = Mathf.Max(0.01f, diameter * trailDiameters / speed);
+            trail.widthMultiplier = diameter;
+            trail.numCapVertices = 2;
+            var sprite = ballVisual ? ballVisual.sprite : null;
+            if (sprite && sprite.texture) trail.material.mainTexture = sprite.texture;
+            var fade = new Gradient();
+            fade.SetKeys(new[]{new GradientColorKey(Color.white,0f),new GradientColorKey(Color.white,1f)},
+                        new[]{new GradientAlphaKey(0.55f,0f),new GradientAlphaKey(0f,1f)});
+            trail.colorGradient = fade; trail.emitting = true; trail.Clear();
         }
         void FixedUpdate()
         {
@@ -57,7 +85,7 @@ namespace Holedown
         {
             if (returned) return;
             returned = true;
-            circle.enabled = false; body.simulated = false;
+            circle.enabled = false; body.simulated = false; if(trail)trail.emitting = false;
             Returned?.Invoke(this);
             Destroy(gameObject);
         }

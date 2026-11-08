@@ -11,7 +11,12 @@ namespace Holedown
         [SerializeField] SpriteRenderer launcher;
         [SerializeField] StartScreenView startScreen;
         [SerializeField] RectTransform stageCanvas;
+        [SerializeField, Tooltip("Launcher pulse on the first ball of a volley; 0 disables it.")]
+        [Min(0f)] float launchPulseSeconds = 0.12f;
+        [SerializeField, Range(1f, 1.5f)] float launchPulseScale = 1.12f;
         GameFlowController flow;
+        Vector3 launcherBaseScale = Vector3.one;
+        Coroutine pulse;
         void RefreshBackground()
         {
             if (!theme || !background) return;
@@ -19,12 +24,32 @@ namespace Holedown
             if (background.sprite != selected) background.sprite = selected;
             background.enabled = selected;
         }
-        void OnDestroy() { if (flow) flow.Changed -= RefreshBackground; }
+        void OnDestroy() { if (flow) { flow.Changed -= RefreshBackground; flow.VolleyLaunched -= PlayLaunchPulse; } }
+        void PlayLaunchPulse()
+        {
+            if (!launcher || launchPulseSeconds <= 0f || !isActiveAndEnabled) return;
+            if (pulse != null) StopCoroutine(pulse);
+            pulse = StartCoroutine(Pulse());
+        }
+        System.Collections.IEnumerator Pulse()
+        {
+            float elapsed = 0; launcher.transform.localScale = launcherBaseScale;
+            while (elapsed < launchPulseSeconds)
+            {
+                elapsed += Time.deltaTime;
+                float t = Mathf.Clamp01(elapsed / launchPulseSeconds);
+                // Out and back: peak at the midpoint of the short pulse.
+                float factor = t < 0.5f ? Mathf.Lerp(1f, launchPulseScale, t * 2f) : Mathf.Lerp(launchPulseScale, 1f, (t - 0.5f) * 2f);
+                launcher.transform.localScale = launcherBaseScale * factor;
+                yield return null;
+            }
+            launcher.transform.localScale = launcherBaseScale; pulse = null;
+        }
         void Start()
         {
             if(!theme) return;
             flow = GetComponent<GameFlowController>();
-            if (flow) flow.Changed += RefreshBackground;
+            if (flow) { flow.Changed += RefreshBackground; flow.VolleyLaunched += PlayLaunchPulse; }
             var cameraRig = gameCamera.GetComponent<BoardCamera>();
             if(cameraRig) cameraRig.ConfigureTheme(theme);
             if(theme.fixedStage && stageCanvas)
@@ -34,7 +59,7 @@ namespace Holedown
                 stageCanvas.position = new Vector3(BoardCamera.StageCenter.x,BoardCamera.StageCenter.y,position.z);
             }
             RefreshBackground();
-            if(theme.launcher) { launcher.sprite = theme.launcher; launcher.color = Color.white; SpriteSizing.Fit(launcher, Vector2.one * 0.3f); }
+            if(theme.launcher) { launcher.sprite = theme.launcher; launcher.color = Color.white; SpriteSizing.Fit(launcher, Vector2.one * 0.3f); launcherBaseScale = launcher.transform.localScale; }
             if(startScreen && theme.titleLogo)
             {
                 startScreen.Logo.sprite = theme.titleLogo; startScreen.Logo.enabled = true;

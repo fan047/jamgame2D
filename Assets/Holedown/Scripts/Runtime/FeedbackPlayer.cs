@@ -12,6 +12,10 @@ namespace Holedown
         [SerializeField] Sprite fragmentSprite;
         [SerializeField] Material fragmentMaterial;
         [SerializeField] VisualTheme theme;
+        [SerializeField, Tooltip("Simultaneous fragment bursts are capped so dense breaks stay readable.")]
+        [Min(1)] int maxFragmentBursts = 6;
+        [SerializeField] float fragmentSeconds = 0.3f;
+        int activeFragmentBursts;
         AudioSource accentSource, uiSource;
         AudioClip fallbackHit;
         float nextHitTime, nextBreakTime;
@@ -125,6 +129,7 @@ namespace Holedown
         void Clear()
         {
             StopAllCoroutines();
+            activeFragmentBursts=0;
             StopSounds();
             nextHitTime = nextBreakTime = 0;
             foreach(Transform child in transform)Destroy(child.gameObject);
@@ -197,8 +202,13 @@ namespace Holedown
         }
         IEnumerator Fragments(Vector3 position, Color color)
         {
+            // Dense breaks spawn fewer pieces instead of stacking an unbounded amount.
+            bool dense=activeFragmentBursts>=maxFragmentBursts;
+            if(dense && activeFragmentBursts>=maxFragmentBursts*2) yield break;
+            activeFragmentBursts++;
             var root=new GameObject("Fragments"); root.transform.SetParent(transform); root.transform.position=position;
-            var pieces=new Transform[5];var velocities=new Vector3[5];
+            int count=dense?2:5;
+            var pieces=new Transform[count];var velocities=new Vector3[count];
             for(int i=0;i<pieces.Length;i++)
             {
                 var go=new GameObject("Piece");go.transform.SetParent(root.transform,false);go.transform.localScale=Vector3.one*0.13f;
@@ -207,9 +217,9 @@ namespace Holedown
                 pieces[i]=go.transform;velocities[i]=Quaternion.Euler(0,0,i*72)*Vector3.up*1.8f;
             }
             float elapsed=0;
-            while(elapsed<0.3f)
-            {elapsed+=Time.deltaTime;for(int i=0;i<pieces.Length;i++){pieces[i].position+=velocities[i]*Time.deltaTime;SpriteSizing.Fit(pieces[i].GetComponent<SpriteRenderer>(),Vector2.one*0.13f*Mathf.Max(0,1-elapsed/0.3f));}yield return null; }
-            Destroy(root);
+            while(elapsed<fragmentSeconds)
+            {elapsed+=Time.deltaTime;for(int i=0;i<pieces.Length;i++){pieces[i].position+=velocities[i]*Time.deltaTime;velocities[i]=Vector3.Lerp(velocities[i],Vector3.zero,Time.deltaTime*4f);SpriteSizing.Fit(pieces[i].GetComponent<SpriteRenderer>(),Vector2.one*0.13f*Mathf.Max(0,1-elapsed/fragmentSeconds));}yield return null; }
+            activeFragmentBursts=Mathf.Max(0,activeFragmentBursts-1);Destroy(root);
         }
     }
 }
