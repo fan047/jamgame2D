@@ -1,0 +1,1092 @@
+fileFormatVersion: 2
+guid: 85247b2e41e2b9f42bad31b8b59c9d4c
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 1575476539473275577
+    second: foreground_game_0
+  - first:
+      213: 668029470684968687
+    second: foreground_game_1
+  - first:
+      213: 20944823363538499
+    second: foreground_game_2
+  - first:
+      213: 519445571611358163
+    second: foreground_game_3
+  - first:
+      213: -3170793015514114372
+    second: foreground_game_4
+  - first:
+      213: 6987926081631680039
+    second: foreground_game_5
+  - first:
+      213: 1443585705928344165
+    second: foreground_game_6
+  - first:
+      213: -5623516688893048592
+    second: foreground_game_7
+  - first:
+      213: -8986277485396864672
+    second: foreground_game_8
+  - first:
+      213: 2506036525380740425
+    second: foreground_game_9
+  - first:
+      213: -774149909299463693
+    second: foreground_game_10
+  - first:
+      213: 3740061761699098571
+    second: foreground_game_11
+  - first:
+      213: 6997414081351327068
+    second: foreground_game_12
+  - first:
+      213: -6421697519614995567
+    second: foreground_game_13
+  - first:
+      213: -6033565828266043761
+    second: foreground_game_14
+  - first:
+      213: -1325690059715592964
+    second: foreground_game_15
+  - first:
+      213: 2951426204349327968
+    second: foreground_game_16
+  - first:
+      213: -1986791969569176823
+    second: foreground_game_17
+  - first:
+      213: 4333612792141791688
+    second: foreground_game_18
+  - first:
+      213: -5277812055057365756
+    second: foreground_game_19
+  - first:
+      213: -5448511840251818531
+    second: foreground_game_20
+  - first:
+      213: -2549162649666133063
+    second: foreground_game_21
+  - first:
+      213: 5861945205508104589
+    second: foreground_game_22
+  - first:
+      213: 6291387757498763344
+    second: foreground_game_23
+  - first:
+      213: -1395539331429337115
+    second: foreground_game_24
+  - first:
+      213: -7195846092520489096
+    second: foreground_game_25
+  - first:
+      213: 2550858656744361065
+    second: foreground_game_26
+  - first:
+      213: -1280769879246053791
+    second: foreground_game_27
+  - first:
+      213: 2043905937779429030
+    second: foreground_game_28
+  - first:
+      213: -849368058632753949
+    second: foreground_game_29
+  - first:
+      213: -5966903463733405690
+    second: foreground_game_30
+  - first:
+      213: 5332229149470822997
+    second: foreground_game_31
+  - first:
+      213: -4936546902905346753
+    second: foreground_game_32
+  - first:
+      213: -6329522890386471014
+    second: foreground_game_33
+  - first:
+      213: -5799006283051207143
+    second: foreground_game_34
+  - first:
+      213: 4296338524555438391
+    second: foreground_game_35
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 0
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 256
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 0
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: iOS
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: foreground_game_0
+      rect:
+        serializedVersion: 2
+        x: 771
+        y: 1485
+        width: 127
+        height: 88
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9ba244fb0973dd510800000000000000
+      internalID: 1575476539473275577
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: foreground_game_1
+      rect:
+        serializedVersion: 2
+        x: 891
+        y: 1561
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fe67ba3a341554900800000000000000
+      internalID: 668029470684968687
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: foreground_game_2
+      rect:
+        serializedVersion: 2
+        x: 42
+        y: 1517
+        width: 10
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 34e8774b4396a4000800000000000000
+      internalID: 20944823363538499
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: foreground_game_3
+      rect:
+        serializedVersion: 2
+        x: 49
+        y: 1528
+        width: 12
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3d37b08cef0753700800000000000000
+      internalID: 519445571611358163
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: foreground_game_4
+      rect:
+        serializedVersion: 2
+        x: 61
+        y: 1473
+        width: 26
+        height: 86
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cb6ddfd4d841ff3d0800000000000000
+      internalID: -3170793015514114372
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: foreground_game_5
+      rect:
+        serializedVersion: 2
+        x: 42
+        y: 1427
+        width: 18
+        height: 37
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 726f7546fb91af060800000000000000
+      internalID: 6987926081631680039
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: foreground_game_6
+      rect:
+        serializedVersion: 2
+        x: 58
+        y: 1462
+        width: 12
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 562c0b41d85a80410800000000000000
+      internalID: 1443585705928344165
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: foreground_game_7
+      rect:
+        serializedVersion: 2
+        x: 68
+        y: 1424
+        width: 14
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0f88c0abd5145f1b0800000000000000
+      internalID: -5623516688893048592
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: foreground_game_8
+      rect:
+        serializedVersion: 2
+        x: 857
+        y: 1363
+        width: 32
+        height: 49
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 06154d50d345a4380800000000000000
+      internalID: -8986277485396864672
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: foreground_game_9
+      rect:
+        serializedVersion: 2
+        x: 43
+        y: 1265
+        width: 20
+        height: 44
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 945297931fa37c220800000000000000
+      internalID: 2506036525380740425
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: foreground_game_10
+      rect:
+        serializedVersion: 2
+        x: 870
+        y: 1276
+        width: 28
+        height: 39
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3f9fd4552caa145f0800000000000000
+      internalID: -774149909299463693
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: foreground_game_11
+      rect:
+        serializedVersion: 2
+        x: 42
+        y: 1193
+        width: 41
+        height: 50
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bcfa8184b5e57e330800000000000000
+      internalID: 3740061761699098571
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: foreground_game_12
+      rect:
+        serializedVersion: 2
+        x: 862
+        y: 1158
+        width: 7
+        height: 72
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c5d1349780fcb1160800000000000000
+      internalID: 6997414081351327068
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: foreground_game_13
+      rect:
+        serializedVersion: 2
+        x: 864
+        y: 1229
+        width: 13
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1935758212c81e6a0800000000000000
+      internalID: -6421697519614995567
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: foreground_game_14
+      rect:
+        serializedVersion: 2
+        x: 42
+        y: 1188
+        width: 12
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f86544da8d7744ca0800000000000000
+      internalID: -6033565828266043761
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: foreground_game_15
+      rect:
+        serializedVersion: 2
+        x: 44
+        y: 1116
+        width: 18
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cfcb26c1ae33a9de0800000000000000
+      internalID: -1325690059715592964
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: foreground_game_16
+      rect:
+        serializedVersion: 2
+        x: 862
+        y: 1117
+        width: 36
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 06a650bde7295f820800000000000000
+      internalID: 2951426204349327968
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: foreground_game_17
+      rect:
+        serializedVersion: 2
+        x: 868
+        y: 1145
+        width: 6
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9030b3bea3f7d64e0800000000000000
+      internalID: -1986791969569176823
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: foreground_game_18
+      rect:
+        serializedVersion: 2
+        x: 43
+        y: 1036
+        width: 19
+        height: 72
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8c143bdbfd5142c30800000000000000
+      internalID: 4333612792141791688
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: foreground_game_19
+      rect:
+        serializedVersion: 2
+        x: 59
+        y: 1103
+        width: 18
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 405080326e171c6b0800000000000000
+      internalID: -5277812055057365756
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: foreground_game_20
+      rect:
+        serializedVersion: 2
+        x: 864
+        y: 1107
+        width: 9
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dddc747495ff264b0800000000000000
+      internalID: -5448511840251818531
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: foreground_game_21
+      rect:
+        serializedVersion: 2
+        x: 872
+        y: 1079
+        width: 21
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9b3e4ff731e8f9cd0800000000000000
+      internalID: -2549162649666133063
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: foreground_game_22
+      rect:
+        serializedVersion: 2
+        x: 879
+        y: 1010
+        width: 20
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d816d134b10d95150800000000000000
+      internalID: 5861945205508104589
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: foreground_game_23
+      rect:
+        serializedVersion: 2
+        x: 42
+        y: 956
+        width: 24
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 05884fd05df7f4750800000000000000
+      internalID: 6291387757498763344
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: foreground_game_24
+      rect:
+        serializedVersion: 2
+        x: 50
+        y: 935
+        width: 24
+        height: 39
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5e771183f5c02ace0800000000000000
+      internalID: -1395539331429337115
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: foreground_game_25
+      rect:
+        serializedVersion: 2
+        x: 58
+        y: 859
+        width: 15
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 87ffee4aa18332c90800000000000000
+      internalID: -7195846092520489096
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: foreground_game_26
+      rect:
+        serializedVersion: 2
+        x: 863
+        y: 863
+        width: 33
+        height: 71
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 96c4a7bee68766320800000000000000
+      internalID: 2550858656744361065
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: foreground_game_27
+      rect:
+        serializedVersion: 2
+        x: 58
+        y: 739
+        width: 33
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 16ed484a49ac93ee0800000000000000
+      internalID: -1280769879246053791
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: foreground_game_28
+      rect:
+        serializedVersion: 2
+        x: 848
+        y: 731
+        width: 31
+        height: 98
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6ae87af0f996d5c10800000000000000
+      internalID: 2043905937779429030
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: foreground_game_29
+      rect:
+        serializedVersion: 2
+        x: 862
+        y: 662
+        width: 23
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3eca1a530407634f0800000000000000
+      internalID: -849368058632753949
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: foreground_game_30
+      rect:
+        serializedVersion: 2
+        x: 43
+        y: 625
+        width: 16
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6085f1be9ec413da0800000000000000
+      internalID: -5966903463733405690
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: foreground_game_31
+      rect:
+        serializedVersion: 2
+        x: 858
+        y: 620
+        width: 40
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 552113bf822eff940800000000000000
+      internalID: 5332229149470822997
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: foreground_game_32
+      rect:
+        serializedVersion: 2
+        x: 860
+        y: 599
+        width: 18
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f35a54b2fbcdd7bb0800000000000000
+      internalID: -4936546902905346753
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: foreground_game_33
+      rect:
+        serializedVersion: 2
+        x: 38
+        y: 41
+        width: 862
+        height: 546
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a978fc867740928a0800000000000000
+      internalID: -6329522890386471014
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: foreground_game_34
+      rect:
+        serializedVersion: 2
+        x: 302
+        y: 40
+        width: 270
+        height: 91
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9167970928ac58fa0800000000000000
+      internalID: -5799006283051207143
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: foreground_game_35
+      rect:
+        serializedVersion: 2
+        x: 590
+        y: 40
+        width: 310
+        height: 99
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 739e3f60029af9b30800000000000000
+      internalID: 4296338524555438391
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      foreground_game_0: 1575476539473275577
+      foreground_game_1: 668029470684968687
+      foreground_game_10: -774149909299463693
+      foreground_game_11: 3740061761699098571
+      foreground_game_12: 6997414081351327068
+      foreground_game_13: -6421697519614995567
+      foreground_game_14: -6033565828266043761
+      foreground_game_15: -1325690059715592964
+      foreground_game_16: 2951426204349327968
+      foreground_game_17: -1986791969569176823
+      foreground_game_18: 4333612792141791688
+      foreground_game_19: -5277812055057365756
+      foreground_game_2: 20944823363538499
+      foreground_game_20: -5448511840251818531
+      foreground_game_21: -2549162649666133063
+      foreground_game_22: 5861945205508104589
+      foreground_game_23: 6291387757498763344
+      foreground_game_24: -1395539331429337115
+      foreground_game_25: -7195846092520489096
+      foreground_game_26: 2550858656744361065
+      foreground_game_27: -1280769879246053791
+      foreground_game_28: 2043905937779429030
+      foreground_game_29: -849368058632753949
+      foreground_game_3: 519445571611358163
+      foreground_game_30: -5966903463733405690
+      foreground_game_31: 5332229149470822997
+      foreground_game_32: -4936546902905346753
+      foreground_game_33: -6329522890386471014
+      foreground_game_34: -5799006283051207143
+      foreground_game_35: 4296338524555438391
+      foreground_game_4: -3170793015514114372
+      foreground_game_5: 6987926081631680039
+      foreground_game_6: 1443585705928344165
+      foreground_game_7: -5623516688893048592
+      foreground_game_8: -8986277485396864672
+      foreground_game_9: 2506036525380740425
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
