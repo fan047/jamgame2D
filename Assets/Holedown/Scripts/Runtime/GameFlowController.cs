@@ -105,8 +105,13 @@ namespace Holedown
         {
             ClearAttempt();
             Session=new GameSession(); Board=configuration.CreateBoard(Campaign.StageIndex);
-            aim.Configure(Settings);boardView.Sync(Board);Session.Ready();
+            aim.Configure(Settings);
+            Session.Ready();
             SetPhase(AppPhase.Playing);
+            // The opening board is shown at its rule positions; only the row waiting below
+            // the floor line fades in, so nothing rises across the whole field.
+            boardView.Sync(Board);
+            boardView.PresentIncoming(Board, Application.isPlaying);
         }
         void Start()
         {
@@ -370,10 +375,11 @@ namespace Holedown
                     // Capture where blocks were so the advance can rise from those positions.
                     boardView.CapturePositions();
                     Session.Settle(Board);
-                    if(Session.Phase==SessionPhase.Won){Campaign.CompleteStage();boardView.Sync(Board);}
-                    else if(Session.Phase==SessionPhase.Lost){Campaign.FailStage();boardView.Sync(Board);}
-                    else if(boardView.AdvanceSeconds>0f){advancing=true;boardView.PlayAdvance(Board);}
-                    else boardView.Sync(Board);
+                    if(Session.Phase==SessionPhase.Won){Campaign.CompleteStage();boardView.Sync(Board);boardView.HideIncoming();}
+                    else if(Session.Phase==SessionPhase.Lost){Campaign.FailStage();boardView.Sync(Board);boardView.HideIncoming();}
+                    // PlayAdvance also covers the zero-duration path: it settles at once and
+                    // still refreshes the waiting row for the next advance.
+                    else { advancing = true; boardView.PlayAdvance(Board); }
                     InvalidateInput();
                     aim.CanAim = !advancing && Session.Phase == SessionPhase.Aiming;
                     Changed?.Invoke();

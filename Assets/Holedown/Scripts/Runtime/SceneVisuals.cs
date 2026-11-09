@@ -8,9 +8,10 @@ namespace Holedown
         [SerializeField] VisualTheme theme;
         [SerializeField] Camera gameCamera;
         [SerializeField] SpriteRenderer background;
+        [SerializeField] SpriteRenderer foreground;
         [SerializeField] SpriteRenderer launcher;
         [SerializeField] StartScreenView startScreen;
-        [SerializeField] RectTransform stageCanvas;
+        [SerializeField] BoardView boardView;        [SerializeField] RectTransform stageCanvas;
         [SerializeField, Tooltip("Launcher pulse on the first ball of a volley; 0 disables it.")]
         [Min(0f)] float launchPulseSeconds = 0.12f;
         [SerializeField, Range(1f, 1.5f)] float launchPulseScale = 1.12f;
@@ -59,6 +60,9 @@ namespace Holedown
                 stageCanvas.position = new Vector3(BoardCamera.StageCenter.x,BoardCamera.StageCenter.y,position.z);
             }
             RefreshBackground();
+            if(foreground) { foreground.sprite = theme ? theme.foreground : null; foreground.enabled = foreground.sprite; foreground.color = Color.white; }
+            if(boardView && boardView.Preview) boardView.Preview.Configure(theme);
+            AlignForeground();
             if(theme.launcher) { launcher.sprite = theme.launcher; launcher.color = Color.white; SpriteSizing.Fit(launcher, Vector2.one * 0.3f); launcherBaseScale = launcher.transform.localScale; }
             if(startScreen && theme.titleLogo)
             {
@@ -78,6 +82,16 @@ namespace Holedown
                 background.transform.localScale = Vector3.one * scale;
             }
             else SpriteSizing.Cover(background, new Vector2(gameCamera.orthographicSize * 2 * gameCamera.aspect, gameCamera.orthographicSize * 2));
+            AlignForeground();
+        }
+        // The foreground shares the background's exact stage rect, so every extracted
+        // rock and crystal pixel stays aligned with the art it came from.
+        void AlignForeground()
+        {
+            if(!foreground || !background) return;
+            foreground.transform.position = background.transform.position;
+            foreground.transform.localScale = background.transform.localScale;
+            foreground.transform.rotation = background.transform.rotation;
         }
     }
 }

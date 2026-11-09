@@ -35,4 +35,9 @@ MonoBehaviour:
   titleLogo: {fileID: 21300000, guid: 5a88f49a0d5d4434db34145081c94b51, type: 3}
   fragment: {fileID: 21300000, guid: 27c1865662718e34ab26c9e40f4869c0, type: 3}
   spark: {fileID: 21300000, guid: 63216fa8a3c6de149aff22d7bbfef6d2, type: 3}
+  foreground: {fileID: 21300000, guid: 85247b2e41e2b9f42bad31b8b59c9d4c, type: 3}
+  previewMaterial: {fileID: 2100000, guid: 94b0f11e4e0256344962812ab6e7eb3f, type: 2}
+  backgroundStages1To3: {fileID: 0}
+  backgroundStages4To6: {fileID: 0}
+  backgroundStages7To9: {fileID: 0}
   flashMaterial: {fileID: 2100000, guid: 66531bb9f79745345a5e09d8318e36c4, type: 2}

@@ -16,6 +16,10 @@ namespace Holedown
         public Sprite targetSquare, targetWide, targetTall;
         public Sprite crackLight, crackHeavy, rewardBadge, targetBadge;
         public Sprite background, launcher, titleLogo, fragment, spark;
+        [Tooltip("Transparent rock/crystal layer drawn in front of blocks (order 10).")]
+        public Sprite foreground;
+        [Tooltip("Shared Holedown/IncomingPreview material for the waiting row below the floor.")]
+        public Material previewMaterial;
         [Tooltip("Stages 1–3, 4–6 and 7–9. Missing slots fall back to background.")]
         public Sprite backgroundStages1To3, backgroundStages4To6, backgroundStages7To9;
         public Sprite Background(int stageIndex)

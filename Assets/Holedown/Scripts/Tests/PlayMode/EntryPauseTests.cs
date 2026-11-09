@@ -18,6 +18,8 @@ namespace Holedown.Tests
             flow.StartGame(); var id = flow.Session.SessionId; flow.StartGame();
             Assert.AreEqual(id, flow.Session.SessionId); Assert.AreEqual(AppPhase.Playing, flow.Phase);
             Assert.IsFalse(flow.TryFire(Vector2.down), "Start frame cannot fire");
+            // The opening board is presented at once; only the waiting row fades in below it.
+            Assert.IsFalse(flow.IsAdvancing);
             yield return null; Assert.IsTrue(flow.TryFire(Vector2.down)); flow.RequestRecall();
         }
         [UnityTest]

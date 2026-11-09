@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -8,6 +9,27 @@ namespace Holedown.Tests
 {
     public sealed class StagePresentationTests
     {
+        [UnityTest]
+        public IEnumerator RealDecorationsSitInFrontOfTheSceneAndBehindTheInterface()
+        {
+            yield return SceneManager.LoadSceneAsync("Assets/Scenes/SampleScene.unity"); yield return null;
+            yield return PlaySceneEntry.StartIfReady();
+            var background=GameObject.Find("Game/Background").GetComponent<SpriteRenderer>();
+            var foreground=GameObject.Find("Game/Foreground").GetComponent<SpriteRenderer>();
+            Assert.IsNotNull(foreground); Assert.AreEqual(10,foreground.sortingOrder,"real decorations are the front-most world layer");
+            Assert.IsNull(foreground.GetComponent<Collider2D>(),"decoration must not collide");
+            Assert.AreEqual(background.bounds.center,foreground.bounds.center,"foreground shares the stage centre");
+            Assert.AreEqual(background.bounds.size,foreground.bounds.size,"foreground shares the stage size");
+            var view=Object.FindFirstObjectByType<BoardView>().Views.Values.First();
+            Assert.Less(view.Visual.sortingOrder,foreground.sortingOrder,"blocks sit behind the rocks");
+            Assert.Less(view.Cracks.sortingOrder,foreground.sortingOrder);
+            var canvas=GameObject.Find("UI").GetComponent<Canvas>();
+            Assert.Greater(canvas.sortingOrder,foreground.sortingOrder,"the interface stays in front of the rocks");
+            var preview=Object.FindFirstObjectByType<IncomingRowPreview>();
+            Assert.IsNotNull(preview);
+            foreach(var cell in preview.Cells.Where(c=>c&&c.gameObject.activeSelf))
+                Assert.Less(cell.sortingOrder,foreground.sortingOrder,"rocks cover the waiting row too");
+        }
         [UnityTest]
         public IEnumerator CompleteFrameFitsPortraitLandscapeAndNarrowViews()
         {

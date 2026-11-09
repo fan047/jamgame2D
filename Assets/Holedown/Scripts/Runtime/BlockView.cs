@@ -18,12 +18,18 @@ namespace Holedown
         Vector2 targetSize;
         MaterialPropertyBlock flash;
         static readonly int FlashAmount = Shader.PropertyToID("_FlashAmount");
+        static readonly int PreviewStrength = Shader.PropertyToID("_Strength");
         public Transform ImpactRoot => visualRoot ? visualRoot : visual.transform;
         public SpriteRenderer Cracks => cracks;
         public bool OriginalColors => theme && theme.originalColors;
         public void ConfigureTheme(VisualTheme value) { theme = value; }
         int reward;
         int maxHealth;
+        int boundWidth, boundHeight;
+        BlockState bound;
+        bool entering;
+        Color entranceTint;
+        Material entranceMaterial;
         Vector3 baseVisualScale;
         Coroutine impact;
         public int DamageLevel { get; private set; }
@@ -33,6 +39,8 @@ namespace Holedown
         public void Bind(BlockState block)
         {
             StopImpact();
+            bound = block;
+            boundWidth = block.Width; boundHeight = block.Height;
             BlockId = block.Id;reward=block.RewardBalls;maxHealth=block.MaxHealth;
             transform.position = new Vector3(block.Column + block.Width * 0.5f, block.Row + block.Height * 0.5f, 0);
             var size = new Vector2(block.Width - 0.1f, block.Height - 0.1f);
@@ -111,6 +119,43 @@ namespace Holedown
         }
         void OnDisable()=>StopImpact();
         public void Remove() { shape.enabled = false; gameObject.SetActive(false); Destroy(gameObject); }
+        // Used by the advance animation: the incoming row starts where the waiting preview
+        // was, wearing the same softened silhouette, and only settles into the real block
+        // once it has reached its row. No label, badge, crack or role sprite leaks early.
+        public void BeginEntrance(Color previewTint)
+        {
+            var material = theme ? theme.previewMaterial : null;
+            if (!material) return;
+            if (cracks) cracks.enabled = false;
+            var ordinary = theme ? theme.Block(boundWidth, boundHeight) : null;
+            if (ordinary) { visual.sprite = ordinary; SpriteSizing.Fit(visual, new Vector2(boundWidth - 0.1f, boundHeight - 0.1f)); baseVisualScale = visualRoot ? Vector3.one : visual.transform.localScale; }
+            entranceMaterial = material; entranceTint = previewTint; entering = true;
+            SetPresentationVisible(false);
+            SetEntrance(0f);
+        }
+        public bool IsEntering => entering;
+        public void SetEntrance(float progress)
+        {
+            if (!entering || !visual) return;
+            float t = Mathf.Clamp01(progress);
+            visual.sharedMaterial = entranceMaterial;
+            visual.color = Color.Lerp(entranceTint, BaseColor, t);
+            SetPreviewStrength(1f - t);
+        }
+        // A cancelled advance restores the real block instead of leaving a faded silhouette.
+        public void EndEntrance()
+        {
+            if (!entering) return;
+            entering = false;
+            SetPreviewStrength(0f);
+            if (bound != null) Bind(bound);
+        }
+        void SetPreviewStrength(float amount)
+        {
+            if (flash == null) flash = new MaterialPropertyBlock();
+            if (!visual) return;
+            visual.GetPropertyBlock(flash); flash.SetFloat(PreviewStrength, amount); visual.SetPropertyBlock(flash);
+        }
         // Used by the advance animation: the incoming row stays hidden until it reaches the bottom.
         public void SetPresentationVisible(bool visible)
         {

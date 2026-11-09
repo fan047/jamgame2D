@@ -18,6 +18,7 @@ namespace Holedown.Tests
                 Assert.AreEqual(AppPhase.Playing, flow.Phase);
                 yield return null;
             }
+            Assert.IsFalse(flow.IsAdvancing, $"the opening board is presented at once: focus={flow.HasFocus}, scale={Time.timeScale}");
         }
         // This workstation can deliver an OS focus loss to the Editor during long PlayMode
         // runs; the game then pauses by design (covered as a product rule by the UI suite).
