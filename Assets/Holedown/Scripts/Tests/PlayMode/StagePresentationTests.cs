@@ -29,6 +29,14 @@ namespace Holedown.Tests
             Assert.IsNotNull(preview);
             foreach(var cell in preview.Cells.Where(c=>c&&c.gameObject.activeSelf))
                 Assert.Less(cell.sortingOrder,foreground.sortingOrder,"rocks cover the waiting row too");
+            // The bounce height is readable without thickening the floor or adding a frame.
+            var floorLine=GameObject.Find("Game/FloorLine").GetComponent<SpriteRenderer>();
+            Assert.IsNotNull(floorLine,"a thin contact line marks the floor");
+            Assert.IsNull(floorLine.GetComponent<Collider2D>(),"the contact line is display only");
+            Assert.AreEqual(0f,floorLine.bounds.max.y,0.03f,"it marks the authored floor top at y=0");
+            Assert.Less(floorLine.bounds.size.y,0.1f,"it stays a line instead of a ground slab");
+            Assert.Greater(floorLine.sortingOrder,view.Visual.sortingOrder);
+            Assert.Less(floorLine.sortingOrder,foreground.sortingOrder,"rocks still pass in front of it");
         }
         [UnityTest]
         public IEnumerator CompleteFrameFitsPortraitLandscapeAndNarrowViews()
