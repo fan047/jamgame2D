@@ -83,6 +83,52 @@ namespace Holedown.Tests
             Assert.AreEqual(8,rb.gameObject.layer); Assert.IsTrue(Physics2D.GetIgnoreLayerCollision(8,8));
             yield return null;
         }
+        // The floor line alone must reverse the ball: the play field starts empty, so the
+        // reported bounce cannot come from a block hit.
+        [UnityTest] public IEnumerator BallsBounceOffTheFloorLineWithoutTouchingABlock()
+        {
+            yield return LoadPhysicsOnlyScene();
+            var board = new BoardState(System.Array.Empty<BlockDefinition>(), new[] { new RowDefinition { blocks = new System.Collections.Generic.List<BlockDefinition> { new BlockDefinition(0, 0, 1, 1, true) } } });
+            var view = UnityEngine.Object.FindFirstObjectByType<BoardView>(); view.Sync(board);
+            Assert.AreEqual(0, view.Views.Count, "the field is empty, so nothing can be hit on the way down");
+            var prefab = AssetDatabase.LoadAssetAtPath<BallActor>("Assets/Holedown/Prefabs/Ball.prefab");
+            var floor = GameObject.Find("Game/Bottom");
+            Assert.IsNotNull(floor, "the authored floor collider must stay in the scene");
+            Assert.AreEqual(new Vector3(4, -0.25f, 0), floor.transform.position);
+            Assert.AreEqual(new Vector2(9, 0.5f), floor.GetComponent<BoxCollider2D>().size);
+            foreach (float speed in new[] { 12f, 24f })
+            foreach (var direction in new[] { Vector2.down, new Vector2(0.35f, -1).normalized, new Vector2(-0.35f, -1).normalized })
+            {
+                var settings = ScriptableObject.CreateInstance<GameSettings>(); settings.ballSpeed = speed;
+                var ball = UnityEngine.Object.Instantiate(prefab, AimInput.Origin, Quaternion.identity);
+                int hits = 0; bool returned = false, descending = false, ascending = false;
+                float lowest = float.MaxValue;
+                ball.Hit += (b, id) => hits++;
+                ball.Returned += b => returned = true;
+                ball.Launch(settings, Guid.NewGuid(), 1, 1, direction);
+                float deadline = Time.time + 12;
+                while (!returned && Time.time < deadline)
+                {
+                    if (ball)
+                    {
+                        var position = ball.transform.position; var velocity = ball.Velocity;
+                        lowest = Mathf.Min(lowest, position.y);
+                        Assert.Greater(position.y, -0.01f, "the ball never enters the waiting area below the floor line");
+                        if (velocity.y < 0) descending = true;
+                        else if (velocity.y > 0 && descending) ascending = true;
+                    }
+                    yield return new WaitForFixedUpdate();
+                }
+                Assert.IsTrue(returned, $"ball speed {speed} did not return");
+                Assert.IsTrue(descending && ascending, "the floor itself reversed the vertical speed");
+                // A fixed step cannot sample the exact contact depth, so bound it: the lowest
+                // sampled centre stays above the floor line and within one step of one radius.
+                Assert.Greater(lowest, 0f, "the ball centre never crosses the floor line");
+                Assert.Less(lowest, settings.ballRadius + speed * Time.fixedDeltaTime + 0.01f, "the ball turns around at the floor line, not at a block");
+                Assert.AreEqual(0, hits, "no block was touched, so this is a floor bounce only");
+                UnityEngine.Object.Destroy(settings);
+            }
+        }
 #endif
     }
 }
