@@ -24,6 +24,14 @@ namespace Holedown
         public List<BlockDefinition> blocks = new List<BlockDefinition>();
     }
 
+    /// <summary>Read-only column footprint of one block in the next incoming row.</summary>
+    public readonly struct IncomingBlockPreview
+    {
+        public readonly int Column;
+        public readonly int Width;
+        public IncomingBlockPreview(int column, int width) { Column = column; Width = width; }
+    }
+
     public sealed class BlockState
     {
         public int Id { get; }
@@ -85,6 +93,20 @@ namespace Holedown
                 blocks.Remove(id);
             }
             return new HitResult(true, block.Health, destroyed, block.IsTarget, destroyed ? block.RewardBalls : 0);
+        }
+
+        // Read-only look at the row the next advance would add. It never consumes the
+        // cursor or touches blocks, and it distinguishes an empty row from exhaustion:
+        // the return value says whether another row exists, the list may still be empty.
+        public bool TryPeekIncomingRow(out IReadOnlyList<IncomingBlockPreview> row)
+        {
+            row = null;
+            if (IncomingCursor >= incoming.Count) return false;
+            var source = incoming[IncomingCursor].blocks;
+            var snapshot = new IncomingBlockPreview[source.Count];
+            for (int i = 0; i < source.Count; i++) snapshot[i] = new IncomingBlockPreview(source[i].column, source[i].width);
+            row = snapshot;
+            return true;
         }
 
         public bool Advance()

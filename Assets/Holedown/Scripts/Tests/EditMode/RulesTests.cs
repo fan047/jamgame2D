@@ -90,5 +90,60 @@ namespace Holedown.Tests
             try { settings.Validate(); settings.ballSpeed = float.NaN; Assert.Throws<ArgumentException>(settings.Validate); }
             finally { UnityEngine.Object.DestroyImmediate(settings); }
         }
+        static BoardState PreviewBoard(out List<RowDefinition> rows)
+        {
+            rows = new List<RowDefinition>
+            {
+                new RowDefinition { blocks = new List<BlockDefinition> { new BlockDefinition(1, 0, 2, 3, false, 2) } },
+                new RowDefinition(),
+                new RowDefinition { blocks = new List<BlockDefinition> { new BlockDefinition(7, 0, 1, 1, true) } }
+            };
+            return new BoardState(new[] { new BlockDefinition(0, 0, 1, 1) }, rows);
+        }
+        [Test] public void PeekReturnsTheNextRowFootprintWithoutConsumingIt()
+        {
+            var b = PreviewBoard(out var rows);
+            int cursor = b.IncomingCursor; int count = b.IncomingCount; int blocks = b.Blocks.Count; int nextId = blocks + 1;
+            Assert.IsTrue(b.TryPeekIncomingRow(out var row));
+            Assert.AreEqual(1, row.Count);
+            Assert.AreEqual(1, row[0].Column); Assert.AreEqual(2, row[0].Width);
+            // Read-only: no cursor move, no new blocks, no order change, no def mutation.
+            Assert.AreEqual(cursor, b.IncomingCursor); Assert.AreEqual(count, b.IncomingCount);
+            Assert.AreEqual(blocks, b.Blocks.Count); Assert.IsFalse(b.Blocks.ContainsKey(nextId));
+            Assert.AreEqual(2, rows[0].blocks[0].rewardBalls);
+            Assert.AreEqual(1, rows[0].blocks[0].column); Assert.AreEqual(2, rows[0].blocks[0].width);
+            b.Advance();
+            Assert.AreEqual(1, b.Blocks[nextId].Column); Assert.AreEqual(2, b.Blocks[nextId].Width); Assert.AreEqual(0, b.Blocks[nextId].Row);
+        }
+        [Test] public void PeekSeparatesEmptyRowsFromExhaustion()
+        {
+            var b = PreviewBoard(out _);
+            Assert.IsTrue(b.TryPeekIncomingRow(out var first)); Assert.IsNotEmpty(first);
+            b.Advance();
+            Assert.IsTrue(b.TryPeekIncomingRow(out var empty), "an empty next row still exists");
+            Assert.IsNotNull(empty); Assert.IsEmpty(empty);
+            b.Advance();
+            Assert.IsTrue(b.TryPeekIncomingRow(out var last));
+            Assert.AreEqual(7, last[0].Column); Assert.AreEqual(1, last[0].Width);
+            b.Advance();
+            Assert.IsFalse(b.TryPeekIncomingRow(out var exhausted), "a consumed queue reports exhaustion");
+            Assert.IsNull(exhausted);
+            Assert.AreEqual(b.IncomingCount, b.IncomingCursor);
+        }
+        [Test] public void PeekSnapshotCannotBeChangedBack()
+        {
+            var b = PreviewBoard(out _);
+            Assert.IsTrue(b.TryPeekIncomingRow(out var row));
+            int nextId = b.Blocks.Count + 1;
+            // The snapshot is a plain array of value copies, so it carries no mutable definition.
+            Assert.IsInstanceOf<IncomingBlockPreview[]>(row);
+            var again = (IncomingBlockPreview[])row; again[0] = new IncomingBlockPreview(5, 1);
+            Assert.IsTrue(b.TryPeekIncomingRow(out var fresh));
+            Assert.AreEqual(1, fresh[0].Column); Assert.AreEqual(2, fresh[0].Width);
+            b.Advance();
+            var added = b.Blocks[nextId];
+            Assert.AreEqual(1, added.Column, "a mutated snapshot must not change what the advance adds");
+            Assert.AreEqual(2, added.Width);
+        }
     }
 }
