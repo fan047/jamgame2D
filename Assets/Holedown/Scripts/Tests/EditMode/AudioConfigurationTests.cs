@@ -31,7 +31,9 @@ namespace Holedown.Tests
         public void InvalidConfigurationsFailWithoutPartialSnapshot(string json){Assert.Throws<ArgumentException>(()=>AudioConfiguration.Parse(json));}
         [Test] public void EmbeddedWaveIsDecodedAndOwnedBySnapshot()
         {
-            var bytes=File.ReadAllBytes("Assets/Holedown/Audio/block_hit.wav");var samples=AudioConfiguration.DecodeWave(bytes);Assert.AreEqual(4080,samples.Length);
+            var bytes=File.ReadAllBytes("Assets/Holedown/Audio/block_hit.wav");var samples=AudioConfiguration.DecodeWave(bytes);
+            // Read the length from the wave itself: a swapped asset must not need a new constant.
+            Assert.AreEqual(BitConverter.ToInt32(bytes,40)/2,samples.Length,"every sample of the embedded wave is decoded");
             var audio=AudioConfiguration.Parse("{\"schemaVersion\":1,\"version\":\"v\",\"cues\":{\"block_hit\":{\"wavBase64\":\""+Convert.ToBase64String(bytes)+"\"}}}");
             var clip=audio.Cues[1].Replacement;Assert.AreEqual(48000,clip.frequency);Assert.AreEqual(1,clip.channels);audio.Dispose();Assert.IsFalse(clip);
         }
