@@ -3,6 +3,7 @@ using TMPro;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.TextCore.LowLevel;
 
 namespace Holedown.Tests
 {
@@ -39,17 +40,47 @@ namespace Holedown.Tests
             Assert.AreEqual("球参：demo-1 / 关卡：growth-1",ChineseText.Configuration("S:demo-1 / L:growth-1"));
             Assert.AreEqual("内置配置",ChineseText.Configuration("Built-in"));
         }
+        const string ChineseFontPath="Assets/Holedown/Fonts/NotoSansCJK/ChineseUI.asset";
+        const string Pixel12Path="Assets/Holedown/Fonts/Pixel/ZLabsPixel12.asset";
+        const string Pixel24Path="Assets/Holedown/Fonts/Pixel/ZLabsPixel24.asset";
+        static TMP_FontAsset Font(string path)
+        {
+            var font=AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(path);
+            Assert.IsNotNull(font,path);
+            return font;
+        }
+        [Test] public void PixelFontsKeepHardPixelsAndFallBackToTheChineseFont()
+        {
+            var chinese=Font(ChineseFontPath);
+            foreach(var pair in new[]{System.Tuple.Create(Pixel12Path,12),System.Tuple.Create(Pixel24Path,24)})
+            {
+                var font=Font(pair.Item1);
+                Assert.IsNotNull(font.sourceFontFile,pair.Item1);
+                Assert.AreEqual(pair.Item2,font.faceInfo.pointSize,"the atlas keeps the pixel grid of the source font");
+                Assert.AreEqual(GlyphRenderMode.RASTER,font.atlasRenderMode,"no antialiasing keeps the pixels hard");
+                Assert.AreEqual(FilterMode.Point,font.atlasTexture.filterMode,"point sampling keeps the pixels hard");
+                Assert.Contains(chinese,font.fallbackFontAssetTable,"small Chinese text falls back to the clear font");
+            }
+        }
         [Test] public void SceneAndBlockUseEmbeddedChineseFontWithAllStaticCharacters()
         {
-            var font=AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/Holedown/Fonts/NotoSansCJK/ChineseUI.asset");
-            Assert.IsNotNull(font);Assert.IsNotNull(font.sourceFontFile);Assert.AreEqual(AtlasPopulationMode.Dynamic,font.atlasPopulationMode);
+            var chinese=Font(ChineseFontPath);
+            var pixel12=Font(Pixel12Path);
+            var pixel24=Font(Pixel24Path);
+            Assert.IsNotNull(chinese.sourceFontFile);Assert.AreEqual(AtlasPopulationMode.Dynamic,chinese.atlasPopulationMode);
             var scene=EditorSceneManager.OpenPreviewScene("Assets/Scenes/SampleScene.unity");
             try
             {
                 int count=0;
                 foreach(var root in scene.GetRootGameObjects())foreach(var text in root.GetComponentsInChildren<TMP_Text>(true))
                 {
-                    Assert.AreSame(font,text.font,text.name);
+                    bool shipped=text.font==chinese||text.font==pixel12||text.font==pixel24;
+                    Assert.IsTrue(shipped,text.name+" uses a shipped font asset");
+                    // The 24 px atlas is only used where the caption is large enough to stay crisp.
+                    if(text.font==pixel24)Assert.GreaterOrEqual(text.fontSize,30f,"pixel 24 px font stays large: "+text.name);
+                    // Only digits and the short headers wear the pixel font; small Chinese stays clear.
+                    if(text.name=="StageIndex"||text.name=="RewardValue")Assert.AreSame(pixel12,text.font,text.name);
+                    if(text.name=="StageLabel"||text.name=="BallLabel"||text.name=="Round"||text.name=="Help"||text.name=="Instructions")Assert.AreSame(chinese,text.font,"small Chinese stays on the clear font: "+text.name);
                     bool runtimeOnly=text.name=="Status" || text.name=="RewardSummary" || text.name=="NextBalls" || text.name=="CompletedCount" || text.name=="Subtitle";
                     bool numeric=text.name=="StageIndex" || text.name=="RewardValue";
                     if(runtimeOnly)Assert.IsTrue(string.IsNullOrEmpty(text.text),text.name);
@@ -57,12 +88,12 @@ namespace Holedown.Tests
                     else Assert.IsTrue(System.Text.RegularExpressions.Regex.IsMatch(text.text,"[\\u4e00-\\u9fff]"),text.text);
                     Assert.IsFalse(text.raycastTarget,text.name);
                     string visible=System.Text.RegularExpressions.Regex.Replace(text.text,"<[^>]+>","");
-                    foreach(char character in visible)if(!char.IsWhiteSpace(character))Assert.IsTrue(font.HasCharacter(character,true,true),"Missing glyph: "+character);
+                    foreach(char character in visible)if(!char.IsWhiteSpace(character))Assert.IsTrue(text.font.HasCharacter(character,true,true),"Missing glyph: "+character);
                     count++;
                 }
                 Assert.AreEqual(34,count);
                 var block=AssetDatabase.LoadAssetAtPath<BlockView>("Assets/Holedown/Prefabs/Block.prefab");
-                Assert.AreSame(font,block.GetComponentInChildren<TMP_Text>(true).font);
+                Assert.AreSame(pixel12,block.GetComponentInChildren<TMP_Text>(true).font,"block numbers use the pixel font");
             }
             finally {EditorSceneManager.ClosePreviewScene(scene);}
         }

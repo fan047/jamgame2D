@@ -37,8 +37,8 @@ namespace Holedown.Tests
             Assert.AreEqual(straightDown.y, beam.End.y, 0.05f);
             Assert.AreEqual(aim.PreviewEnd(Vector2.down).y, beam.End.y, 0.01f, "the beam ends exactly on the prediction");
             Assert.Greater(beam.End.y, 0f, "the beam never reaches into the waiting area");
-            // The scene ships a 10 px design width; the plan allows 8–10 px at 540×960.
-            Assert.That(beam.Width * 540f / 9.4f, Is.InRange(8f, 10f), "beam width inside the planned band");
+            // The scene ships a 13 px design width; the plan allows 12–14 px at 540×960.
+            Assert.That(beam.Width * 540f / 9.4f, Is.InRange(12f, 14f), "beam width inside the planned band");
             var renderer = beam.GetComponent<MeshRenderer>();
             Assert.AreEqual(2, renderer.sortingOrder, "above blocks and cracks");
             Assert.Greater(beam.transform.position.z, -1f);
