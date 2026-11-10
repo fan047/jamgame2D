@@ -26,7 +26,7 @@
 
 | 项目 | 结果 |
 |---|---|
-| Unity EditMode | 134/134（含 `BundledConfigurationTests` 5 项、`AndroidBuildSettingsTests` 2 项） |
+| Unity EditMode | 136/136（含 `BundledConfigurationTests` 5 项、`AndroidBuildSettingsTests` 2 项） |
 | Unity PlayMode | 107/107（含 `AndroidPlaytestTests` 13 项） |
 | 随包配置 | 九关加载成功；坏 JSON／缺文件／少关卡均进配置错误页且 `Campaign` 为空；修好文件后「重新读取」恢复到标题页 |
 | 触控（设备层） | 虚拟 Touchscreen 走 `QueueStateEvent`：Began→拖动→Ended 只发一轮；移除设备造成的 Canceled 不发射 |
