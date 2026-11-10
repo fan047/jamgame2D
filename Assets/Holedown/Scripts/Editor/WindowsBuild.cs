@@ -15,7 +15,8 @@ namespace Holedown.Editor
             if (EditorApplication.isPlaying) throw new BuildFailedException("Exit Play Mode before building.");
             if (!BuildPipeline.IsBuildTargetSupported(BuildTargetGroup.Standalone,BuildTarget.StandaloneWindows64))
                 throw new BuildFailedException("Windows x64 build support is missing.");
-            string buildDirectory=CreateBuildDirectory("Builds");
+            // Windows builds live beside the Android ones: Builds/Windows/NN.
+            string buildDirectory=CreateBuildDirectory(Path.Combine("Builds","Windows"));
             string outputDirectory=Path.Combine(buildDirectory,"Windows");Directory.CreateDirectory(outputDirectory);
             var temp=Path.GetFullPath("Library/Locus/tmp/build-temp");
             Directory.CreateDirectory(temp);
