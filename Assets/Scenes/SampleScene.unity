@@ -6327,6 +6327,7 @@ GameObject:
   - component: {fileID: 1404852081}
   - component: {fileID: 1404852083}
   - component: {fileID: 1404852082}
+  - component: {fileID: 1404852084}
   m_Layer: 0
   m_Name: UI
   m_TagString: Untagged
@@ -6504,6 +6505,23 @@ MonoBehaviour:
   launcher: {fileID: 1840627757}
   dangerLine: {fileID: 78798209}
   panelTransition: {fileID: 985487625}
+--- !u!114 &1404852084
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1404852076}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 535ce9712ded474a8d59bdb005257279, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Holedown.Runtime::Holedown.AudioSettingsView
+  flow: {fileID: 1028796998}
+  feedback: {fileID: 1898611272}
+  titlePanel: {fileID: 985487622}
+  pauseCard: {fileID: 1881515119}
+  font: {fileID: 11400000, guid: 347c074bee33aa2428242ff812ad00fa, type: 2}
 --- !u!1 &1457466480
 GameObject:
   m_ObjectHideFlags: 0
@@ -8144,6 +8162,7 @@ MonoBehaviour:
   lossSound: {fileID: 8300000, guid: d020f1035de344048ac160375cfb07a3, type: 3}
   recallSound: {fileID: 8300000, guid: 822254a92ea44a7293150beda636eb59, type: 3}
   confirmSound: {fileID: 8300000, guid: 597e8638df4a4ff4b77f4a831dd7a6d6, type: 3}
+  backgroundMusic: {fileID: 8300000, guid: 95e839e23350457684638cb98d604946, type: 3}
   fragmentSprite: {fileID: 7482667652216324306, guid: 9b51139e69622394b99b0322acd0c44d, type: 3}
   fragmentMaterial: {fileID: 2100000, guid: db7639095b2c7be418b8254b65104209, type: 2}
   theme: {fileID: 11400000, guid: 104ba133b5cf0614d8ecc0c8721b0aad, type: 2}

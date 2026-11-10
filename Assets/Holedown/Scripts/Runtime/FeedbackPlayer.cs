@@ -9,6 +9,7 @@ namespace Holedown
         [SerializeField] AudioSource audioSource;
         [SerializeField] AudioClip launchSound, hitSound, breakSound, rewardSound;
         [SerializeField] AudioClip winSound, lossSound, recallSound, confirmSound;
+        [SerializeField] AudioClip backgroundMusic;
         [SerializeField] Sprite fragmentSprite;
         [SerializeField] Material fragmentMaterial;
         [SerializeField] VisualTheme theme;
@@ -16,7 +17,13 @@ namespace Holedown
         [Min(1)] int maxFragmentBursts = 6;
         [SerializeField] float fragmentSeconds = 0.3f;
         int activeFragmentBursts;
-        AudioSource accentSource, uiSource;
+        const string MusicVolumeKey = "Holedown.MusicVolume";
+        const string EffectsVolumeKey = "Holedown.EffectsVolume";
+        const float MusicMixGain = 0.42f;
+        AudioSource accentSource, uiSource, musicSource;
+        float effectsMixGain;
+        public int MusicVolume { get; private set; }
+        public int EffectsVolume { get; private set; }
         AudioClip fallbackHit;
         float nextHitTime, nextBreakTime;
         public int SoundsPlayed { get; private set; }
@@ -56,15 +63,53 @@ namespace Holedown
 
         void Awake()
         {
-            if (!audioSource) return;
-            accentSource = CreateSource(64);
-            uiSource = CreateSource(128);
-            if (hitSound) return;
+            MusicVolume = Mathf.Clamp(PlayerPrefs.GetInt(MusicVolumeKey, 70), 0, 100);
+            EffectsVolume = Mathf.Clamp(PlayerPrefs.GetInt(EffectsVolumeKey, 100), 0, 100);
+            if (backgroundMusic)
+            {
+                musicSource = gameObject.AddComponent<AudioSource>();
+                musicSource.clip = backgroundMusic;
+                musicSource.playOnAwake = false;
+                musicSource.loop = true;
+                musicSource.priority = 32;
+            }
+            if (audioSource)
+            {
+                effectsMixGain = audioSource.volume;
+                accentSource = CreateSource(64);
+                uiSource = CreateSource(128);
+            }
+            ApplyVolumes();
+            if (!audioSource || hitSound) return;
             const int rate=22050;
             var samples=new float[1323];
             for(int i=0;i<samples.Length;i++) {float t=(float)i/rate; samples[i]=Mathf.Sin(t*880*Mathf.PI*2)*0.18f*(1f-(float)i/samples.Length);}
             fallbackHit=AudioClip.Create("Placeholder hit",samples.Length,1,rate,false);
             fallbackHit.SetData(samples,0);
+        }
+
+        public void SetMusicVolume(int percent)
+        {
+            MusicVolume = Mathf.Clamp(percent, 0, 100);
+            PlayerPrefs.SetInt(MusicVolumeKey, MusicVolume);
+            ApplyVolumes();
+        }
+
+        public void SetEffectsVolume(int percent)
+        {
+            EffectsVolume = Mathf.Clamp(percent, 0, 100);
+            PlayerPrefs.SetInt(EffectsVolumeKey, EffectsVolume);
+            ApplyVolumes();
+        }
+
+        void ApplyVolumes()
+        {
+            // The squared curve gives the lower half of each slider finer control.
+            float music = MusicVolume / 100f;
+            float effects = EffectsVolume / 100f;
+            if (musicSource) musicSource.volume = MusicMixGain * music * music;
+            if (!audioSource) return;
+            audioSource.volume = accentSource.volume = uiSource.volume = effectsMixGain * effects * effects;
         }
 
         AudioSource CreateSource(int priority)
@@ -86,6 +131,7 @@ namespace Holedown
 
         void OnEnable()
         {
+            if (musicSource) musicSource.Play();
             flow.BlockHit += PlayHit;
             flow.VolleyLaunched += PlayLaunch;
             flow.ManualRecallAccepted += PlayRecall;
@@ -97,6 +143,7 @@ namespace Holedown
 
         void OnDisable()
         {
+            if (musicSource) musicSource.Stop();
             flow.BlockHit -= PlayHit;
             flow.VolleyLaunched -= PlayLaunch;
             flow.ManualRecallAccepted -= PlayRecall;

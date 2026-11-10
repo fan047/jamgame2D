@@ -72,6 +72,67 @@ namespace Holedown.Tests
             body.OnScroll(new PointerEventData(EventSystem.current){scrollDelta=new Vector2(0,-80)});yield return null;Assert.Less(body.verticalNormalizedPosition,.95f);Assert.AreEqual(position,recovery.transform.position);Capture("error-scrolled");
             recovery.onClick.Invoke();yield return null;yield return null;Assert.IsNull(flow.InitializationError);Assert.AreEqual(AppPhase.Playing,flow.Phase);
         }
+        [UnityTest] public IEnumerator AudioSettingsSeparateTheVolumesAndRestoreSavedValues()
+        {
+            const string musicKey = "Holedown.MusicVolume", effectsKey = "Holedown.EffectsVolume";
+            int oldMusic = PlayerPrefs.GetInt(musicKey, -1), oldEffects = PlayerPrefs.GetInt(effectsKey, -1);
+            try
+            {
+                PlayerPrefs.DeleteKey(musicKey);
+                PlayerPrefs.DeleteKey(effectsKey);
+                yield return Load();
+                yield return new WaitForSecondsRealtime(.2f);
+                var feedback = Object.FindFirstObjectByType<FeedbackPlayer>();
+                var sources = feedback.GetComponents<AudioSource>();
+                var musicSource = sources.Single(source => source.loop);
+                Assert.AreEqual("exploration_theme", musicSource.clip.name);
+                Assert.IsTrue(musicSource.isPlaying);
+                var overlay = UI.Find("AudioSettingsPanel");
+                Button("设置").onClick.Invoke();
+                Assert.IsTrue(overlay.gameObject.activeInHierarchy);
+                Assert.IsFalse(Button("开始游戏").IsInteractable());
+                var music = overlay.Find("Card/MusicVolume").GetComponent<Slider>();
+                var effects = overlay.Find("Card/EffectsVolume").GetComponent<Slider>();
+                Assert.AreEqual(70, music.value);
+                Assert.AreEqual(100, effects.value);
+                Capture("audio-settings-title");
+                music.value = 0;
+                Assert.AreEqual(0f, musicSource.volume);
+                Assert.IsTrue(sources.Where(source => !source.loop).All(source => source.volume > 0f));
+                music.value = 45;
+                effects.value = 0;
+                Assert.Greater(musicSource.volume, 0f);
+                Assert.IsTrue(sources.Where(source => !source.loop).All(source => source.volume == 0f));
+                Button("完成").onClick.Invoke();
+                Assert.IsTrue(Button("开始游戏").IsInteractable());
+                Assert.AreEqual(45, PlayerPrefs.GetInt(musicKey));
+                Assert.AreEqual(0, PlayerPrefs.GetInt(effectsKey));
+
+                yield return Load();
+                feedback = Object.FindFirstObjectByType<FeedbackPlayer>();
+                Assert.AreEqual(45, feedback.MusicVolume);
+                Assert.AreEqual(0, feedback.EffectsVolume);
+                Button("开始游戏").onClick.Invoke();
+                yield return null;
+                yield return null;
+                flow.RequestPause();
+                Button("设置").onClick.Invoke();
+                Assert.AreEqual(AppPhase.Paused, flow.Phase);
+                Assert.IsFalse(Button("继续游戏").IsInteractable());
+                Capture("audio-settings-pause");
+                Button("完成").onClick.Invoke();
+                Assert.IsTrue(Button("继续游戏").IsInteractable());
+                Assert.AreEqual(AppPhase.Paused, flow.Phase);
+            }
+            finally
+            {
+                if (oldMusic < 0) PlayerPrefs.DeleteKey(musicKey);
+                else PlayerPrefs.SetInt(musicKey, oldMusic);
+                if (oldEffects < 0) PlayerPrefs.DeleteKey(effectsKey);
+                else PlayerPrefs.SetInt(effectsKey, oldEffects);
+                PlayerPrefs.Save();
+            }
+        }
         void Win()
         {
             while(!flow.Board.Blocks.Values.Any(b=>b.IsTarget))flow.Board.Advance();var target=flow.Board.Blocks.Values.Single(b=>b.IsTarget);
