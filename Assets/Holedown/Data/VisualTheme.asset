@@ -38,6 +38,28 @@ MonoBehaviour:
   foreground: {fileID: 21300000, guid: 85247b2e41e2b9f42bad31b8b59c9d4c, type: 3}
   previewMaterial: {fileID: 2100000, guid: 94b0f11e4e0256344962812ab6e7eb3f, type: 2}
   backgroundStages1To3: {fileID: 0}
-  backgroundStages4To6: {fileID: 0}
-  backgroundStages7To9: {fileID: 0}
+  backgroundStages4To6: {fileID: 21300000, guid: c0c03ae51924e724da0fef90ee8265c1, type: 3}
+  backgroundStages7To9: {fileID: 21300000, guid: 77ec51fdff3304d49b4914607c3cd909, type: 3}
+  stages4To6:
+    foreground: {fileID: 21300000, guid: 772fe822220014f4089b27319751c6f5, type: 3}
+    ordinarySquare: {fileID: 21300000, guid: b4227561d0db2cd4ba0dec848c9b0b91, type: 3}
+    ordinaryWide: {fileID: 21300000, guid: 6ba6ec418ad2c4642b9c2a02a210d919, type: 3}
+    ordinaryTall: {fileID: 21300000, guid: 72f5d28cac7dff64494695c2dfeea395, type: 3}
+    rewardSquare: {fileID: 21300000, guid: bb16303567a69204787ab83e6d746cec, type: 3}
+    rewardWide: {fileID: 21300000, guid: 51fd984fdd36b86489993b875a5d989c, type: 3}
+    rewardTall: {fileID: 21300000, guid: 3ad3939025bb0564d98e1605d0b2b935, type: 3}
+    targetSquare: {fileID: 21300000, guid: 61d95d21c124adb4c826c6e965fb8229, type: 3}
+    targetWide: {fileID: 21300000, guid: 5c11b0b3ca237394185807b95ad67545, type: 3}
+    targetTall: {fileID: 21300000, guid: 608ac9540f53219409f25313a3fb4e61, type: 3}
+  stages7To9:
+    foreground: {fileID: 21300000, guid: 7015fb9dd9279294fa3b75e2a979f6c5, type: 3}
+    ordinarySquare: {fileID: 21300000, guid: 5b4d468049a0a74499270b769cb75930, type: 3}
+    ordinaryWide: {fileID: 21300000, guid: 3365173860cb1084d8e11ca58a7b0463, type: 3}
+    ordinaryTall: {fileID: 21300000, guid: 43d2bfaa71b98c24d88c65d9c9eaaba7, type: 3}
+    rewardSquare: {fileID: 21300000, guid: 0f051bc143ba6b34c87a6586e1d6b5ef, type: 3}
+    rewardWide: {fileID: 21300000, guid: 99bd2bdb841ddea479d2226d2dbff883, type: 3}
+    rewardTall: {fileID: 21300000, guid: 89f6f98c848ba7247af0c9ba26e4d275, type: 3}
+    targetSquare: {fileID: 21300000, guid: d7df4c3d70a66b44cba5a92fbaa7bfae, type: 3}
+    targetWide: {fileID: 21300000, guid: d9e2119cddb87644b9f83ce7be794d93, type: 3}
+    targetTall: {fileID: 21300000, guid: 9e95d450a2af3d546ba8b46545d18659, type: 3}
   flashMaterial: {fileID: 2100000, guid: 66531bb9f79745345a5e09d8318e36c4, type: 2}

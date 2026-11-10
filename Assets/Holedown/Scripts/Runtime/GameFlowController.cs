@@ -110,6 +110,7 @@ namespace Holedown
             SetPhase(AppPhase.Playing);
             // The opening board is shown at its rule positions; only the row waiting below
             // the floor line fades in, so nothing rises across the whole field.
+            boardView.ConfigureStage(Campaign.StageIndex);
             boardView.Sync(Board);
             boardView.PresentIncoming(Board, Application.isPlaying);
         }

@@ -21,9 +21,18 @@ namespace Holedown
         void RefreshBackground()
         {
             if (!theme || !background) return;
-            var selected = theme.Background(flow && flow.Campaign != null ? flow.Campaign.StageIndex : -1);
+            int stage = flow && flow.Campaign != null ? flow.Campaign.StageIndex : -1;
+            // Background and foreground are one decision: a group's in-place decorations
+            // only ever belong to that group's cave.
+            var selected = theme.Background(stage);
             if (background.sprite != selected) background.sprite = selected;
             background.enabled = selected;
+            if (foreground)
+            {
+                var layer = theme.Foreground(stage);
+                if (foreground.sprite != layer) foreground.sprite = layer;
+                foreground.enabled = layer;
+            }
         }
         void OnDestroy() { if (flow) { flow.Changed -= RefreshBackground; flow.VolleyLaunched -= PlayLaunchPulse; } }
         void PlayLaunchPulse()
@@ -60,7 +69,9 @@ namespace Holedown
                 stageCanvas.position = new Vector3(BoardCamera.StageCenter.x,BoardCamera.StageCenter.y,position.z);
             }
             RefreshBackground();
-            if(foreground) { foreground.sprite = theme ? theme.foreground : null; foreground.enabled = foreground.sprite; foreground.color = Color.white; }
+            if(foreground) { foreground.color = Color.white; }
+            // A failed configuration load leaves Campaign null; the error page must survive.
+            if(boardView) boardView.ConfigureStage(flow && flow.Campaign != null ? flow.Campaign.StageIndex : -1);
             if(boardView && boardView.Preview) boardView.Preview.Configure(theme);
             AlignForeground();
             if(theme.launcher) { launcher.sprite = theme.launcher; launcher.color = Color.white; SpriteSizing.Fit(launcher, Vector2.one * 0.3f); launcherBaseScale = launcher.transform.localScale; }

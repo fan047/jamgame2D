@@ -23,8 +23,12 @@ namespace Holedown
         public SpriteRenderer Cracks => cracks;
         public bool OriginalColors => theme && theme.originalColors;
         public void ConfigureTheme(VisualTheme value) { theme = value; }
+        // The group index is set before the board is presented, so the very first bind uses
+        // the right cave's block art instead of swapping it afterwards.
+        public void ConfigureStage(int index) { stageIndex = index; }
         int reward;
         int maxHealth;
+        int stageIndex;
         int boundWidth, boundHeight;
         BlockState bound;
         bool entering;
@@ -34,6 +38,7 @@ namespace Holedown
         Coroutine impact;
         public int DamageLevel { get; private set; }
         public int BlockId { get; private set; }
+        public int StageIndex => stageIndex;
         public Color BaseColor { get; private set; }
         public SpriteRenderer Visual => visual;
         public void Bind(BlockState block)
@@ -48,7 +53,7 @@ namespace Holedown
             targetSize = size;
             if(theme)
             {
-                var sprite = theme.Block(block.Width, block.Height, block.IsTarget, block.RewardBalls); if(sprite) visual.sprite = sprite;
+                var sprite = theme.Block(stageIndex, block.Width, block.Height, block.IsTarget, block.RewardBalls); if(sprite) visual.sprite = sprite;
                 if(theme.crackLight) lightCracks = theme.crackLight;
                 if(theme.crackHeavy) heavyCracks = theme.crackHeavy;
                 if(theme.flashMaterial) { visual.sharedMaterial = theme.flashMaterial; if(cracks) cracks.sharedMaterial = theme.flashMaterial; }
@@ -127,6 +132,8 @@ namespace Holedown
             var material = theme ? theme.previewMaterial : null;
             if (!material) return;
             if (cracks) cracks.enabled = false;
+            // The entrance keeps the shared grey-blue silhouette of the waiting row; the
+            // group's own sprite and colours only appear when the block lands.
             var ordinary = theme ? theme.Block(boundWidth, boundHeight) : null;
             if (ordinary) { visual.sprite = ordinary; SpriteSizing.Fit(visual, new Vector2(boundWidth - 0.1f, boundHeight - 0.1f)); baseVisualScale = visualRoot ? Vector3.one : visual.transform.localScale; }
             entranceMaterial = material; entranceTint = previewTint; entering = true;

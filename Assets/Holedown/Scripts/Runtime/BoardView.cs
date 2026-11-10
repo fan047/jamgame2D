@@ -12,6 +12,9 @@ namespace Holedown
         [Min(0f)] float advanceSeconds = 0.2f;
         [SerializeField, Tooltip("Waiting-row centre used only when no preview presenter is wired.")]
         float waitingRowY = -0.55f;
+        [SerializeField, Tooltip("Current campaign stage index; selects the cave group of the block art.")]
+        int stageIndex;
+        public int StageIndex => stageIndex;
         readonly Dictionary<int, BlockView> views = new Dictionary<int, BlockView>();
         readonly Dictionary<int, Vector3> captured = new Dictionary<int, Vector3>();
         Coroutine advance;
@@ -35,10 +38,17 @@ namespace Holedown
             foreach (var block in board.Blocks.Values)
             {
                 if (!views.TryGetValue(block.Id, out var view))
-                { view = Instantiate(blockPrefab, transform); views.Add(block.Id, view); }
+                { view = Instantiate(blockPrefab, transform); views.Add(block.Id, view); view.ConfigureStage(stageIndex); }
                 view.Bind(block);
             }
             Physics2D.SyncTransforms();
+        }
+        // Set before the board is presented so the opening bind, the waiting row and every
+        // later advance use the same group art.
+        public void ConfigureStage(int index)
+        {
+            stageIndex = index;
+            foreach (var view in views.Values) if (view) view.ConfigureStage(index);
         }
         // Shows the row the next advance would add. The opening board is presented at its
         // rule positions; only the waiting row fades in.

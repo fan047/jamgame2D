@@ -43,6 +43,8 @@ namespace Holedown
             for (int i = 0; i < row.Count; i++)
             {
                 var cell = Cell(i);
+                // The shared grey-blue silhouette uses the first cave's ordinary sprite: the
+                // preview material multiplies the base colour, so a group sprite would tint it.
                 var sprite = theme ? theme.Block(row[i].Width, 1) : null;
                 cell.sprite = sprite;
                 cell.sortingOrder = sortingOrder;

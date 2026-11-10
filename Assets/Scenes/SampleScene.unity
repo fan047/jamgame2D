@@ -1226,6 +1226,7 @@ MonoBehaviour:
   preview: {fileID: 2037298180}
   advanceSeconds: 0.2
   waitingRowY: -0.55
+  stageIndex: 0
 --- !u!1 &318290491
 GameObject:
   m_ObjectHideFlags: 0
