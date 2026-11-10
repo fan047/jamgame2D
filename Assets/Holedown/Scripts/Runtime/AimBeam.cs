@@ -24,6 +24,13 @@ namespace Holedown
         Mesh mesh;
         MeshRenderer meshRenderer;
         MaterialPropertyBlock block;
+        // Reused between rebuilds: Show() runs on every pointer sample, so the buffers are pooled
+        // instead of allocating new vertex/colour/triangle arrays each frame.
+        Vector3[] vertices;
+        Vector2[] uv;
+        Color[] colors;
+        int[] triangles;
+        bool indicesDirty = true;
         static readonly int SweepId = Shader.PropertyToID("_Sweep");
         float sweep;
         public bool IsVisible => meshRenderer && meshRenderer.enabled;
@@ -91,9 +98,15 @@ namespace Holedown
             direction.Normalize();
             Vector2 normal = new Vector2(-direction.y, direction.x);
             int count = Mathf.Max(4, segments);
-            var vertices = new Vector3[(count + 1) * 2];
-            var uv = new Vector2[vertices.Length];
-            var colors = new Color[vertices.Length];
+            int vertexCount = (count + 1) * 2;
+            if (vertices == null || vertices.Length != vertexCount)
+            {
+                vertices = new Vector3[vertexCount];
+                uv = new Vector2[vertexCount];
+                colors = new Color[vertexCount];
+                triangles = new int[count * 6];
+                indicesDirty = true;
+            }
             float length = Vector2.Distance(origin, end);
             for (int i = 0; i <= count; i++)
             {
@@ -107,16 +120,20 @@ namespace Holedown
                 colors[i * 2] = Color.white;
                 colors[i * 2 + 1] = Color.white;
             }
-            var triangles = new int[count * 6];
-            for (int i = 0; i < count; i++)
+            // The strip topology never changes, so the index buffer is filled once per size.
+            if (indicesDirty)
             {
-                int v = i * 2;
-                triangles[i * 6] = v;
-                triangles[i * 6 + 1] = v + 1;
-                triangles[i * 6 + 2] = v + 2;
-                triangles[i * 6 + 3] = v + 1;
-                triangles[i * 6 + 4] = v + 3;
-                triangles[i * 6 + 5] = v + 2;
+                for (int i = 0; i < count; i++)
+                {
+                    int v = i * 2;
+                    triangles[i * 6] = v;
+                    triangles[i * 6 + 1] = v + 1;
+                    triangles[i * 6 + 2] = v + 2;
+                    triangles[i * 6 + 3] = v + 1;
+                    triangles[i * 6 + 4] = v + 3;
+                    triangles[i * 6 + 5] = v + 2;
+                }
+                indicesDirty = false;
             }
             mesh.Clear();
             mesh.vertices = vertices;

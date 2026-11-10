@@ -78,7 +78,13 @@ namespace Holedown
         public bool UserInputAllowed => isActiveAndEnabled && HasFocus && (input == null || input.AcceptsCommands);
         void OnDestroy() { ReleasePause(); configuration?.Dispose(); if(boardView)boardView.AdvanceCompleted-=OnAdvanceCompleted; }
 
-        void OnEnable() { aim.FireRequested += OnFireRequested; input = GetComponent<PlayerInputController>(); if(boardView)boardView.AdvanceCompleted+=OnAdvanceCompleted; }
+        void OnEnable()
+        {
+            // Unity leaves the mobile frame rate at the platform default (30 fps); this game runs on a
+            // 60 Hz target, so ask for it before the first frame and let the platform pace it.
+            if (Application.isMobilePlatform) { QualitySettings.vSyncCount = 0; Application.targetFrameRate = 60; }
+            aim.FireRequested += OnFireRequested; input = GetComponent<PlayerInputController>(); if(boardView)boardView.AdvanceCompleted+=OnAdvanceCompleted;
+        }
         void OnDisable()
         {
             aim.FireRequested -= OnFireRequested;

@@ -16,6 +16,7 @@ namespace Holedown
         [SerializeField] float pendingBounceSeconds = 0.18f;
         [SerializeField, Range(1f, 1.3f)] float pendingBounceScale = 1.08f;
         int shownPending = -1;
+        string shownStage, shownBalls, shownRound, shownReward, shownStatus;
         Coroutine bounce;
         void Recall() => flow.QueueCommand(FlowCommand.Recall);
         void Reload() => flow.QueueCommand(FlowCommand.Reload);
@@ -55,12 +56,19 @@ namespace Holedown
             if(session==null)return;
             var campaign=flow.Campaign;
             int pending=campaign?.PendingBonus ?? 0;
-            stageIndex.text=$"{(campaign?.StageIndex ?? 0)+1:00} / {campaign?.StageCount ?? 1:00}";
-            ballCount.text=$"{flow.EntryBalls}<size=34%> 球</size>";
-            round.text=$"第 {session.Round + (session.Phase==SessionPhase.Aiming?1:0)} 轮";
-            rewardStrip.SetActive(pending>0);rewardValue.text=$"+{pending}";
+            Set(stageIndex,$"{(campaign?.StageIndex ?? 0)+1:00} / {campaign?.StageCount ?? 1:00}",ref shownStage);
+            Set(ballCount,$"{flow.EntryBalls}<size=34%> 球</size>",ref shownBalls);
+            Set(round,$"第 {session.Round + (session.Phase==SessionPhase.Aiming?1:0)} 轮",ref shownRound);
+            rewardStrip.SetActive(pending>0);Set(rewardValue,$"+{pending}",ref shownReward);
             if(pending!=shownPending){shownPending=pending;if(pending>0)BouncePending();else{if(bounce!=null)StopCoroutine(bounce);bounce=null;rewardValue.rectTransform.localScale=Vector3.one;}}
-            status.text=$"关卡：{flow.StageId} | 在场 {session.ActiveCount} 球（待发 {session.Pending}） | 补行 {flow.Board?.IncomingCursor ?? 0}/{flow.Board?.IncomingCount ?? 0} | {(flow.IsAdvancing ? "推进中" : ChineseText.Session(session.Phase))}\n配置：{ChineseText.Configuration(flow.ConfigurationLabel)}";
+            Set(status,$"关卡：{flow.StageId} | 在场 {session.ActiveCount} 球（待发 {session.Pending}） | 补行 {flow.Board?.IncomingCursor ?? 0}/{flow.Board?.IncomingCount ?? 0} | {(flow.IsAdvancing ? "推进中" : ChineseText.Session(session.Phase))}\n配置：{ChineseText.Configuration(flow.ConfigurationLabel)}",ref shownStatus);
+        }
+        // Each Changed event used to rebuild every label mesh even when the string was identical;
+        // a volley raises Changed many times per second, so identical text is skipped now.
+        static void Set(TMP_Text target, string value, ref string cache)
+        {
+            if (cache == value || !target) return;
+            cache = value; target.text = value;
         }
     }
 }
