@@ -15,7 +15,7 @@ namespace Holedown.Tests
         float oldScale;
         GrowthSeedScope seed;
         [SetUp] public void Setup() { oldScale=Time.timeScale; Time.timeScale=20; seed=new GrowthSeedScope(); }
-        [TearDown] public void Cleanup() { Time.timeScale=oldScale; seed.Dispose(); }
+        [TearDown] public void Cleanup() { BallActor.IgnoreRampForTests=false; Time.timeScale=oldScale; seed.Dispose(); }
         static IEnumerator Shoot(GameFlowController flow,float angle)
         {
             float a=angle*Mathf.Deg2Rad;
@@ -29,6 +29,9 @@ namespace Holedown.Tests
         {
             yield return SceneManager.LoadSceneAsync("Assets/Scenes/SampleScene.unity");yield return null;yield return PlaySceneEntry.StartIfReady();
             var flow=UnityEngine.Object.FindFirstObjectByType<GameFlowController>();
+            // These approved routes were shot at one constant ball speed. The per-round ramp is
+            // pinned off exactly (not merely slowed) so the reward accounting stays the subject.
+            BallActor.IgnoreRampForTests=true;
             Assert.AreEqual(3,flow.Campaign.StageCount);
             for(int stage=0;stage<3;stage++) {
                 int expectedBalls=stage==0?12:stage==1?12+(first?3:0):12+(first?3:0)+(second?5:0);

@@ -187,13 +187,17 @@ namespace Holedown
         {
             var interval = new WaitForSeconds(Settings.launchInterval);
             bool firstBall = true;
+            // The round's ramp starts when the first ball actually leaves the launcher, on
+            // shared scaled time, so pause freezes it and later balls continue from here.
+            float rampStart = float.NaN;
             while (Session.SessionId == session && Session.VolleyId == volley && Session.Phase == SessionPhase.Volley && Session.Pending > 0)
             {
                 while(!CanSimulate) yield return null;
+                if (firstBall) rampStart = Time.time;
                 int id = Session.RegisterLaunch();
                 var ball = Instantiate(ballPrefab, AimInput.Origin, Quaternion.identity);
                 balls.Add(id,ball); ball.Hit += OnHit; ball.Returned += OnReturned;
-                ball.Launch(Settings,session,volley,id,direction);
+                ball.Launch(Settings,session,volley,id,direction,rampStart);
                 if (firstBall)
                 {
                     firstBall = false;
