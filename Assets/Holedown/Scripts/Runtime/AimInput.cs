@@ -10,6 +10,8 @@ namespace Holedown
         [SerializeField] Camera gameCamera;
         [SerializeField] GameSettings settings;
         [SerializeField] LineRenderer preview;
+        [SerializeField, Tooltip("Stepped ice-blue beam; when set it replaces the plain line.")]
+        AimBeam beam;
         [SerializeField] LayerMask collisionMask;
         readonly List<RaycastResult> uiHits = new List<RaycastResult>();
         PointerEventData pointer;
@@ -53,14 +55,23 @@ namespace Holedown
         }
         public void SamplePointer(Vector2 screen, bool fire)
         {
-            preview.enabled = false;
+            HidePreview();
             if (!CanAim || !TryPointerDirection(screen, out var direction)) return;
-            preview.enabled = true;
-            preview.SetPosition(0, Origin); preview.SetPosition(1, PreviewEnd(direction));
+            if (beam) beam.Show(Origin, PreviewEnd(direction));
+            else
+            {
+                preview.enabled = true;
+                preview.SetPosition(0, Origin); preview.SetPosition(1, PreviewEnd(direction));
+            }
             if (fire) FireRequested?.Invoke(direction);
         }
-        public void HidePreview() { if (preview) preview.enabled = false; }
-        public bool PreviewVisible => preview && preview.enabled;
-        void OnDisable() { if (preview) preview.enabled = false; }
+        public void HidePreview()
+        {
+            if (beam) beam.Hide();
+            if (preview) preview.enabled = false;
+        }
+        public bool PreviewVisible => beam ? beam.IsVisible : preview && preview.enabled;
+        public AimBeam Beam => beam;
+        void OnDisable() { HidePreview(); }
     }
 }

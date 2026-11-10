@@ -227,7 +227,8 @@ namespace Holedown
             float angle = Mathf.Clamp(Mathf.Atan2(direction.x,-direction.y)*Mathf.Rad2Deg,-Settings.maxAimAngle,Settings.maxAimAngle)*Mathf.Deg2Rad;
             direction = new Vector2(Mathf.Sin(angle),-Mathf.Cos(angle));
             if (!Session.TryFire(EntryBalls)) return false;
-            aim.CanAim = false; InvalidateInput(); volleyStarted = Time.time;
+            // The beam disappears on the launch frame, not one frame later.
+            aim.CanAim = false; aim.HidePreview(); InvalidateInput(); volleyStarted = Time.time;
             launching = StartCoroutine(LaunchVolley(Session.SessionId,Session.VolleyId,direction));
             Changed?.Invoke(); return true;
         }
