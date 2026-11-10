@@ -4,7 +4,7 @@
 
 <img src="Assets/Holedown/Art/Theme/title_logo.png" alt="水晶矿洞游戏徽章" width="240">
 
-当前交付为**中期预览 · Windows 构建 13**，内含三关、中文占位 UI、八条音效与离线策划工作台。程序支持九关串联与三组背景，正式第 4–9 关和两张新背景待接入。 [构建 13 交付记录](Docs/中期版/构建13交付说明.md)
+当前交付为 **Windows 构建 23**，包含九关、青晶／紫晶／玫红金晶三组矿洞、正式中文 UI、八类音效和离线策划工作台。团队以[最终版文档](Docs/README.md)为准。[构建 23 交付记录](Docs/中期版/构建23交付说明.md)
 
 ## 运行游戏
 
@@ -19,7 +19,7 @@
 | 暂停 | Esc 或「暂停」 |
 | 恢复 | 「继续游戏」 |
 
-球全部收回后进行结算。目标块还在时，棋盘会上移并从底部补行。方块触及危险线会失败，可以重试当前关。
+球全部收回且待发队列清空后进行结算。目标块还在时，棋盘会上移，灰蓝色的下一排预告从底部升入。推进后方块触及危险线会失败，可以重试当前关。
 
 ## 策划工作台
 
@@ -30,7 +30,7 @@
 | `settings.json`、`level.json` | 在工作台同时导入两份文件，编辑后分别导出。放回 `Config`，在策划测试暂停菜单点「重载当前关」。正式模式的「重载并重开」会回到第 1 关。 |
 | 可选的 `audio.json` | 在「音效」页单独导入或导出。放回 `Config`，在策划测试暂停菜单点「重载音效」，可继续当前一局。普通模式启动时也会读取音效配置。 |
 
-Unity Editor 读取项目根目录的 `Config`，Windows 试玩包读取 exe 同目录的 `Config`。双击试玩包里的「策划测试.cmd」可直达指定关，入关球数可选基础值、满前关奖励或手填。 [策划快速上手](Tools/PlannerEditor/快速上手.txt)
+Unity Editor 读取项目根目录的 `Config`，Windows 试玩包读取 exe 同目录的 `Config`。双击试玩包里的「策划测试.cmd」可直达指定关，入关球数可选基础值、满前关奖励或手填。[策划与交付指南](Docs/最终版/交付与操作.md)
 
 ## 开发与验证
 
@@ -40,7 +40,7 @@ Unity Editor 读取项目根目录的 `Config`，Windows 试玩包读取 exe 同
 | [Assets/Holedown](Assets/Holedown) | 游戏图片、预制体、音频与数据资产 |
 | [Config](Config) | 球参、关卡配置与可选示例 |
 | [Tools/PlannerEditor](Tools/PlannerEditor) | 离线工作台源码与前端测试 |
-| [Docs](Docs/README.md) | 中期版产品、技术、团队交接与历史资料 |
+| [Docs](Docs/README.md) | 最终版产品、技术、交付指南与历史资料 |
 
 Unity 回归可在 Test Runner 中运行 `Holedown.EditTests` 和 `Holedown.PlayTests`。工作台的配置与音效核心测试可在仓库根目录使用 Node.js 运行。
 
