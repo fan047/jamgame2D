@@ -40,7 +40,8 @@ namespace Holedown.Tests
         {
             var theme=AssetDatabase.LoadAssetAtPath<VisualTheme>("Assets/Holedown/Data/VisualTheme.asset");
             var prefab=AssetDatabase.LoadAssetAtPath<BlockView>("Assets/Holedown/Prefabs/Block.prefab");
-            Assert.IsTrue(theme.originalColors); Assert.IsFalse(theme.logoContainsTitle);
+            // The supplied key art already carries the wordmark, so the drawn title text stays hidden.
+            Assert.IsTrue(theme.originalColors); Assert.IsTrue(theme.logoContainsTitle);
             foreach(var sprite in new[]{theme.ball,theme.background,theme.launcher,theme.crackLight,theme.crackHeavy,theme.rewardBadge,theme.targetBadge,theme.titleLogo,theme.fragment,theme.spark}) Assert.IsNotNull(sprite);
             for(int role=0;role<3;role++) for(int shape=0;shape<3;shape++)
             {
