@@ -1,13 +1,13 @@
 (function(root){const defaults={
   "settings": {
     "schemaVersion": 1,
-    "version": "mid-1",
+    "version": "demo-1",
     "ballsPerRound": 12,
     "ballRadius": 0.12,
     "ballSpeed": 12,
-    "launchInterval": 0.06,
+    "launchInterval": 0.07,
     "maxAimAngle": 80,
-    "recallTimeout": 20
+    "recallTimeout": 30
   },
   "level": {
     "schemaVersion": 2,
