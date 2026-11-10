@@ -10,8 +10,12 @@ namespace Holedown
     {
         [SerializeField, Min(0)] float cut = 10.44f;
         public float Cut { get => cut; set { cut = value; SetVerticesDirty(); } }
+        // Sliced art falls back to the standard Image mesh so a framed panel or beveled button keeps
+        // its UVs; the flat two-cut-corner surface stays the default for colour-only images.
+        public bool HasSlicedArt { get { var active = overrideSprite ? overrideSprite : sprite; return active && active.border != Vector4.zero; } }
         protected override void OnPopulateMesh(VertexHelper mesh)
         {
+            if (HasSlicedArt) { base.OnPopulateMesh(mesh); return; }
             mesh.Clear();var r=GetPixelAdjustedRect();float c=Mathf.Min(cut,Mathf.Min(r.width,r.height)*.5f);
             var points=new[]{new Vector2(r.xMin,r.yMin),new Vector2(r.xMax-c,r.yMin),new Vector2(r.xMax,r.yMin+c),new Vector2(r.xMax,r.yMax),new Vector2(r.xMin+c,r.yMax),new Vector2(r.xMin,r.yMax-c)};
             for(int i=0;i<points.Length;i++)mesh.AddVert(points[i],color,Vector2.zero);

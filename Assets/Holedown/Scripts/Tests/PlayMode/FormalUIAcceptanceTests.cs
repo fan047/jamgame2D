@@ -68,7 +68,7 @@ namespace Holedown.Tests
             string longError="level.json."+string.Concat(Enumerable.Repeat("第4关第2列方块与其他方块重叠请修正后重新导出。",45))+": overlaps another block";
             typeof(GameFlowController).GetProperty("InitializationError").SetValue(flow,longError);Refresh();yield return null;yield return new WaitForSecondsRealtime(.2f);
             var body=UI.Find("ResultPanel/Card/BodyScroll").GetComponent<ScrollRect>();Assert.Greater(body.content.rect.height,body.viewport.rect.height*2);Assert.IsFalse(body.content.GetComponent<TMP_Text>().enableAutoSizing);
-            var recovery=Button("重新读取配置");Assert.AreEqual(MineUIStyle.Ivory,recovery.targetGraphic.color);var position=recovery.transform.position;Capture("error-top");
+            var recovery=Button("重新读取配置");var recoveryArt=recovery.targetGraphic as Image;Assert.IsNotNull(recoveryArt);Assert.IsNotNull(recoveryArt.sprite,"the recovery action shows the shipped primary button art");Assert.AreEqual(Color.white,recoveryArt.color);var position=recovery.transform.position;Capture("error-top");
             body.OnScroll(new PointerEventData(EventSystem.current){scrollDelta=new Vector2(0,-80)});yield return null;Assert.Less(body.verticalNormalizedPosition,.95f);Assert.AreEqual(position,recovery.transform.position);Capture("error-scrolled");
             recovery.onClick.Invoke();yield return null;yield return null;Assert.IsNull(flow.InitializationError);Assert.AreEqual(AppPhase.Playing,flow.Phase);
         }

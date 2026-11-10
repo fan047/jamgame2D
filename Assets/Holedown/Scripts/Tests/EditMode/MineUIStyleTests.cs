@@ -9,7 +9,7 @@ namespace Holedown.Tests
         {
             var go=new GameObject("Style",typeof(RectTransform),typeof(CutCornerImage),typeof(Button));
             var child=new GameObject("Label",typeof(RectTransform),typeof(TMPro.TextMeshProUGUI));child.transform.SetParent(go.transform,false);
-            try {var b=go.GetComponent<Button>();b.targetGraphic=go.GetComponent<CutCornerImage>();MineUIStyle.Button(b,true);Assert.AreEqual(MineUIStyle.Ivory,b.targetGraphic.color);Assert.AreEqual(MineUIStyle.Ink,child.GetComponent<TMPro.TMP_Text>().color);Assert.IsFalse(child.GetComponent<TMPro.TMP_Text>().raycastTarget);MineUIStyle.Button(b);Assert.AreEqual(MineUIStyle.Secondary,b.targetGraphic.color);Assert.Greater(b.colors.highlightedColor.r,b.colors.normalColor.r);}
+            try {var b=go.GetComponent<Button>();b.targetGraphic=go.GetComponent<CutCornerImage>();MineUIStyle.Button(b,true);var surface=(Image)b.targetGraphic;Assert.IsNotNull(surface.sprite,"primary uses the shipped ivory button art");Assert.AreEqual("UIButtonIvory",surface.sprite.name);Assert.AreEqual(Color.white,surface.color);Assert.AreEqual(MineUIStyle.Ink,child.GetComponent<TMPro.TMP_Text>().color);Assert.IsFalse(child.GetComponent<TMPro.TMP_Text>().raycastTarget);MineUIStyle.Button(b);Assert.AreEqual("UIButtonBlue",((Image)b.targetGraphic).sprite.name,"secondary switches to the blue-grey art");Assert.Greater(b.colors.highlightedColor.r,b.colors.normalColor.r);}
             finally{Object.DestroyImmediate(go);}
         }
         [Test] public void SoftScrimFadesUpwardWithoutAnyBorder()
