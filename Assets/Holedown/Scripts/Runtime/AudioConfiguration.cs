@@ -30,6 +30,7 @@ namespace Holedown
         public const int MaxFileBytes=4*1024*1024;
         public static AudioSnapshot Read(string directory)
         {
+            if(string.IsNullOrEmpty(directory))return new AudioSnapshot();
             string file=Path.Combine(directory,"audio.json");if(!File.Exists(file))return new AudioSnapshot();
             if(new FileInfo(file).Length>MaxFileBytes)throw new ArgumentException("audio.json：文件过大（最多 4 MiB）。");
             return Parse(File.ReadAllText(file,Encoding.UTF8));

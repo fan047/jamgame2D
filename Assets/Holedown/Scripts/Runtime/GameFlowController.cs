@@ -6,6 +6,9 @@ using UnityEngine;
 namespace Holedown
 {
     public enum AppPhase { Loading, Title, Playing, Paused, ConfigError, PlannerSelection }
+    // Where the packaged configuration comes from. Automatic picks the bundled StreamingAssets
+    // copy on Android and the external directory everywhere else (Editor and Windows).
+    public enum ConfigSource { Automatic, ExternalDirectory, BundledStreamingAssets }
     public enum FlowCommand { Start, Continue, Recall, NextStage, RetryStage, RestartRun, Reload, BeginPlannerTest, PlannerSelection }
 
     public sealed class GameFlowController : MonoBehaviour
@@ -17,6 +20,18 @@ namespace Holedown
         [SerializeField] BallActor ballPrefab;
         [SerializeField, Tooltip("Optional JSON folder. Empty: project/Config in Editor; executable/Config in Player.")]
         string externalConfigDirectory;
+        [SerializeField, Tooltip("Automatic: bundled StreamingAssets on Android, external directory elsewhere.")]
+        ConfigSource configSource = ConfigSource.Automatic;
+        public bool UsesBundledConfiguration => configSource == ConfigSource.BundledStreamingAssets
+            || (configSource == ConfigSource.Automatic && Application.platform == RuntimePlatform.Android);
+        // The packaged build always ships the full campaign; a short list is a broken bundle,
+        // never a cue to fall back to a single stage.
+        public const int BundledStageCount = 9;
+        static void RequireBundledStages(LoadedConfiguration candidate)
+        {
+            if (candidate.Campaign.Stages.Count != BundledStageCount)
+                throw new ArgumentException($"Config/level.json: expected {BundledStageCount} stages; found {candidate.Campaign.Stages.Count}.");
+        }
         [SerializeField] bool plannerTestMode;
         PlannerTestContext plannerContext, requestedPlannerContext;
         int plannerEntryBalls;
@@ -119,6 +134,19 @@ namespace Holedown
             Session = new GameSession();
             plannerTestMode |= Array.IndexOf(Environment.GetCommandLineArgs(),"--planner-test")>=0;
             if(plannerTestMode) gameObject.AddComponent<PlannerTestView>().Configure(this);
+            if(UsesBundledConfiguration)
+            {
+                // The phone reads the copy that shipped inside the build; there is no external
+                // directory to fall back to.
+                SetPhase(AppPhase.Loading);
+                StartCoroutine(LoadBundledConfiguration());
+                return;
+            }
+            LoadFromDirectory();
+            Changed?.Invoke();
+        }
+        void LoadFromDirectory()
+        {
             try
             {
                 ConfigurationDirectory = !string.IsNullOrWhiteSpace(externalConfigDirectory)
@@ -126,6 +154,26 @@ namespace Holedown
                     : System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Application.dataPath),"Config");
                 configuration = ExternalConfiguration.Load(ConfigurationDirectory,settings,level);
                 Campaign=new CampaignState(configuration.Campaign.Stages.Count,Settings.ballsPerRound);
+                if(plannerTestMode) SetPhase(AppPhase.PlannerSelection);
+                else if(hasStarted) BeginAttempt(); else SetPhase(AppPhase.Title);
+            }
+            catch (Exception exception)
+            {
+                InitializationError = exception.Message; aim.CanAim = false;
+                SetPhase(AppPhase.ConfigError);
+                Debug.LogError("Initialization failed: " + exception.Message, this);
+            }
+        }
+        IEnumerator LoadBundledConfiguration()
+        {
+            string settingsText = null, levelText = null, error = null;
+            yield return BundledConfiguration.Read(text => settingsText = text, text => levelText = text, message => error = message);
+            try
+            {
+                if (error != null) throw new ArgumentException(error);
+                configuration = ExternalConfiguration.Parse(settingsText, levelText, settings, level, "Bundled");
+                RequireBundledStages(configuration);
+                Campaign = new CampaignState(configuration.Campaign.Stages.Count, Settings.ballsPerRound);
                 if(plannerTestMode) SetPhase(AppPhase.PlannerSelection);
                 else if(hasStarted) BeginAttempt(); else SetPhase(AppPhase.Title);
             }
@@ -265,6 +313,17 @@ namespace Holedown
         {
             if(plannerTestMode){ReloadPlannerTest();return;}
             if(!UserInputAllowed || Phase == AppPhase.Loading || !EnterTransition())return;
+            if(UsesBundledConfiguration)
+            {
+                // ClearAttempt stops every coroutine on this object, so the cleanup happens here
+                // and only the read plus commit runs in the coroutine that follows.
+                SetPhase(AppPhase.Loading); ClearAttempt(); ReleasePause();
+                ConfigurationDirectory = null;
+                configuration?.Dispose(); configuration = null; Campaign = null; Board = null;
+                Session = new GameSession(); InitializationError = null;
+                StartCoroutine(ReloadBundledConfiguration());
+                return;
+            }
             try
             {
                 SetPhase(AppPhase.Loading); ClearAttempt(); ReleasePause();
@@ -277,6 +336,28 @@ namespace Holedown
                 CommandConfirmed?.Invoke();
             }
             catch(Exception exception)
+            {
+                InitializationError = exception.Message; SetPhase(AppPhase.ConfigError);
+                Debug.LogError("Initialization failed: " + exception.Message, this);
+            }
+            finally { transitioning = false; Changed?.Invoke(); }
+        }
+        // The packaged files cannot change on the phone, but the command keeps its meaning:
+        // re-read the bundle and restart from stage 1 without touching an external folder.
+        IEnumerator ReloadBundledConfiguration()
+        {
+            string settingsText = null, levelText = null, error = null;
+            yield return BundledConfiguration.Read(text => settingsText = text, text => levelText = text, message => error = message);
+            try
+            {
+                if (error != null) throw new ArgumentException(error);
+                configuration = ExternalConfiguration.Parse(settingsText, levelText, settings, level, "Bundled");
+                RequireBundledStages(configuration);
+                Campaign = new CampaignState(configuration.Campaign.Stages.Count, Settings.ballsPerRound);
+                if(hasStarted) BeginAttempt(); else SetPhase(AppPhase.Title);
+                CommandConfirmed?.Invoke();
+            }
+            catch (Exception exception)
             {
                 InitializationError = exception.Message; SetPhase(AppPhase.ConfigError);
                 Debug.LogError("Initialization failed: " + exception.Message, this);
@@ -359,11 +440,31 @@ namespace Holedown
             if(!ownsPause) return;
             ownsPause = false; Time.timeScale = savedTimeScale; PauseChanged?.Invoke(false);
         }
+        // Backgrounding freezes the run and drops every input; coming back only re-enables the
+        // UI, the player still has to press continue. Focus and pause events arrive in either
+        // order, so both restore through the same path and never leave HasFocus false.
+        void OnApplicationPause(bool paused)
+        {
+            if(paused) LeaveForeground(); else RestoreForeground();
+        }
         void OnApplicationFocus(bool focused)
         {
-            if(!focused) Pause(manual: false);
-            HasFocus = focused; InvalidateInput();
-            if(input) input.FocusChanged(focused);
+            if(focused) RestoreForeground(); else LeaveForeground();
+        }
+        void LeaveForeground()
+        {
+            Pause(manual: false);
+            HasFocus = false;
+            InvalidateInput();
+            if(input) input.FocusChanged(false);
+            aim.CanAim = false;
+            Changed?.Invoke();
+        }
+        void RestoreForeground()
+        {
+            HasFocus = true;
+            InvalidateInput();
+            if(input) input.FocusChanged(true);
             aim.CanAim = CanSimulate && Session?.Phase == SessionPhase.Aiming;
             Changed?.Invoke();
         }

@@ -43,6 +43,8 @@ namespace Holedown
             MineUIStyle.Button(resume,true);
             MineUIStyle.PauseLayout(card,(RectTransform)helpScroll.transform,flow.IsPlannerTest);
             if(reloadAudio)reloadAudio.gameObject.SetActive(flow.IsPlannerTest && flow.Phase==AppPhase.Paused);
+            bool externalReload=!flow.UsesBundledConfiguration;
+            if(reload)reload.gameObject.SetActive(externalReload);
             if(feedback)
             {
                 string error=feedback.AudioError;

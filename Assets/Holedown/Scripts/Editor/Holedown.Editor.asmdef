@@ -1,1 +1,9 @@
-{"name":"Holedown.Editor","includePlatforms":["Editor"]}
+{
+    "name": "Holedown.Editor",
+    "includePlatforms": [
+        "Editor"
+    ],
+    "references": [
+        "Holedown.Runtime"
+    ]
+}

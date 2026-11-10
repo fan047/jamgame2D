@@ -41,14 +41,16 @@ namespace Holedown
         };
         IEnumerator Start()
         {
-            while(flow && flow.ConfigurationDirectory==null)yield return null;
+            // The Android build has no external directory; waiting for it would hang.
+            while(flow && flow.ConfigurationDirectory==null && !flow.UsesBundledConfiguration)yield return null;
             if(flow)LoadAudio();
         }
         bool LoadAudio()
         {
             try
             {
-                var candidate=AudioConfiguration.Read(flow.ConfigurationDirectory);
+                // The packaged build has no external folder at all: use the built-in cues.
+                var candidate=flow.UsesBundledConfiguration ? new AudioSnapshot() : AudioConfiguration.Read(flow.ConfigurationDirectory);
                 StopSounds();var old=audioConfiguration;audioConfiguration=candidate;AudioError=null;old.Dispose();
                 AudioChanged?.Invoke();return true;
             }

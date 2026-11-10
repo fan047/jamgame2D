@@ -60,6 +60,7 @@ namespace Holedown
             if (fire) FireRequested?.Invoke(direction);
         }
         public void HidePreview() { if (preview) preview.enabled = false; }
+        public bool PreviewVisible => preview && preview.enabled;
         void OnDisable() { if (preview) preview.enabled = false; }
     }
 }

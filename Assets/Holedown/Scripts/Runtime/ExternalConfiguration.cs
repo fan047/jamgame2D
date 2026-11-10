@@ -31,20 +31,32 @@ namespace Holedown
 
     public static class ExternalConfiguration
     {
+        // External directory (Editor and Windows): both files missing falls back to the
+        // built-in single stage; one missing or invalid is an error.
         public static LoadedConfiguration Load(string directory, GameSettings defaults, LevelDefinition level)
         {
             string settingsPath=directory==null?null:Path.Combine(directory,"settings.json"), levelPath=directory==null?null:Path.Combine(directory,"level.json");
             bool hasSettings=File.Exists(settingsPath),hasLevel=File.Exists(levelPath);
+            if(!hasSettings && !hasLevel)
+            {
+                var settings=UnityEngine.Object.Instantiate(defaults);
+                settings.Validate();
+                return new LoadedConfiguration(settings,new CampaignDefinition(new[]{new StageDefinition("stage-1","Built-in",level.initialBlocks,level.incomingRows)},settings.ballsPerRound),"Built-in");
+            }
+            if(!hasSettings || !hasLevel) throw new ArgumentException("Config requires both settings.json and level.json. Missing: "+(!hasSettings?settingsPath:levelPath));
+            return Parse(SafeRead(settingsPath), SafeRead(levelPath), defaults, level, null);
+        }
+
+        // Plain texts (bundled StreamingAssets on Android). Missing text is always an error:
+        // the packaged build must never silently drop back to a single built-in stage.
+        public static LoadedConfiguration Parse(string settingsText, string levelText, GameSettings defaults, LevelDefinition level, string label)
+        {
             var settings=UnityEngine.Object.Instantiate(defaults);
             try
             {
-                if(!hasSettings && !hasLevel)
-                {
-                    settings.Validate();
-                    return new LoadedConfiguration(settings,new CampaignDefinition(new[]{new StageDefinition("stage-1","Built-in",level.initialBlocks,level.incomingRows)},settings.ballsPerRound),"Built-in");
-                }
-                if(!hasSettings || !hasLevel) throw new ArgumentException("Config requires both settings.json and level.json. Missing: "+(!hasSettings?settingsPath:levelPath));
-                var s=Read(settingsPath); var l=Read(levelPath);
+                if(string.IsNullOrEmpty(settingsText)) throw new ArgumentException("Config/"+BundledConfiguration.SettingsFile+": missing.");
+                if(string.IsNullOrEmpty(levelText)) throw new ArgumentException("Config/"+BundledConfiguration.LevelFile+": missing.");
+                var s=ParseJson(settingsText,BundledConfiguration.SettingsFile); var l=ParseJson(levelText,BundledConfiguration.LevelFile);
                 string sv=Header(s,"settings.json",1),lv=Header(l,"level.json",1,2);
                 Keys(s,"settings.json","schemaVersion","version","ballsPerRound","ballRadius","ballSpeed","launchInterval","maxAimAngle","recallTimeout");
                 settings.ballsPerRound=Integer(s,"ballsPerRound","settings.json");
@@ -72,13 +84,29 @@ namespace Holedown
                         stages.Add(ParseStage(stage,path,false));
                     }
                 }
-                return new LoadedConfiguration(settings,new CampaignDefinition(stages,settings.ballsPerRound),$"S:{sv} / L:{lv}");
+                return new LoadedConfiguration(settings,new CampaignDefinition(stages,settings.ballsPerRound),label ?? $"S:{sv} / L:{lv}");
             }
             catch
             {
                 LoadedConfiguration.Release(settings);
                 throw;
             }
+        }
+
+        static string SafeRead(string path)
+        {
+            try { return File.ReadAllText(path); }
+            catch(Exception ex) { throw new ArgumentException(Path.GetFileName(path)+": "+ex.Message,ex); }
+        }
+
+        static JObject ParseJson(string text,string file)
+        {
+            try
+            {
+                return JObject.Parse(text,new JsonLoadSettings{DuplicatePropertyNameHandling=DuplicatePropertyNameHandling.Error});
+            }
+            catch(Exception ex) when(ex is JsonException)
+            { throw new ArgumentException(file+": "+ex.Message,ex); }
         }
 
         static StageDefinition ParseStage(JObject obj,string path,bool legacy)
