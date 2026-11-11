@@ -47,7 +47,7 @@ namespace Holedown.Tests
             var background=GameObject.Find("Game/Background").GetComponent<SpriteRenderer>();
             var stage=new Vector2(9.4f,9.4f*1672/941);
             var oldTarget=camera.targetTexture;
-            var target=new RenderTexture(540,960,0);
+            var target=new RenderTexture(540,960,24);
             camera.targetTexture=target;
             try
             {
@@ -81,7 +81,7 @@ namespace Holedown.Tests
             // Fractional Editor GameView pixels (DPI scaling) round ScreenToWorldPoint differently.
             // Use an integer-sized render surface, just like an actual Player backbuffer.
             var oldTarget=camera.targetTexture;
-            var target=new RenderTexture(300,1000,0);camera.targetTexture=target;
+            var target=new RenderTexture(300,1000,24);camera.targetTexture=target;
             try
             {
                 camera.aspect=1280f/720; rig.Synchronize();

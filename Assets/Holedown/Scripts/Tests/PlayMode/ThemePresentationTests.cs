@@ -49,7 +49,7 @@ namespace Holedown.Tests
                 var definition=new BlockDefinition(0,0,width,12,role==2,role==1?5:0,height);
                 // Rendering fixture deliberately covers target-tall too; production rules prohibit tall incoming rows.
                 var state=(BlockState)System.Activator.CreateInstance(typeof(BlockState),
-                    System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic,null,new object[]{1,definition,0},null);
+                    System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic,null,new object[]{1,definition,0,definition.health},null);
                 var view=Object.Instantiate(prefab);
                 try
                 {

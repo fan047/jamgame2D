@@ -17,6 +17,8 @@ namespace Holedown.Tests
         [SetUp] public void Setup()
         {
             BoardView.SkipAdvanceForTests=true;
+            // A persisted easy run would rewrite fixture health and rewards.
+            PlayerPrefs.DeleteKey("Holedown.Difficulty");
             directory=Path.GetFullPath("Library/Locus/tmp/planner-mode/"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(directory);
             File.Copy("Config/settings.json",Path.Combine(directory,"settings.json"));
             var levels=new JArray();

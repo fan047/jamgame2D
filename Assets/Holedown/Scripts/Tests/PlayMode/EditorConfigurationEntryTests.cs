@@ -10,6 +10,11 @@ namespace Holedown.Tests
 {
     public sealed class EditorConfigurationEntryTests
     {
+        const string DifficultyKey = "Holedown.Difficulty";
+        // The game persists the chosen difficulty, so a leftover easy run would halve
+        // every health here and make this layout check meaningless.
+        [SetUp] public void UseNormalDifficulty() => PlayerPrefs.DeleteKey(DifficultyKey);
+
         [UnityTest] public IEnumerator DefaultSceneLoadsVerifiedProjectCampaignLayout()
         {
             float scale=Time.timeScale;

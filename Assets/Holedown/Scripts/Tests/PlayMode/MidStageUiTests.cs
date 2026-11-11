@@ -42,7 +42,7 @@ namespace Holedown.Tests
         [UnityTest] public IEnumerator FormalHudIsMinimalAndPauseOwnsReload()
         {
             yield return Load();var f=Object.FindFirstObjectByType<GameFlowController>();var ui=GameObject.Find("UI").transform;Fits();
-            Assert.IsTrue(ui.Find("StartPanel/Controls").gameObject.activeInHierarchy);f.StartGame();yield return null;yield return null;
+            Assert.IsTrue(ui.Find("StartPanel/TitleContent/Controls").gameObject.activeInHierarchy);f.StartGame();yield return null;yield return null;
             var status=ui.Find("Status").GetComponent<TMP_Text>();Assert.IsFalse(status.gameObject.activeInHierarchy);StringAssert.Contains(f.EntryBalls.ToString(),ui.Find("HudHeader/BallCount").GetComponent<TMP_Text>().text);Assert.IsFalse(ui.Find("HudHeader/PendingReward").gameObject.activeInHierarchy);Assert.IsFalse(ui.Find("ReloadConfig").gameObject.activeInHierarchy);
             Assert.AreEqual(0,ui.Find("Recall").GetComponent<RectTransform>().anchoredPosition.x);Assert.IsFalse(ui.Find("Recall").GetComponent<Button>().interactable);Fits();
             Assert.IsTrue(f.TryFire(Vector2.down));Assert.IsTrue(ui.Find("Recall").GetComponent<Button>().interactable);f.RequestPause();yield return null;

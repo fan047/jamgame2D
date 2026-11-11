@@ -14,7 +14,7 @@ namespace Holedown.Tests
     {
         float oldScale;
         GrowthSeedScope seed;
-        [SetUp] public void Setup() { oldScale=Time.timeScale; Time.timeScale=20; seed=new GrowthSeedScope(); }
+        [SetUp] public void Setup() { oldScale=Time.timeScale; Time.timeScale=20; PlayerPrefs.DeleteKey("Holedown.Difficulty"); seed=new GrowthSeedScope(); }
         [TearDown] public void Cleanup() { BallActor.IgnoreRampForTests=false; Time.timeScale=oldScale; seed.Dispose(); }
         static IEnumerator Shoot(GameFlowController flow,float angle)
         {

@@ -226,8 +226,14 @@ namespace Holedown.Tests
         {
             yield return StartTouching();
             var mouse = InputSystem.AddDevice<Mouse>();
+            // Mouse-to-touch mirroring only runs while the Game view owns input. In a full
+            // suite the focused window varies, so pin the behaviour for this test only.
+            var previousBackground = InputSystem.settings.backgroundBehavior;
+            var previousEditorInput = InputSystem.settings.editorInputBehaviorInPlayMode;
             try
             {
+                InputSystem.settings.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
+                InputSystem.settings.editorInputBehaviorInPlayMode = InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
                 TouchSimulation.Enable();
                 yield return null; yield return null;
                 var touchscreen = TouchSimulation.instance.simulatedTouchscreen;
@@ -254,6 +260,8 @@ namespace Holedown.Tests
             {
                 TouchSimulation.Disable();
                 if (mouse != null && mouse.added) InputSystem.RemoveDevice(mouse);
+                InputSystem.settings.backgroundBehavior = previousBackground;
+                InputSystem.settings.editorInputBehaviorInPlayMode = previousEditorInput;
             }
         }
         [UnityTest] public IEnumerator TouchModeIgnoresTheMousePress()

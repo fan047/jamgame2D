@@ -56,9 +56,18 @@ def close_inner_pockets(mask):
 
 def main():
     apply = '--apply' in sys.argv
+    # The decoration silhouette that ships has already been checked in game. Rebuilding
+    # the background can move the brightness key (the rebuilt 1-3 wall reaches the
+    # canvas edge), so --preserve-alpha keeps the shipped mask and only takes the new
+    # colours; the overlay stays invisible instead of covering different pixels.
+    preserve = '--preserve-alpha' in sys.argv
     rgb = np.array(Image.open(SRC).convert('RGB'))
     h, w, _ = rgb.shape
-    mask = close_inner_pockets(decoration_mask(rgb))
+    if preserve:
+        assert OUT.exists(), '--preserve-alpha needs the existing foreground to reuse'
+        mask = (np.array(Image.open(OUT).convert('RGBA'))[:, :, 3] > 0).astype(np.uint8)
+    else:
+        mask = close_inner_pockets(decoration_mask(rgb))
     # Original pixels only: the foreground is a copy of the art it belongs to.
     out = np.dstack([rgb.copy(), np.where(mask > 0, 255, 0).astype('uint8')])
     out[out[:, :, 3] == 0] = 0
