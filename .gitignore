@@ -120,3 +120,7 @@ InitTestScene*.unity*
 __pycache__/
 *.pyc
 /[Aa]ssets/_Recovery.meta
+
+# Unity-generated local settings (not part of the game)
+/ProjectSettings/Packages/com.unity.ai.assistant/
+/ProjectSettings/SceneTemplateSettings.json
