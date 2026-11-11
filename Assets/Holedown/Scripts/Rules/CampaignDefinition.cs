@@ -28,7 +28,7 @@ namespace Holedown
             PossibleReward=(int)possibleReward;
         }
         static BlockDefinition Copy(BlockDefinition d)=>new BlockDefinition(d.column,d.row,d.width,d.health,d.target,d.rewardBalls,d.height);
-        public BoardState CreateBoard()=>new BoardState(initial,rows);
+        public BoardState CreateBoard(GameDifficulty difficulty = GameDifficulty.Normal) => new BoardState(initial, rows, difficulty);
     }
 
     public sealed class CampaignDefinition
@@ -48,10 +48,10 @@ namespace Holedown
             }
             Stages=new List<StageDefinition>(stages).AsReadOnly();
         }
-        public BoardState CreateBoard(int index)
+        public BoardState CreateBoard(int index, GameDifficulty difficulty = GameDifficulty.Normal)
         {
             if(index<0 || index>=Stages.Count)throw new ArgumentOutOfRangeException(nameof(index));
-            return Stages[index].CreateBoard();
+            return Stages[index].CreateBoard(difficulty);
         }
     }
 }

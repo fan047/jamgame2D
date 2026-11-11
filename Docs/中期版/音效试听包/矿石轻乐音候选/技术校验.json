@@ -1,0 +1,173 @@
+{
+  "date": "2026-11-09T09:46:55.436Z",
+  "format": "48kHz, PCM16, mono",
+  "main": [
+    {
+      "file": "试听/01_发射_volley_launch.wav",
+      "seconds": 0.29639583333333336,
+      "peak": 0.5,
+      "rms": 0.06981337557122155,
+      "bytes": 28498,
+      "sha256": "0a6070424ca73e145ac0697a2ccde3e299f9fd4190ec47ecc05227580153978f"
+    },
+    {
+      "file": "试听/02_受击_block_hit.wav",
+      "seconds": 0.18,
+      "peak": 0.259979248046875,
+      "rms": 0.05837004092381346,
+      "bytes": 17324,
+      "sha256": "736f6046afd91994bc7bd01c78ff7ecdf6ff3090653fc7fe7568f0961873712b"
+    },
+    {
+      "file": "试听/03_碎裂_block_break.wav",
+      "seconds": 0.5,
+      "peak": 0.5999755859375,
+      "rms": 0.07101464480135455,
+      "bytes": 48044,
+      "sha256": "82cc1dc9d968f069a7a4376540fef1815f78e90b122e6e15c0d482748cc042f5"
+    },
+    {
+      "file": "试听/04_奖励_reward_break.wav",
+      "seconds": 0.36925,
+      "peak": 0.5,
+      "rms": 0.12761319665831597,
+      "bytes": 35492,
+      "sha256": "031d456ef1d551e0b5764bfc1bff14aab5cdedc93243bdb1fe3c6c717ae887a4"
+    },
+    {
+      "file": "试听/05_过关_stage_clear.wav",
+      "seconds": 0.7972083333333333,
+      "peak": 0.649993896484375,
+      "rms": 0.1873517105414103,
+      "bytes": 76576,
+      "sha256": "f83f9ccdd94458315ca3128a2fc5d13360cae89df6207287e01709adda38df95"
+    },
+    {
+      "file": "试听/06_失败_stage_fail.wav",
+      "seconds": 0.83425,
+      "peak": 0.499969482421875,
+      "rms": 0.139148725261471,
+      "bytes": 80132,
+      "sha256": "73328f39a08c8c6d98699ff7c73821c5507c0b8ca3e3af1691c562d2792f1c54"
+    },
+    {
+      "file": "试听/07_召回_manual_recall.wav",
+      "seconds": 0.4,
+      "peak": 0.3343505859375,
+      "rms": 0.040358578951535794,
+      "bytes": 38444,
+      "sha256": "36a70c1dc924f5cc008f3bab46c1b27c834c39d51f6ab108b99922edd0d31c15"
+    },
+    {
+      "file": "试听/08_确认_ui_confirm.wav",
+      "seconds": 0.09710416666666667,
+      "peak": 0.239990234375,
+      "rms": 0.01259947448833205,
+      "bytes": 9366,
+      "sha256": "0df5aab7c4a888fe30171a89be2634c08114a00677ab1f28b300c183bb9fdd47"
+    }
+  ],
+  "alternatives": [
+    {
+      "file": "备选/air1_knifeSlice.wav",
+      "seconds": 0.4371041666666667,
+      "peak": 0.699981689453125,
+      "rms": 0.09114364162635988,
+      "bytes": 42006,
+      "sha256": "a08504687b719fa78b22a4e4a1ce4c46e9c879d5d7565fcb9af22b9131159834"
+    },
+    {
+      "file": "备选/air2_knifeSlice2.wav",
+      "seconds": 0.49635416666666665,
+      "peak": 0.699981689453125,
+      "rms": 0.07553320457056771,
+      "bytes": 47694,
+      "sha256": "2b27080c6c972d8bf78b672998ee3d70d223f5356deda20f8cbb233650109c70"
+    },
+    {
+      "file": "备选/click1_click_001.wav",
+      "seconds": 0.09710416666666667,
+      "peak": 0.699981689453125,
+      "rms": 0.03674899767626227,
+      "bytes": 9366,
+      "sha256": "84bb74b1cd5a6ee336c2f399216fd6bc61d2b523b5d098a0343d844c956ba40c"
+    },
+    {
+      "file": "备选/click2_click_002.wav",
+      "seconds": 0.008708333333333334,
+      "peak": 0.333831787109375,
+      "rms": 0.07657701332564368,
+      "bytes": 880,
+      "sha256": "fc6bb2b0fcae79e0bca415e364a8e623c12564b1feb833d4396c3d5f9363e625"
+    },
+    {
+      "file": "备选/jingle10_jingles_PIZZI10.wav",
+      "seconds": 0.7972083333333333,
+      "peak": 0.699981689453125,
+      "rms": 0.20176338919261844,
+      "bytes": 76576,
+      "sha256": "91a68a3ef50c05c21d95a4049b7550771bb38af61aee0eceb13e60c5a483d673"
+    },
+    {
+      "file": "备选/jingle11_jingles_PIZZI11.wav",
+      "seconds": 0.7925208333333333,
+      "peak": 0.699981689453125,
+      "rms": 0.19434765396999934,
+      "bytes": 76126,
+      "sha256": "b9e3858ef137c3b20c0f1ced9810c33efa6d773caedf5d2da86371ae9156c8ed"
+    },
+    {
+      "file": "备选/jingle16_jingles_PIZZI16.wav",
+      "seconds": 0.4615416666666667,
+      "peak": 0.699981689453125,
+      "rms": 0.17812963919074024,
+      "bytes": 44352,
+      "sha256": "623a2506462a92913e94e40a45b5843a57e50791e844b0ff027db35f660ee1ae"
+    },
+    {
+      "file": "备选/mining0_impactMining_000.wav",
+      "seconds": 0.8172916666666666,
+      "peak": 0.699981689453125,
+      "rms": 0.07879565426142618,
+      "bytes": 78504,
+      "sha256": "e56f3353352b01e84af51cca77d406f8d155fe0a5b34294efdb4787fcb7b8ff3"
+    },
+    {
+      "file": "备选/mining1_impactMining_001.wav",
+      "seconds": 0.759375,
+      "peak": 0.699981689453125,
+      "rms": 0.07484375630881898,
+      "bytes": 72944,
+      "sha256": "443de2655842fc4a2c8660dc270202eded529f9d0a4529b1caec133e8bf5f90c"
+    },
+    {
+      "file": "备选/mining2_impactMining_002.wav",
+      "seconds": 0.8046666666666666,
+      "peak": 0.699981689453125,
+      "rms": 0.056894217249557066,
+      "bytes": 77292,
+      "sha256": "614722b031fe050a54f4614cabb35f324867b73bf38f483513c22a886914393a"
+    },
+    {
+      "file": "备选/mining3_impactMining_003.wav",
+      "seconds": 0.8511041666666667,
+      "peak": 0.699981689453125,
+      "rms": 0.05745394824590517,
+      "bytes": 81750,
+      "sha256": "66055cc64577c80b5c0be22825494bee2d1d2ca2090641787ff5601909c62632"
+    },
+    {
+      "file": "备选/mining4_impactMining_004.wav",
+      "seconds": 0.7705208333333333,
+      "peak": 0.699981689453125,
+      "rms": 0.0829984166566621,
+      "bytes": 74014,
+      "sha256": "d5e263ecc5e25c89e44021387c3a970e823f819f45bd8d22390e6e5e814ec4db"
+    }
+  ],
+  "originalAudioUnchanged": true,
+  "decodeChecked": true,
+  "subjectiveListeningChecked": false,
+  "licenseNote": "RPG: 镜像保留Kenney作者及CC0原文；其余三包：原作者素材页面公开标注CC0，镜像未附独立素材包许可文件，发布前建议再复核原包。镜像仓库软件许可不替代音频作者许可。",
+  "airSubstitution": "Swishes镜像存在泛化CC-BY-SA声明，未下载未使用；以Kenney RPG knifeSlice/knifeSlice2替代短气流候选。"
+}

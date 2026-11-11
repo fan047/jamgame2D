@@ -50,6 +50,67 @@ namespace Holedown.Tests
         {
             var c=new CampaignState(2,int.MaxValue-1);Assert.Throws<OverflowException>(()=>c.RecordHit(1,Reward()));Assert.AreEqual(0,c.PendingBonus);
         }
+        [Test]
+        public void EasyDifficultyScalesStartingBlocksAndFutureRowsFromOriginalHealth()
+        {
+            var initial = new[]
+            {
+                new BlockDefinition(0, 0, 1, int.MaxValue),
+                new BlockDefinition(1, 0, 1, 10, false, 3),
+                new BlockDefinition(2, 0, 1, 2)
+            };
+            var row = new RowDefinition();
+            row.blocks.Add(new BlockDefinition(0, 0, 1, 1));
+            row.blocks.Add(new BlockDefinition(1, 0, 1, 3, true));
+            var stage = new StageDefinition("difficulty", "Difficulty", initial, new[] { row });
+
+            var easy = stage.CreateBoard(GameDifficulty.Easy);
+            Assert.AreEqual(1717986918, easy.Blocks[1].MaxHealth);
+            Assert.AreEqual(8, easy.Blocks[2].Health);
+            Assert.AreEqual(3, easy.Blocks[2].RewardBalls);
+            Assert.AreEqual(2, easy.Blocks[3].Health);
+            easy.Advance();
+            Assert.AreEqual(1, easy.Blocks[4].Health);
+            Assert.AreEqual(2, easy.Blocks[5].MaxHealth);
+            Assert.IsTrue(easy.Blocks[5].IsTarget);
+
+            var normal = stage.CreateBoard();
+            normal.Advance();
+            Assert.AreEqual(10, normal.Blocks[2].Health);
+            Assert.AreEqual(3, normal.Blocks[5].Health);
+        }
+
+        [Test]
+        public void RestartKeepsGrowthAndOnlyTheThirdNormalFailureOffersEasyRetry()
+        {
+            var campaign = new CampaignState(3, 12);
+            campaign.RecordHit(1, Reward());
+            campaign.CompleteStage();
+            campaign.NextStage();
+            campaign.RecordHit(1, Reward(5));
+            Assert.IsTrue(campaign.RestartStage());
+            Assert.AreEqual(1, campaign.StageIndex);
+            Assert.AreEqual(15, campaign.EntryBalls);
+            Assert.AreEqual(3, campaign.ConfirmedBonus);
+            Assert.AreEqual(0, campaign.PendingBonus);
+
+            campaign.FailStage(); // A failure in easy mode does not count.
+            campaign.RetryStage();
+            for (int count = 1; count <= 4; count++)
+            {
+                Assert.IsTrue(campaign.FailStage(countNormalFailure: true));
+                Assert.IsFalse(campaign.FailStage(countNormalFailure: true));
+                Assert.AreEqual(count == 3, campaign.OffersEasyRetry);
+                if (count == 3) campaign.DismissEasyRetry();
+                Assert.IsTrue(campaign.RetryStage());
+                Assert.IsFalse(campaign.OffersEasyRetry);
+                if (count == 1) Assert.IsTrue(campaign.RestartStage());
+            }
+            campaign.CompleteStage();
+            campaign.NextStage();
+            campaign.FailStage(countNormalFailure: true);
+            Assert.IsFalse(campaign.OffersEasyRetry);
+        }
         [TestCase(3,0,false)] [TestCase(1,-1,false)] [TestCase(1,3,true)]
         public void UnsupportedHeightRewardOrTargetCombinationRejected(int height,int reward,bool target)
         {

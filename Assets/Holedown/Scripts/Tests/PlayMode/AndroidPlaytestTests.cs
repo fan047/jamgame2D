@@ -229,11 +229,15 @@ namespace Holedown.Tests
             try
             {
                 TouchSimulation.Enable();
+                yield return null; yield return null;
                 var touchscreen = TouchSimulation.instance.simulatedTouchscreen;
                 Assert.IsNotNull(touchscreen, "the simulated touch device drives the phone path");
                 var start = BoardPoint();
                 var end = BoardPoint() + new Vector2(10f, 0f);
                 yield return MouseAt(mouse, start, down: true);
+                // The simulated touch device mirrors the pointer with a frame of latency.
+                float pressed = Time.realtimeSinceStartup + 1f;
+                while (!touchscreen.primaryTouch.press.isPressed && Time.realtimeSinceStartup < pressed) yield return null;
                 Assert.IsTrue(touchscreen.primaryTouch.press.isPressed, "the device reports a pressed touch");
                 yield return MouseAt(mouse, end, down: true);
                 yield return MouseAt(mouse, end, down: false);

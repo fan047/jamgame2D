@@ -112,3 +112,11 @@ InitTestScene*.unity*
 
 # Auto-generated cache in Assets folder
 /[Aa]ssets/[Ss]ceneDependencyCache*
+
+# Project: tooling, personal agent config and editor recovery copies
+/Locus/
+/Packages/com.farlocus.locus/
+/[Aa]ssets/_Recovery/
+__pycache__/
+*.pyc
+/[Aa]ssets/_Recovery.meta

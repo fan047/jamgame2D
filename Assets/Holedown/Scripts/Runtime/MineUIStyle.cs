@@ -28,10 +28,10 @@ namespace Holedown
             text.fontSize=size;text.enableAutoSizing=false;text.color=muted?Muted:Ivory;
             text.raycastTarget=false;
         }
-        public static void PauseLayout(RectTransform card,RectTransform help,bool planner)
+        public static void PauseLayout(RectTransform card,RectTransform help,bool planner,bool externalReload)
         {
-            card.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical,(planner?580:380)*Units);
-            help.anchoredPosition=new Vector2(0,-(planner?380:310)*Units);
+            card.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical,(planner?580:externalReload?444:300)*Units);
+            help.anchoredPosition=new Vector2(0,-(planner?380:374)*Units);
         }
         public static void Availability(Button button,bool enabled)
         {

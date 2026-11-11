@@ -36,6 +36,10 @@ namespace Holedown
         PlannerTestContext plannerContext, requestedPlannerContext;
         int plannerEntryBalls;
         public bool IsPlannerTest => plannerTestMode;
+        const string DifficultyPreference = "Holedown.Difficulty";
+        public GameDifficulty Difficulty { get; private set; }
+        public bool OffersEasyRetry => !plannerTestMode && Phase == AppPhase.Playing
+            && Session?.Phase == SessionPhase.Lost && Campaign?.OffersEasyRetry == true;
         public PlannerTestContext PlannerContext => plannerContext;
         public string PlannerError { get; private set; }
         public int EntryBalls => plannerContext != null ? plannerEntryBalls : Campaign?.EntryBalls ?? Settings.ballsPerRound;
@@ -56,15 +60,15 @@ namespace Holedown
         public event Action Changed;
         public event Action AttemptReset;
         public CampaignState Campaign { get; private set; }
-        bool transitioning;
+        bool transitioning, stageTransitionInputBlocked;
         int transitionFrame = -1;
-        public bool IsTransitioning => transitioning;
+        public bool IsTransitioning => transitioning || stageTransitionInputBlocked;
         public GameSettings Settings => configuration?.Settings ?? settings;
         public string ConfigurationLabel => configuration?.Label ?? "Not loaded";
         public string ConfigurationDirectory { get; private set; }
         public AppPhase Phase { get; private set; } = AppPhase.Loading;
         public bool HasFocus { get; private set; } = true;
-        public bool CanSimulate => isActiveAndEnabled && Phase == AppPhase.Playing && HasFocus && !advancing;
+        public bool CanSimulate => isActiveAndEnabled && Phase == AppPhase.Playing && HasFocus && !advancing && !stageTransitionInputBlocked;
         public bool IsAdvancing => advancing;
         bool advancing;
         public int InputGeneration { get; private set; }
@@ -75,7 +79,17 @@ namespace Holedown
         FlowCommand? pendingCommand;
         Vector2? pendingFire;
         int pendingGeneration;
-        public bool UserInputAllowed => isActiveAndEnabled && HasFocus && (input == null || input.AcceptsCommands);
+        public bool UserInputAllowed => isActiveAndEnabled && HasFocus && !stageTransitionInputBlocked && (input == null || input.AcceptsCommands);
+        internal void SetStageTransitionInputBlocked(bool blocked, bool rearmInput = true)
+        {
+            if (stageTransitionInputBlocked == blocked) return;
+            stageTransitionInputBlocked = blocked;
+            InvalidateInput();
+            if (!blocked && rearmInput && input) input.FocusChanged(HasFocus);
+            aim.CanAim = CanSimulate && Session?.Phase == SessionPhase.Aiming;
+            if (!aim.CanAim) aim.HidePreview();
+            Changed?.Invoke();
+        }
         void OnDestroy() { ReleasePause(); configuration?.Dispose(); if(boardView)boardView.AdvanceCompleted-=OnAdvanceCompleted; }
 
         void OnEnable()
@@ -90,6 +104,7 @@ namespace Holedown
             aim.FireRequested -= OnFireRequested;
             if(boardView)boardView.AdvanceCompleted-=OnAdvanceCompleted;
             advancing=false;
+            stageTransitionInputBlocked=false;
             ReleasePause();
             ClearAttempt();
         }
@@ -125,7 +140,8 @@ namespace Holedown
         void BeginAttempt()
         {
             ClearAttempt();
-            Session=new GameSession(); Board=configuration.CreateBoard(Campaign.StageIndex);
+            Session=new GameSession();
+            Board=configuration.CreateBoard(Campaign.StageIndex, plannerTestMode ? GameDifficulty.Normal : Difficulty);
             aim.Configure(Settings);
             Session.Ready();
             SetPhase(AppPhase.Playing);
@@ -139,6 +155,8 @@ namespace Holedown
         {
             Session = new GameSession();
             plannerTestMode |= Array.IndexOf(Environment.GetCommandLineArgs(),"--planner-test")>=0;
+            Difficulty = PlayerPrefs.GetInt(DifficultyPreference) == (int)GameDifficulty.Easy
+                ? GameDifficulty.Easy : GameDifficulty.Normal;
             if(plannerTestMode) gameObject.AddComponent<PlannerTestView>().Configure(this);
             if(UsesBundledConfiguration)
             {
@@ -308,6 +326,51 @@ namespace Holedown
             if(!CanSimulate || !UserInputAllowed || Session?.Phase!=SessionPhase.Lost || Campaign==null || !EnterTransition())return;
             try { if (Campaign.RetryStage()) { BeginAttempt(); CommandConfirmed?.Invoke(); } } finally { transitioning = false; }
         }
+        public bool ChangeDifficulty(GameDifficulty difficulty)
+        {
+            if (difficulty == Difficulty || plannerTestMode || !UserInputAllowed) return false;
+            if (Phase == AppPhase.Paused) return RestartCurrentStage(difficulty);
+            if (Phase != AppPhase.Title) return false;
+            SaveDifficulty(difficulty);
+            Changed?.Invoke();
+            CommandConfirmed?.Invoke();
+            return true;
+        }
+
+        public bool RestartCurrentStage() => RestartCurrentStage(Difficulty);
+
+        public bool RetryOnEasy() => OffersEasyRetry && RestartCurrentStage(GameDifficulty.Easy);
+
+        public void DismissEasyRetry()
+        {
+            if (!OffersEasyRetry || !UserInputAllowed) return;
+            Campaign.DismissEasyRetry();
+            Changed?.Invoke();
+        }
+
+        bool RestartCurrentStage(GameDifficulty difficulty)
+        {
+            bool allowed = Phase == AppPhase.Paused || (OffersEasyRetry && difficulty == GameDifficulty.Easy);
+            if (!allowed || plannerTestMode || !UserInputAllowed || Campaign == null || !EnterTransition()) return false;
+            try
+            {
+                if (!Campaign.RestartStage()) return false;
+                if (Difficulty != difficulty) SaveDifficulty(difficulty);
+                ReleasePause();
+                BeginAttempt();
+                CommandConfirmed?.Invoke();
+                return true;
+            }
+            finally { transitioning = false; }
+        }
+
+        void SaveDifficulty(GameDifficulty difficulty)
+        {
+            Difficulty = difficulty;
+            PlayerPrefs.SetInt(DifficultyPreference, (int)difficulty);
+            PlayerPrefs.Save();
+        }
+
         public void RestartRun()
         {
             if(plannerTestMode){ReturnToPlannerSelection();return;}
@@ -489,7 +552,12 @@ namespace Holedown
                     boardView.CapturePositions();
                     Session.Settle(Board);
                     if(Session.Phase==SessionPhase.Won){Campaign.CompleteStage();boardView.Sync(Board);boardView.HideIncoming();}
-                    else if(Session.Phase==SessionPhase.Lost){Campaign.FailStage();boardView.Sync(Board);boardView.HideIncoming();}
+                    else if(Session.Phase==SessionPhase.Lost)
+                    {
+                        Campaign.FailStage(!plannerTestMode && Difficulty == GameDifficulty.Normal);
+                        boardView.Sync(Board);
+                        boardView.HideIncoming();
+                    }
                     // PlayAdvance also covers the zero-duration path: it settles at once and
                     // still refreshes the waiting row for the next advance.
                     else { advancing = true; boardView.PlayAdvance(Board); }

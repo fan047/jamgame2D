@@ -1,0 +1,57 @@
+// Run this method body through unity_execute IN PLAY MODE after opening SampleScene.
+// Replace REVIEW_PASS with before/background/blocks/details/after. Never save the scene.
+var dir="Library/Locus/tmp/theme-polish/runtime-REVIEW_PASS";
+System.IO.Directory.CreateDirectory(dir);
+var cam=Camera.main;
+void Capture(string name) {
+    foreach(var sz in new[]{new Vector2Int(540,960),new Vector2Int(1280,720)}) {
+        var old=cam.targetTexture;var asp=cam.aspect;var ortho=cam.orthographicSize;var act=RenderTexture.active;
+        var rt=new RenderTexture(sz.x,sz.y,24);rt.Create();
+        try {
+            cam.targetTexture=rt;cam.aspect=(float)sz.x/sz.y;
+            cam.GetComponent<Holedown.BoardCamera>().SendMessage("LateUpdate");
+            Canvas.ForceUpdateCanvases();cam.Render();RenderTexture.active=rt;
+            var tex=new Texture2D(sz.x,sz.y,TextureFormat.RGBA32,false);
+            tex.ReadPixels(new Rect(0,0,sz.x,sz.y),0,0);tex.Apply();
+            System.IO.File.WriteAllBytes($"{dir}/{name}-{sz.x}x{sz.y}.png",tex.EncodeToPNG());
+            UnityEngine.Object.Destroy(tex);
+        } finally {
+            cam.targetTexture=old;cam.aspect=asp;cam.orthographicSize=ortho;
+            RenderTexture.active=act;rt.Release();UnityEngine.Object.Destroy(rt);
+        }
+    }
+    print(name);
+}
+Capture("title");
+var flow=UnityEngine.Object.FindFirstObjectByType<Holedown.GameFlowController>();flow.enabled=false;
+UnityEngine.Object.FindFirstObjectByType<Holedown.StartScreenView>(FindObjectsInactive.Include).panel.SetActive(false);
+var board=UnityEngine.Object.FindFirstObjectByType<Holedown.BoardView>();board.Clear();
+var gallery=new GameObject("ArtReviewGallery");
+var views=new System.Collections.Generic.List<Holedown.BlockView>();
+try {
+    for(int role=0;role<3;role++)for(int form=0;form<3;form++) {
+        int w=form==1?2:1;int h=form==2?2:1;int x=form==0?0:form==1?2:6;
+        var def=new Holedown.BlockDefinition(x,role*3,w,99,role==2,role==1?3:0,h);
+        var b=new Holedown.BlockState(role*3+form,def,role*3);
+        var view=UnityEngine.Object.Instantiate(board.blockPrefab,gallery.transform);
+        view.Bind(b);views.Add(view);
+    }
+    await ctx.WaitFrames(2);Time.timeScale=0;Capture("nine-blocks");
+    foreach(var v in views)v.SetHealth(60,v.BlockId>=6);Capture("light-cracks");
+    foreach(var v in views)v.SetHealth(25,v.BlockId>=6);Capture("heavy-cracks");
+    var theme=UnityEditor.AssetDatabase.LoadAssetAtPath<Holedown.VisualTheme>("Assets/Holedown/Data/VisualTheme.asset");
+    for(int i=0;i<24;i++) {
+        var go=new GameObject("ReviewBall");go.transform.SetParent(gallery.transform);
+        go.transform.position=new Vector3(.3f+(i%8),1.8f+(i/8)*3,0);
+        var sr=go.AddComponent<SpriteRenderer>();sr.sprite=theme.ball;sr.sortingOrder=10;
+        Holedown.SpriteSizing.Fit(sr,Vector2.one*.24f);
+    }
+    var fx=UnityEngine.Object.FindFirstObjectByType<Holedown.FeedbackPlayer>();
+    UnityEngine.Random.InitState(431);
+    for(int i=0;i<9;i++) {
+        var e=fx.Fragments(views[i].transform.position,Color.white);e.MoveNext();
+        var s=fx.SpecialFeedback(views[i].transform.position,0,true,views[i].GetComponentInChildren<TMPro.TMP_Text>().font);s.MoveNext();
+    }
+    Capture("dense-review");
+    print("Temporary frozen presentation fixture, not a physical collision test. No scene saved.");
+} finally { Time.timeScale=1; }

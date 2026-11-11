@@ -133,6 +133,158 @@ namespace Holedown.Tests
                 PlayerPrefs.Save();
             }
         }
+        [UnityTest] public IEnumerator PauseRestartAndDifficultyChangesConfirmBeforeResettingTheStage()
+        {
+            const string preference = "Holedown.Difficulty";
+            int saved = PlayerPrefs.GetInt(preference, -1);
+            try
+            {
+                PlayerPrefs.DeleteKey(preference);
+                yield return Load();
+                Assert.IsNotNull(Button("设置"));
+                Assert.IsNull(UI.Find("StartPanel/TitleContent/DifficultySettingsButton"));
+                Button("开始游戏").onClick.Invoke();
+                yield return null;
+                yield return null;
+
+                var original = flow.Session;
+                flow.Campaign.RecordHit(900, new HitResult(true, 0, true, false, 5));
+                Assert.IsTrue(flow.TryFire(Vector2.down));
+                flow.RequestPause();
+                Button("重新开始本关").onClick.Invoke();
+                Assert.IsFalse(Button("继续游戏").IsInteractable());
+                Button("取消").onClick.Invoke();
+                Assert.AreSame(original, flow.Session);
+                Assert.AreEqual(5, flow.Campaign.PendingBonus);
+                Button("重新开始本关").onClick.Invoke();
+                Button("确认重开").onClick.Invoke();
+                Assert.AreNotSame(original, flow.Session);
+                Assert.AreEqual(0, flow.Session.ActiveCount);
+                Assert.AreEqual(0, flow.Session.Pending);
+                Assert.AreEqual(0, flow.Campaign.PendingBonus);
+                Assert.AreEqual(AppPhase.Playing, flow.Phase);
+                yield return null;
+
+                var normalHealth = flow.Board.Blocks.Values.Select(block => block.Health).ToArray();
+                original = flow.Session;
+                flow.RequestPause();
+                Button("设置").onClick.Invoke();
+                Button("简单").onClick.Invoke();
+                Assert.AreEqual(GameDifficulty.Normal, flow.Difficulty);
+                Assert.IsFalse(PlayerPrefs.HasKey(preference));
+                Button("取消").onClick.Invoke();
+                Assert.AreSame(original, flow.Session);
+                Assert.AreEqual(AppPhase.Paused, flow.Phase);
+                Button("设置").onClick.Invoke();
+                Button("简单").onClick.Invoke();
+                Capture("difficulty-confirm");
+                Button("切换并重开").onClick.Invoke();
+                Assert.AreNotSame(original, flow.Session);
+                Assert.AreEqual(GameDifficulty.Easy, flow.Difficulty);
+                CollectionAssert.AreEqual(normalHealth.Select(health => Mathf.Max(1, Mathf.RoundToInt(health * .8f))),
+                    flow.Board.Blocks.Values.Select(block => block.Health));
+
+                yield return Load();
+                Assert.AreEqual(GameDifficulty.Easy, flow.Difficulty);
+                Assert.IsNotNull(Button("设置"));
+                Button("开始游戏").onClick.Invoke();
+                yield return null;
+                yield return null;
+                original = flow.Session;
+                flow.RequestPause();
+                Button("设置").onClick.Invoke();
+                Button("普通").onClick.Invoke();
+                Button("切换并重开").onClick.Invoke();
+                Assert.AreNotSame(original, flow.Session);
+                CollectionAssert.AreEqual(normalHealth, flow.Board.Blocks.Values.Select(block => block.Health));
+            }
+            finally
+            {
+                if (saved < 0) PlayerPrefs.DeleteKey(preference);
+                else PlayerPrefs.SetInt(preference, saved);
+                PlayerPrefs.Save();
+            }
+        }
+
+        [UnityTest] public IEnumerator ThirdNormalLossOffersEasyRetryOncePerStage()
+        {
+            const string preference = "Holedown.Difficulty";
+            int saved = PlayerPrefs.GetInt(preference, -1);
+            try
+            {
+                PlayerPrefs.DeleteKey(preference);
+                yield return Load();
+                Button("开始游戏").onClick.Invoke();
+                yield return null;
+                yield return null;
+                for (int attempt = 1; attempt <= 4; attempt++)
+                {
+                    yield return LoseCurrentStage();
+                    Assert.AreEqual(attempt == 3, flow.OffersEasyRetry);
+                    if (attempt == 3)
+                    {
+                        Assert.IsFalse(Button("重试本关").IsInteractable());
+                        Capture("easy-retry-offer");
+                        Button("保持普通").onClick.Invoke();
+                        Assert.AreEqual(SessionPhase.Lost, flow.Session.Phase);
+                        Assert.AreEqual(GameDifficulty.Normal, flow.Difficulty);
+                        Assert.IsTrue(Button("重试本关").IsInteractable());
+                    }
+                    Button("重试本关").onClick.Invoke();
+                    yield return null;
+                    yield return null;
+                    Assert.AreEqual(SessionPhase.Aiming, flow.Session.Phase);
+                }
+                Win();
+                Button("进入下一关").onClick.Invoke();
+                yield return WaitForStageTransition();
+                int stage = flow.Campaign.StageIndex;
+                int entryBalls = flow.EntryBalls;
+                var normalHealth = flow.Board.Blocks.Values.Select(block => block.Health).ToArray();
+                for (int attempt = 1; attempt <= 3; attempt++)
+                {
+                    yield return LoseCurrentStage();
+                    Assert.AreEqual(attempt == 3, flow.OffersEasyRetry);
+                    if (attempt == 3) break;
+                    Button("重试本关").onClick.Invoke();
+                    yield return null;
+                    yield return null;
+                }
+                Button("用简单模式重试").onClick.Invoke();
+                Assert.AreEqual(GameDifficulty.Easy, flow.Difficulty);
+                Assert.AreEqual(SessionPhase.Aiming, flow.Session.Phase);
+                Assert.AreEqual(stage, flow.Campaign.StageIndex);
+                Assert.AreEqual(entryBalls, flow.EntryBalls);
+                CollectionAssert.AreEqual(normalHealth.Select(health => Mathf.Max(1, Mathf.RoundToInt(health * .8f))),
+                    flow.Board.Blocks.Values.Select(block => block.Health));
+            }
+            finally
+            {
+                if (saved < 0) PlayerPrefs.DeleteKey(preference);
+                else PlayerPrefs.SetInt(preference, saved);
+                PlayerPrefs.Save();
+            }
+        }
+
+        IEnumerator LoseCurrentStage()
+        {
+            for (int row = 0; row < 8 && flow.Board.Blocks.Values.All(block => block.Row + block.Height < 8); row++)
+                flow.Board.Advance();
+            Assert.IsTrue(flow.Session.TryFire(flow.EntryBalls));
+            Assert.IsTrue(flow.Session.Recall());
+            yield return null; // Use the controller's production settlement path.
+            Assert.AreEqual(SessionPhase.Lost, flow.Session.Phase);
+        }
+
+        IEnumerator WaitForStageTransition()
+        {
+            var transition = Object.FindFirstObjectByType<StageTransitionView>();
+            Assert.IsNotNull(transition);
+            float deadline = Time.realtimeSinceStartup + 2f;
+            while (transition.IsPlaying && Time.realtimeSinceStartup < deadline) yield return null;
+            Assert.IsFalse(transition.IsPlaying, "the short stage curtain must finish");
+            yield return null; yield return null;
+        }
         void Win()
         {
             while(!flow.Board.Blocks.Values.Any(b=>b.IsTarget))flow.Board.Advance();var target=flow.Board.Blocks.Values.Single(b=>b.IsTarget);
@@ -144,7 +296,7 @@ namespace Holedown.Tests
             yield return Load();flow.StartGame();yield return null;yield return null;
             while(flow.Session.Phase!=SessionPhase.Lost){flow.Session.TryFire(flow.EntryBalls);flow.Session.Recall();Assert.IsTrue(flow.Session.TryBeginSettlement());flow.Session.Settle(flow.Board);}flow.Campaign.FailStage();Refresh();yield return new WaitForSecondsRealtime(.2f);Capture("loss");
             Button("重试本关").onClick.Invoke();yield return null;yield return null;Assert.AreEqual(SessionPhase.Aiming,flow.Session.Phase);
-            for(int i=0;i<flow.Campaign.StageCount;i++){Win();yield return new WaitForSecondsRealtime(.2f);if(!flow.Campaign.IsFinalStage){if(i==0)Capture("stage-clear");Button("进入下一关").onClick.Invoke();yield return null;yield return null;}else{Capture("run-complete");Assert.IsFalse(UI.Find("ResultPanel/Card/Advance").gameObject.activeInHierarchy);}}
+            for(int i=0;i<flow.Campaign.StageCount;i++){Win();yield return new WaitForSecondsRealtime(.2f);if(!flow.Campaign.IsFinalStage){if(i==0)Capture("stage-clear");Button("进入下一关").onClick.Invoke();yield return WaitForStageTransition();}else{Capture("run-complete");Assert.IsFalse(UI.Find("ResultPanel/Card/Advance").gameObject.activeInHierarchy);}}
             Button("重新开始全程").onClick.Invoke();yield return null;yield return null;Assert.AreEqual(0,flow.Campaign.StageIndex);
         }
         [UnityTest] public IEnumerator MaximumPlannerBallCountStillFitsWithoutShrinkingTheHud()

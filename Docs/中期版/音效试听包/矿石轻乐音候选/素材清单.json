@@ -1,0 +1,151 @@
+{
+  "created": "2026-11-09T09:41:45.422Z",
+  "entries": [
+    {
+      "id": "mining0",
+      "repo": "modern",
+      "folder": "Kenney-Impact",
+      "file": "sample/assets/audio/impact/impactMining_000.ogg",
+      "author": "Kenney",
+      "page": "https://kenney.nl/assets/impact-sounds",
+      "local": "原始素材/Kenney-Impact/impactMining_000.ogg",
+      "sha256": "36b4ea107222d073c67ca64dde26944975609202d5090b2f2021213c1a7e35cd",
+      "bytes": 12035,
+      "mirror": "https://github.com/iree-gd/iree.gd/blob/9db7d7069a9ad75c77e9b5657d1ae5bdf615a6bc/sample/assets/audio/impact/impactMining_000.ogg"
+    },
+    {
+      "id": "mining1",
+      "repo": "modern",
+      "folder": "Kenney-Impact",
+      "file": "sample/assets/audio/impact/impactMining_001.ogg",
+      "author": "Kenney",
+      "page": "https://kenney.nl/assets/impact-sounds",
+      "local": "原始素材/Kenney-Impact/impactMining_001.ogg",
+      "sha256": "61235a18de3f3d92118235398222dbf51d448f1be70b1c8bc962b10b86f2d9c6",
+      "bytes": 11481,
+      "mirror": "https://github.com/iree-gd/iree.gd/blob/9db7d7069a9ad75c77e9b5657d1ae5bdf615a6bc/sample/assets/audio/impact/impactMining_001.ogg"
+    },
+    {
+      "id": "mining2",
+      "repo": "modern",
+      "folder": "Kenney-Impact",
+      "file": "sample/assets/audio/impact/impactMining_002.ogg",
+      "author": "Kenney",
+      "page": "https://kenney.nl/assets/impact-sounds",
+      "local": "原始素材/Kenney-Impact/impactMining_002.ogg",
+      "sha256": "059558ec751115ca6b1441e00f0adc837c1a3eeb0a066b109e0fd879fc5d0b0c",
+      "bytes": 11235,
+      "mirror": "https://github.com/iree-gd/iree.gd/blob/9db7d7069a9ad75c77e9b5657d1ae5bdf615a6bc/sample/assets/audio/impact/impactMining_002.ogg"
+    },
+    {
+      "id": "mining3",
+      "repo": "modern",
+      "folder": "Kenney-Impact",
+      "file": "sample/assets/audio/impact/impactMining_003.ogg",
+      "author": "Kenney",
+      "page": "https://kenney.nl/assets/impact-sounds",
+      "local": "原始素材/Kenney-Impact/impactMining_003.ogg",
+      "sha256": "4237fa2cd80364ad81cd0af44f67d7497f1c5edcc7bdb02cd22be2ba4580c83d",
+      "bytes": 12160,
+      "mirror": "https://github.com/iree-gd/iree.gd/blob/9db7d7069a9ad75c77e9b5657d1ae5bdf615a6bc/sample/assets/audio/impact/impactMining_003.ogg"
+    },
+    {
+      "id": "mining4",
+      "repo": "modern",
+      "folder": "Kenney-Impact",
+      "file": "sample/assets/audio/impact/impactMining_004.ogg",
+      "author": "Kenney",
+      "page": "https://kenney.nl/assets/impact-sounds",
+      "local": "原始素材/Kenney-Impact/impactMining_004.ogg",
+      "sha256": "8ca3a99d85d845751ad8ce7b40509da58263a62e48cde70e5a30b5ccef4c9a3b",
+      "bytes": 11668,
+      "mirror": "https://github.com/iree-gd/iree.gd/blob/9db7d7069a9ad75c77e9b5657d1ae5bdf615a6bc/sample/assets/audio/impact/impactMining_004.ogg"
+    },
+    {
+      "id": "jingle10",
+      "repo": "modern",
+      "folder": "Kenney-Jingles",
+      "file": "sample/assets/audio/pizzicato_jingles/jingles_PIZZI10.ogg",
+      "author": "Kenney",
+      "page": "https://kenney.nl/assets/music-jingles",
+      "local": "原始素材/Kenney-Jingles/jingles_PIZZI10.ogg",
+      "sha256": "baf50beffc4cc2dbb92c9d596a22732a8b5249c7648b681c0df6d0af6c561478",
+      "bytes": 14004,
+      "mirror": "https://github.com/iree-gd/iree.gd/blob/9db7d7069a9ad75c77e9b5657d1ae5bdf615a6bc/sample/assets/audio/pizzicato_jingles/jingles_PIZZI10.ogg"
+    },
+    {
+      "id": "jingle11",
+      "repo": "modern",
+      "folder": "Kenney-Jingles",
+      "file": "sample/assets/audio/pizzicato_jingles/jingles_PIZZI11.ogg",
+      "author": "Kenney",
+      "page": "https://kenney.nl/assets/music-jingles",
+      "local": "原始素材/Kenney-Jingles/jingles_PIZZI11.ogg",
+      "sha256": "072fe661c6ce8c7672afaf0af51e27533d6effe99d35584b01d864bde800ecc1",
+      "bytes": 13830,
+      "mirror": "https://github.com/iree-gd/iree.gd/blob/9db7d7069a9ad75c77e9b5657d1ae5bdf615a6bc/sample/assets/audio/pizzicato_jingles/jingles_PIZZI11.ogg"
+    },
+    {
+      "id": "jingle16",
+      "repo": "modern",
+      "folder": "Kenney-Jingles",
+      "file": "sample/assets/audio/pizzicato_jingles/jingles_PIZZI16.ogg",
+      "author": "Kenney",
+      "page": "https://kenney.nl/assets/music-jingles",
+      "local": "原始素材/Kenney-Jingles/jingles_PIZZI16.ogg",
+      "sha256": "1b1211b6360aae37ea685fee057bcabd034a749c1dfac6a9d643086d96e9b9aa",
+      "bytes": 10201,
+      "mirror": "https://github.com/iree-gd/iree.gd/blob/9db7d7069a9ad75c77e9b5657d1ae5bdf615a6bc/sample/assets/audio/pizzicato_jingles/jingles_PIZZI16.ogg"
+    },
+    {
+      "id": "click1",
+      "repo": "ui",
+      "folder": "Kenney-Interface",
+      "file": "assets/audio/interface/click_001.ogg",
+      "author": "Kenney",
+      "page": "https://kenney.nl/assets/interface-sounds",
+      "local": "原始素材/Kenney-Interface/click_001.ogg",
+      "sha256": "ccfb7fa0cccdd9faec0eb16033c732b1e308d139d80f799161495d58f7adcdb9",
+      "bytes": 4876,
+      "mirror": "https://github.com/ShadowBlip/OpenGamepadUI/blob/12747dfff84cac02ed00528194199f2ad4f63c1c/assets/audio/interface/click_001.ogg"
+    },
+    {
+      "id": "click2",
+      "repo": "ui",
+      "folder": "Kenney-Interface",
+      "file": "assets/audio/interface/click_002.ogg",
+      "author": "Kenney",
+      "page": "https://kenney.nl/assets/interface-sounds",
+      "local": "原始素材/Kenney-Interface/click_002.ogg",
+      "sha256": "adcd1f4adc35f1b41bc1b5bbefeff7aa44f2f3f0d96d3199b544140c7c1e761c",
+      "bytes": 4275,
+      "mirror": "https://github.com/ShadowBlip/OpenGamepadUI/blob/12747dfff84cac02ed00528194199f2ad4f63c1c/assets/audio/interface/click_002.ogg"
+    },
+    {
+      "id": "air1",
+      "repo": "legacy",
+      "folder": "Kenney-RPG",
+      "file": "Audio (295 files)/RPG sounds (50 sounds)/knifeSlice.ogg",
+      "author": "Kenney",
+      "page": "https://github.com/ismetcabbar9-oss/kenney-audio-assets",
+      "local": "原始素材/Kenney-RPG/knifeSlice.ogg",
+      "sha256": "4cd96dc630bed9840c15f1dd2306da2cc56a4da26a5d3f1a03c5a7265ac5e54f",
+      "bytes": 15532,
+      "mirror": "https://github.com/ismetcabbar9-oss/kenney-audio-assets/blob/b7729283e47d38f203d85560cfda5b2c1fd6fc7e/Audio%20(295%20files)/RPG%20sounds%20(50%20sounds)/knifeSlice.ogg"
+    },
+    {
+      "id": "air2",
+      "repo": "legacy",
+      "folder": "Kenney-RPG",
+      "file": "Audio (295 files)/RPG sounds (50 sounds)/knifeSlice2.ogg",
+      "author": "Kenney",
+      "page": "https://github.com/ismetcabbar9-oss/kenney-audio-assets",
+      "local": "原始素材/Kenney-RPG/knifeSlice2.ogg",
+      "sha256": "6c2064d0ef988d1ec3d56868e823ea8823a5cac00f2742560052633529407def",
+      "bytes": 15099,
+      "mirror": "https://github.com/ismetcabbar9-oss/kenney-audio-assets/blob/b7729283e47d38f203d85560cfda5b2c1fd6fc7e/Audio%20(295%20files)/RPG%20sounds%20(50%20sounds)/knifeSlice2.ogg"
+    }
+  ],
+  "licenseEvidence": "RPG: 镜像保留Kenney作者及CC0原文；其余三包：原作者素材页面公开标注CC0，镜像未附独立素材包许可文件，发布前建议再复核原包。镜像仓库软件许可不替代音频作者许可。",
+  "airSubstitution": "Swishes镜像存在泛化CC-BY-SA声明，未下载未使用；以Kenney RPG knifeSlice/knifeSlice2替代短气流候选。"
+}

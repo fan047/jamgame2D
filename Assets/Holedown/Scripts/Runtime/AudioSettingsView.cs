@@ -8,61 +8,112 @@ namespace Holedown
 {
     public sealed class AudioSettingsView : MonoBehaviour
     {
+        enum Dialog { Settings, RestartStage, ChangeDifficulty, EasyRetry }
+
         [SerializeField] GameFlowController flow;
         [SerializeField] FeedbackPlayer feedback;
         [SerializeField] RectTransform titlePanel, pauseCard;
         [SerializeField] TMP_FontAsset font;
-        RectTransform overlay;
+        RectTransform overlay, settingsCard, confirmationCard;
         Slider music;
+        TMP_Text settingsTitle, confirmationTitle, confirmationBody;
+        TMP_Text confirmLabel, cancelLabel;
+        Button normal, easy, done, confirm, cancel, restartStage;
         Button opener;
         CanvasGroup parentMenu;
         AppPhase returnPhase;
+        Dialog dialog;
+        GameDifficulty selectedDifficulty;
+        GameDifficulty? shownDifficulty;
         bool menuWasInteractable;
 
         void Start()
         {
             var top = new Vector2(0.5f, 1f);
-            var titleSettings = MakeButton(titlePanel, "AudioSettingsButton", "设置", top, new Vector2(194, -51), new Vector2(96, 42));
+            var titleParent = titlePanel.Find("TitleContent") as RectTransform;
+            if (!titleParent) titleParent = titlePanel;
+            var topRight = new Vector2(1f, 1f);
+            var titleSettings = MakeButton(titleParent, "AudioSettingsButton", "设置", topRight, new Vector2(-68, -51), new Vector2(96, 56));
             var pauseSettings = MakeButton(pauseCard, "AudioSettingsButton", "设置", top, new Vector2(141, -42), new Vector2(86, 36));
             titleSettings.onClick.AddListener(() => Open(titleSettings, AppPhase.Title));
             pauseSettings.onClick.AddListener(() => Open(pauseSettings, AppPhase.Paused));
+            restartStage = MakeButton(pauseCard, "RestartCurrentStage", "重新开始本关", top, new Vector2(0, -229), new Vector2(344, 52));
+            restartStage.onClick.AddListener(OpenRestart);
 
             overlay = Rect(transform, "AudioSettingsPanel", new Vector2(.5f, .5f), Vector2.zero, Vector2.zero);
             Stretch(overlay, Vector2.zero, Vector2.zero);
             overlay.gameObject.AddComponent<UnityEngine.UI.Image>().color = new Color(0.025f, 0.05f, 0.09f, 0.85f);
-            var card = Rect(overlay, "Card", new Vector2(.5f, .5f), Vector2.zero, new Vector2(386, 322));
+            settingsCard = MakeCard("Card", new Vector2(386, 394));
+            settingsTitle = Label(settingsCard, "Title", "设置", top, new Vector2(0, -45), new Vector2(310, 42), 28, TextAlignmentOptions.Center);
+            music = MakeSlider(settingsCard, "MusicVolume", "背景音乐", 103, feedback.MusicVolume, feedback.SetMusicVolume);
+            MakeSlider(settingsCard, "EffectsVolume", "音效音量", 181, feedback.EffectsVolume, feedback.SetEffectsVolume);
+            Label(settingsCard, "DifficultyLabel", "难度", top, new Vector2(-124, -270), new Vector2(76, 34), 18, TextAlignmentOptions.Left);
+            normal = MakeButton(settingsCard, "NormalDifficulty", "普通", top, new Vector2(-17, -270), new Vector2(115, 44));
+            easy = MakeButton(settingsCard, "EasyDifficulty", "简单", top, new Vector2(104, -270), new Vector2(115, 44));
+            normal.onClick.AddListener(() => ChooseDifficulty(GameDifficulty.Normal));
+            easy.onClick.AddListener(() => ChooseDifficulty(GameDifficulty.Easy));
+            done = MakeButton(settingsCard, "Close", "完成", top, new Vector2(0, -344), new Vector2(170, 44), true);
+            done.onClick.AddListener(Close);
+
+            confirmationCard = MakeCard("Confirmation", new Vector2(408, 252));
+            confirmationTitle = Label(confirmationCard, "Title", "", top, new Vector2(0, -46), new Vector2(350, 42), 25, TextAlignmentOptions.Center);
+            confirmationBody = Label(confirmationCard, "Body", "", top, new Vector2(0, -116), new Vector2(340, 76), 17, TextAlignmentOptions.Center);
+            cancel = MakeButton(confirmationCard, "Cancel", "", top, new Vector2(-91, -203), new Vector2(166, 46));
+            confirm = MakeButton(confirmationCard, "Confirm", "", top, new Vector2(91, -203), new Vector2(166, 46), true);
+            cancelLabel = cancel.GetComponentInChildren<TMP_Text>();
+            confirmLabel = confirm.GetComponentInChildren<TMP_Text>();
+            cancel.onClick.AddListener(Cancel);
+            confirm.onClick.AddListener(Confirm);
+            overlay.gameObject.SetActive(false);
+            Refresh();
+        }
+
+        RectTransform MakeCard(string name, Vector2 size)
+        {
+            var card = Rect(overlay, name, new Vector2(.5f, .5f), Vector2.zero, size);
             var background = card.gameObject.AddComponent<CutCornerImage>();
             background.Cut = MineUIStyle.PanelCut;
             background.color = MineUIStyle.Panel;
             background.raycastTarget = false;
-            Label(card, "Title", "音量设置", top, new Vector2(0, -45), new Vector2(310, 42), 28, TextAlignmentOptions.Center);
-            music = MakeSlider(card, "MusicVolume", "背景音乐", 103, feedback.MusicVolume, feedback.SetMusicVolume);
-            MakeSlider(card, "EffectsVolume", "音效音量", 181, feedback.EffectsVolume, feedback.SetEffectsVolume);
-            var done = MakeButton(card, "Close", "完成", top, new Vector2(0, -274), new Vector2(170, 44), true);
-            done.onClick.AddListener(Close);
-            overlay.gameObject.SetActive(false);
+            return card;
         }
 
-        void OnEnable() => flow.Changed += CloseIfPhaseChanged;
+        void OnEnable() => flow.Changed += Refresh;
 
         void OnDisable()
         {
-            flow.Changed -= CloseIfPhaseChanged;
+            flow.Changed -= Refresh;
             Close();
         }
 
         void Update()
         {
-            if (overlay.gameObject.activeSelf && Keyboard.current?.escapeKey.wasPressedThisFrame == true && flow.UserInputAllowed)
-                Close();
+            if (overlay && overlay.gameObject.activeSelf && Keyboard.current?.escapeKey.wasPressedThisFrame == true)
+                Cancel();
         }
 
-        void Open(Button button, AppPhase phase)
+        void Open(Button button, AppPhase phase, bool focusDifficulty = false)
         {
             if (overlay.gameObject.activeSelf || flow.Phase != phase || !flow.UserInputAllowed) return;
+            bool formal = !flow.IsPlannerTest;
+            settingsCard.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, (formal ? 394 : 322) * MineUIStyle.Units);
+            settingsTitle.text = formal ? "设置" : "音量设置";
+            settingsCard.Find("DifficultyLabel").gameObject.SetActive(formal);
+            normal.gameObject.SetActive(formal);
+            easy.gameObject.SetActive(formal);
+            ((RectTransform)done.transform).anchoredPosition = new Vector2(0, -(formal ? 344 : 274) * MineUIStyle.Units);
+            dialog = Dialog.Settings;
+            confirmationCard.gameObject.SetActive(false);
+            settingsCard.gameObject.SetActive(true);
+            ShowOverlay(button.GetComponentInParent<CanvasGroup>(), button, phase);
+            Select(focusDifficulty ? (flow.Difficulty == GameDifficulty.Easy ? easy.gameObject : normal.gameObject) : music.gameObject);
+        }
+
+        void ShowOverlay(CanvasGroup menu, Button button, AppPhase phase)
+        {
             opener = button;
             returnPhase = phase;
-            parentMenu = button.GetComponentInParent<CanvasGroup>();
+            parentMenu = menu;
             if (parentMenu)
             {
                 menuWasInteractable = parentMenu.interactable;
@@ -70,12 +121,84 @@ namespace Holedown
             }
             overlay.SetAsLastSibling();
             overlay.gameObject.SetActive(true);
-            if (EventSystem.current) EventSystem.current.SetSelectedGameObject(music.gameObject);
         }
 
-        void CloseIfPhaseChanged()
+        void Refresh()
         {
-            if (flow.Phase != returnPhase) Close();
+            if (!overlay) return;
+            if (shownDifficulty != flow.Difficulty)
+            {
+                shownDifficulty = flow.Difficulty;
+                MineUIStyle.Button(normal, flow.Difficulty == GameDifficulty.Normal);
+                MineUIStyle.Button(easy, flow.Difficulty == GameDifficulty.Easy);
+            }
+            restartStage.gameObject.SetActive(!flow.IsPlannerTest);
+            if (overlay.gameObject.activeSelf && (flow.Phase != returnPhase || (dialog == Dialog.EasyRetry && !flow.OffersEasyRetry)))
+                Close();
+            if (!overlay.gameObject.activeSelf && flow.OffersEasyRetry)
+            {
+                var resultPanel = transform.Find("ResultPanel");
+                ShowOverlay(resultPanel.GetComponent<CanvasGroup>(), null, AppPhase.Playing);
+                ShowConfirmation(Dialog.EasyRetry, "试试简单模式？", "本关已失败 3 次。\n简单模式下，方块血量降低 20%。",
+                    "保持普通", "用简单模式重试");
+            }
+        }
+
+        static string DifficultyLabel(GameDifficulty difficulty) => difficulty == GameDifficulty.Easy ? "简单" : "普通";
+
+        void ChooseDifficulty(GameDifficulty difficulty)
+        {
+            if (!flow.UserInputAllowed || difficulty == flow.Difficulty) return;
+            if (flow.Phase == AppPhase.Title) flow.ChangeDifficulty(difficulty);
+            else if (flow.Phase == AppPhase.Paused)
+            {
+                selectedDifficulty = difficulty;
+                ShowConfirmation(Dialog.ChangeDifficulty, "切换难度？",
+                    $"切换到{DifficultyLabel(difficulty)}模式后，本关会从头开始。", "取消", "切换并重开");
+            }
+        }
+
+        void OpenRestart()
+        {
+            if (flow.Phase != AppPhase.Paused || !flow.UserInputAllowed || overlay.gameObject.activeSelf) return;
+            ShowOverlay(restartStage.GetComponentInParent<CanvasGroup>(), restartStage, AppPhase.Paused);
+            ShowConfirmation(Dialog.RestartStage, "重新开始本关？", "本关会从头开始，清空本关暂存奖励。", "取消", "确认重开");
+        }
+
+        void ShowConfirmation(Dialog kind, string title, string body, string cancelText, string confirmText)
+        {
+            dialog = kind;
+            confirmationTitle.text = title;
+            confirmationBody.text = body;
+            cancelLabel.text = cancelText;
+            confirmLabel.text = confirmText;
+            settingsCard.gameObject.SetActive(false);
+            confirmationCard.gameObject.SetActive(true);
+            Select(cancel.gameObject);
+        }
+
+        void Confirm()
+        {
+            bool accepted = dialog switch
+            {
+                Dialog.RestartStage => flow.RestartCurrentStage(),
+                Dialog.ChangeDifficulty => flow.ChangeDifficulty(selectedDifficulty),
+                Dialog.EasyRetry => flow.RetryOnEasy(),
+                _ => false
+            };
+            if (accepted) Close();
+        }
+
+        void Cancel()
+        {
+            if (!flow.UserInputAllowed) return;
+            if (dialog == Dialog.EasyRetry) flow.DismissEasyRetry();
+            else Close();
+        }
+
+        static void Select(GameObject selected)
+        {
+            if (EventSystem.current) EventSystem.current.SetSelectedGameObject(selected);
         }
 
         void Close()
@@ -83,8 +206,7 @@ namespace Holedown
             if (!overlay || !overlay.gameObject.activeSelf) return;
             overlay.gameObject.SetActive(false);
             if (parentMenu) parentMenu.interactable = menuWasInteractable;
-            if (EventSystem.current)
-                EventSystem.current.SetSelectedGameObject(flow.Phase == returnPhase && opener && opener.isActiveAndEnabled ? opener.gameObject : null);
+            Select(flow.Phase == returnPhase && opener && opener.isActiveAndEnabled ? opener.gameObject : null);
             PlayerPrefs.Save();
         }
 

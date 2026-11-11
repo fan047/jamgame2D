@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 namespace Holedown
 {
+    public enum GameDifficulty { Normal, Easy }
+
     [Serializable]
     public sealed class BlockDefinition
     {
@@ -43,8 +45,8 @@ namespace Holedown
         public int Health { get; internal set; }
         public bool IsTarget { get; }
         public int RewardBalls { get; }
-        internal BlockState(int id, BlockDefinition definition, int row)
-        { Id = id; Column = definition.column; Row = row; Width = definition.width; Height = definition.height; MaxHealth = definition.health; Health = definition.health; IsTarget = definition.target; RewardBalls = definition.rewardBalls; }
+        internal BlockState(int id, BlockDefinition definition, int row, int health)
+        { Id = id; Column = definition.column; Row = row; Width = definition.width; Height = definition.height; MaxHealth = health; Health = health; IsTarget = definition.target; RewardBalls = definition.rewardBalls; }
     }
 
     public readonly struct HitResult
@@ -62,15 +64,17 @@ namespace Holedown
     {
         readonly Dictionary<int, BlockState> blocks = new Dictionary<int, BlockState>();
         readonly List<RowDefinition> incoming = new List<RowDefinition>();
+        readonly GameDifficulty difficulty;
         int nextId;
         public IReadOnlyDictionary<int, BlockState> Blocks => blocks;
         public int IncomingCursor { get; private set; }
         public int IncomingCount => incoming.Count;
         public bool TargetDestroyed { get; private set; }
 
-        public BoardState(IReadOnlyList<BlockDefinition> initial, IReadOnlyList<RowDefinition> rows)
+        public BoardState(IReadOnlyList<BlockDefinition> initial, IReadOnlyList<RowDefinition> rows, GameDifficulty difficulty = GameDifficulty.Normal)
         {
             Validate(initial, rows);
+            this.difficulty = difficulty;
             foreach (var d in initial) Add(d, d.row);
             foreach (var row in rows)
             {
@@ -80,7 +84,13 @@ namespace Holedown
             }
         }
 
-        void Add(BlockDefinition d, int row) { var block = new BlockState(++nextId, d, row); blocks.Add(block.Id, block); }
+        void Add(BlockDefinition definition, int row)
+        {
+            // Round four fifths to the nearest integer using a wide intermediate.
+            int health = difficulty == GameDifficulty.Easy ? Math.Max(1, (int)((4L * definition.health + 2) / 5)) : definition.health;
+            var block = new BlockState(++nextId, definition, row, health);
+            blocks.Add(block.Id, block);
+        }
 
         public HitResult ApplyHit(int id)
         {

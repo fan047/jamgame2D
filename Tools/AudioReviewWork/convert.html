@@ -1,0 +1,52 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><title>矿石轻乐音候选转换</title><style>body{font:16px system-ui;max-width:860px;margin:32px auto;background:#101b2b;color:#f4ecd1}button{padding:12px 20px}li{margin:18px 0}audio{display:block;width:100%;margin-top:8px}pre{white-space:pre-wrap}</style><h1>矿石质感＋轻乐音</h1><p>独立候选包；仅使用浏览器原生音频解码，不修改 Unity。听感尚待确认。</p><button id="convert">生成八条试听与备用 WAV</button><pre id="status">等待生成</pre><ul id="players"></ul><script>
+const $=id=>document.getElementById(id);
+window.reviewState={status:'ready',completed:[],errors:[]};
+const cache=new Map();
+async function decode(id){
+ if(!cache.has(id))cache.set(id,(async()=>{const response=await fetch('/raw/'+id);if(!response.ok)throw Error('Source fetch failed: '+id);const bytes=await response.arrayBuffer();const context=new OfflineAudioContext(1,1,48000);return context.decodeAudioData(bytes);})());
+ return cache.get(id);
+}
+async function render(id,rate=1,reverse=false){
+ const input=await decode(id),length=Math.ceil(input.length/input.sampleRate*48000/rate);
+ const context=new OfflineAudioContext(1,length,48000),mono=context.createBuffer(1,input.length,input.sampleRate),data=mono.getChannelData(0);
+ for(let c=0;c<input.numberOfChannels;c++){const values=input.getChannelData(c);for(let i=0;i<values.length;i++)data[i]+=values[i]/input.numberOfChannels;}
+ if(reverse)data.reverse();
+ const source=context.createBufferSource();source.buffer=mono;source.playbackRate.value=rate;source.connect(context.destination);source.start();
+ return (await context.startRendering()).getChannelData(0);
+}
+function trim(data,max){
+ let peak=0;for(const value of data)peak=Math.max(peak,Math.abs(value));if(peak<0.00001)throw Error('Silent source');
+ const threshold=peak*0.001;let start=0,end=data.length;
+ while(start<end&&Math.abs(data[start])<threshold)start++;
+ while(end>start&&Math.abs(data[end-1])<threshold)end--;
+ start=Math.max(0,start-240);end=Math.min(data.length,end+480,start+Math.floor(max*48000));
+ return data.slice(start,end);
+}
+function finish(data,peak){
+ let observed=0;for(const x of data)observed=Math.max(observed,Math.abs(x));
+ const gain=peak/observed;const fadeIn=Math.min(48,data.length),fadeOut=Math.min(576,data.length);
+ for(let i=0;i<data.length;i++){const envelope=Math.min(1,i/fadeIn,(data.length-1-i)/fadeOut);data[i]*=gain*Math.max(0,envelope);}
+ return data;
+}
+function wav(data){
+ const buffer=new ArrayBuffer(44+data.length*2),view=new DataView(buffer);const text=(at,s)=>{for(let i=0;i<s.length;i++)view.setUint8(at+i,s.charCodeAt(i));};
+ text(0,'RIFF');view.setUint32(4,buffer.byteLength-8,true);text(8,'WAVE');text(12,'fmt ');view.setUint32(16,16,true);view.setUint16(20,1,true);view.setUint16(22,1,true);view.setUint32(24,48000,true);view.setUint32(28,96000,true);view.setUint16(32,2,true);view.setUint16(34,16,true);text(36,'data');view.setUint32(40,data.length*2,true);
+ for(let i=0;i<data.length;i++){if(!Number.isFinite(data[i])||Math.abs(data[i])>=1)throw Error('Invalid or clipped sample');view.setInt16(44+i*2,Math.round(data[i]*32767),true);}
+ return buffer;
+}
+async function save(id,data){const response=await fetch('/output/'+id,{method:'POST',headers:{'Content-Type':'audio/wav'},body:wav(data)});if(!response.ok)throw Error(await response.text());window.reviewState.completed.push({id,seconds:data.length/48000});}
+$('convert').onclick=async()=>{
+ $('convert').disabled=true;window.reviewState.status='converting';
+ try{
+  const config=await(await fetch('/config')).json();
+  for(const job of config.jobs){
+   let data=trim(await render(job.sources[0],job.rate,job.reverse),job.max);
+   if(job.sources.length>1){const second=trim(await render(job.sources[1]),job.max);const offset=1680;const mix=new Float32Array(Math.min(Math.floor(job.max*48000),Math.max(data.length,second.length+offset)));mix.set(data.subarray(0,mix.length));for(let i=0;i<second.length&&i+offset<mix.length;i++)mix[i+offset]+=second[i]*0.35;data=mix;}
+   data=finish(data,job.peak);await save(job.id,data);
+   const item=document.createElement('li');item.textContent=job.label+' · '+(data.length/48000).toFixed(3)+' 秒 · 候选，未定稿';const player=document.createElement('audio');player.controls=true;player.src='/output/'+job.id;player.preload='metadata';item.append(player);$('players').append(item);$('status').textContent='已生成 '+job.label;
+  }
+  for(const entry of config.entries){const data=finish(trim(await render(entry.id),3),0.7);await save('alt-'+entry.id,data);}
+  window.reviewState.status='complete';$('status').textContent='完成：8 条试听＋'+config.entries.length+' 条备用。技术转换通过，听感需人工确认。';
+ }catch(error){window.reviewState.status='failed';window.reviewState.errors.push(error.message);$('status').textContent=error.stack;}
+};
+</script></html>

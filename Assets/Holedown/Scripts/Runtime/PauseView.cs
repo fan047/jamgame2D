@@ -41,10 +41,13 @@ namespace Holedown
         void Refresh()
         {
             MineUIStyle.Button(resume,true);
-            MineUIStyle.PauseLayout(card,(RectTransform)helpScroll.transform,flow.IsPlannerTest);
-            if(reloadAudio)reloadAudio.gameObject.SetActive(flow.IsPlannerTest && flow.Phase==AppPhase.Paused);
             bool externalReload=!flow.UsesBundledConfiguration;
+            MineUIStyle.PauseLayout(card,(RectTransform)helpScroll.transform,flow.IsPlannerTest,externalReload);
+            if(reloadAudio)reloadAudio.gameObject.SetActive(flow.IsPlannerTest && flow.Phase==AppPhase.Paused);
             if(reload)reload.gameObject.SetActive(externalReload);
+            if (externalReload && !flow.IsPlannerTest)
+                ((RectTransform)reload.transform).anchoredPosition = new Vector2(0, -293 * MineUIStyle.Units);
+            helpScroll.gameObject.SetActive(externalReload);
             if(feedback)
             {
                 string error=feedback.AudioError;

@@ -1,0 +1,10 @@
+{
+  "block_break.wav": "a161fc48c9d5ef2552db370345afa496b96bd128a83cb9a57ec0d8b8f8367d0a",
+  "block_hit.wav": "eedfb2dcf4be70bc0a10bee3f609852f682b2f49d99bae24ea41dd3bd83e8aea",
+  "manual_recall.wav": "d4e9c181d1e759dcc0efc94d4f3c00d8a5f3cb932ee1dce2c3f0536420aa0f4d",
+  "reward_break.wav": "ea09d96e01e4b2745ad8d480b5dfe6cdb9ef6f6b5088040950b9f3d5418c4c75",
+  "stage_clear.wav": "62c1485fb4524eb5820fd236a67c0a9557687fd675065e17e4a3ecb442da8406",
+  "stage_fail.wav": "9a97f4272b4fd4b5521c297ab185dec09b99c758e20fe0cfa50175bf8a5ddf82",
+  "ui_confirm.wav": "11d8229aec94b481216070e38653b486c7aa4b0bc7ca4dcc8ea4ddd68c8a2d51",
+  "volley_launch.wav": "eebc37ed876dca4e25bf2e209272820b093c4a98388eb765c3914225b20afe04"
+}

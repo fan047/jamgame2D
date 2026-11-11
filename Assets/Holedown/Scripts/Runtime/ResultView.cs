@@ -19,11 +19,21 @@ namespace Holedown
         string shownReason;
         bool wasVisible;
         Vector2 secondaryPosition;
-        void Awake(){secondaryPosition=restart.GetComponent<RectTransform>().anchoredPosition;}
+        StageTransitionView stageTransition;
+        void Awake()
+        {
+            secondaryPosition=restart.GetComponent<RectTransform>().anchoredPosition;
+            stageTransition=GetComponent<StageTransitionView>();
+        }
         void OnEnable() { flow.Changed += Refresh; restart.onClick.AddListener(RestartRun); advance.onClick.AddListener(Advance); Refresh(); }
         void OnDisable() { flow.Changed -= Refresh; restart.onClick.RemoveListener(RestartRun); advance.onClick.RemoveListener(Advance); }
         void RestartRun() => flow.QueueCommand(!string.IsNullOrEmpty(flow.InitializationError) ? FlowCommand.Reload : FlowCommand.RestartRun);
-        void Advance() => flow.QueueCommand(flow.IsPlannerTest || flow.Session?.Phase == SessionPhase.Lost ? FlowCommand.RetryStage : FlowCommand.NextStage);
+        void Advance()
+        {
+            bool retry = flow.IsPlannerTest || flow.Session?.Phase == SessionPhase.Lost;
+            if (!retry && stageTransition) { stageTransition.PlayNextStage(); return; }
+            flow.QueueCommand(retry ? FlowCommand.RetryStage : FlowCommand.NextStage);
+        }
         void Refresh()
         {
             bool error = !string.IsNullOrEmpty(flow.InitializationError);

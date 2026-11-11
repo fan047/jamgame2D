@@ -16,7 +16,7 @@ namespace Holedown
         public CampaignDefinition Campaign { get; }
         // Compatibility entry point: each access creates a fresh first-stage board.
         public BoardState Board => CreateBoard(0);
-        public BoardState CreateBoard(int stageIndex) => Campaign.CreateBoard(stageIndex);
+        public BoardState CreateBoard(int stageIndex, GameDifficulty difficulty = GameDifficulty.Normal) => Campaign.CreateBoard(stageIndex, difficulty);
         public string Label { get; }
         internal LoadedConfiguration(GameSettings settings, CampaignDefinition campaign, string label)
         { Settings=settings; Campaign=campaign; Label=label; }
